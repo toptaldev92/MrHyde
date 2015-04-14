@@ -15,8 +15,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import roboguice.activity.RoboActivity;
-import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -24,8 +22,7 @@ import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 
-@ContentView(R.layout.activity_login)
-public final class LoginActivity extends RoboActivity{
+public final class LoginFragment extends AbstractFragment {
 
 	private static final  String
 			OAUTH_URL = "https://github.com/login/oauth/authorize",
@@ -36,9 +33,15 @@ public final class LoginActivity extends RoboActivity{
 	@InjectView(R.id.login_button) Button loginButton;
 	@Inject GitHubApi gitHubApi;
 
+
+	public LoginFragment() {
+		super(R.layout.fragment_login);
+	}
+
+
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+	public void onViewCreated(View view, Bundle savedInstanceState) {
+		super.onViewCreated(view, savedInstanceState);
 
 		loginButton.setOnClickListener(new View.OnClickListener() {
 			private Dialog loginDialog;
@@ -46,7 +49,7 @@ public final class LoginActivity extends RoboActivity{
 			@Override
 			public void onClick(View arg0) {
 				final String state = UUID.randomUUID().toString();
-				loginDialog = new Dialog(LoginActivity.this);
+				loginDialog = new Dialog(getActivity());
 				loginDialog.setContentView(R.layout.dialog_login);
 				WebView webView = (WebView) loginDialog.findViewById(R.id.webview);
 				// webView.getSettings().setJavaScriptEnabled(true);
