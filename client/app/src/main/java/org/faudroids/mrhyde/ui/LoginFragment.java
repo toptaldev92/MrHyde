@@ -9,7 +9,8 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 
 import org.faudroids.mrhyde.R;
-import org.faudroids.mrhyde.github.GitHubApi;
+import org.faudroids.mrhyde.github.AuthApi;
+import org.faudroids.mrhyde.github.AuthManager;
 import org.faudroids.mrhyde.github.TokenDetails;
 
 import java.util.UUID;
@@ -32,7 +33,8 @@ public final class LoginFragment extends AbstractFragment {
 
 
 	@InjectView(R.id.login_button) Button loginButton;
-	@Inject GitHubApi gitHubApi;
+	@Inject AuthApi authApi;
+	@Inject AuthManager authManager;
 
 
 	public LoginFragment() {
@@ -90,13 +92,15 @@ public final class LoginFragment extends AbstractFragment {
 
 	private void getAccessToken(String code) {
 		String clientSecret = getString(R.string.gitHubClientSecret);
-		gitHubApi.getAccessToken(CLIENT_ID, clientSecret, code)
+		authApi.getAccessToken(CLIENT_ID, clientSecret, code)
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(new Action1<TokenDetails>() {
 					@Override
 					public void call(TokenDetails tokenDetails) {
 						Timber.d("gotten token " + tokenDetails.getAccessToken() + " for scope " + tokenDetails.getScope());
+						authManager.setTokenDetails(tokenDetails);
+						replaceFragment(new ReposFragment());
 					}
 				},new Action1<Throwable>() {
 					@Override

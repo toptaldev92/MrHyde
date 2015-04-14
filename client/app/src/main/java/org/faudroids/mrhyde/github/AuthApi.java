@@ -6,7 +6,10 @@ import retrofit.http.POST;
 import retrofit.http.Query;
 import rx.Observable;
 
-public interface GitHubApi {
+/**
+ * Retrofit interface for fetching the access token.
+ */
+public interface AuthApi {
 
 	@POST("/login/oauth/access_token")
 	@Headers("Accept: application/json")
