@@ -5,7 +5,6 @@ import android.app.FragmentTransaction;
 import android.os.Bundle;
 
 import org.faudroids.mrhyde.R;
-import org.faudroids.mrhyde.ui.LoginFragment;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.ContentView;
@@ -18,11 +17,13 @@ public final class MainActivity extends RoboActivity{
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		Fragment fragment = new LoginFragment();
-		FragmentTransaction transaction = getFragmentManager().beginTransaction();
-		transaction.replace(R.id.fragment_container, fragment);
-		transaction.addToBackStack(null);
-		transaction.commit();
+		if (savedInstanceState == null) {
+			Fragment fragment = new LoginFragment();
+			FragmentTransaction transaction = getFragmentManager().beginTransaction();
+			transaction.replace(R.id.fragment_container, fragment);
+			transaction.addToBackStack(null);
+			transaction.commit();
+		}
 	}
 
 }
