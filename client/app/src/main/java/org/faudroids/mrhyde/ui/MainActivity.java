@@ -1,8 +1,11 @@
-package org.faudroids.mrhyde;
+package org.faudroids.mrhyde.ui;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
+
+import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.ui.LoginFragment;
 
 import roboguice.activity.RoboActivity;
 import roboguice.inject.ContentView;

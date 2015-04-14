@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde;
+package org.faudroids.mrhyde.ui;
 
 import android.app.Activity;
 import android.support.v7.app.ActionBarActivity;
@@ -12,6 +12,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+
+import org.faudroids.mrhyde.R;
 
 
 public class MainDrawerActivity extends ActionBarActivity

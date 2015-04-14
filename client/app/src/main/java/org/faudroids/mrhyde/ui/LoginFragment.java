@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde;
+package org.faudroids.mrhyde.ui;
 
 import android.app.Dialog;
 import android.net.Uri;
@@ -8,6 +8,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.github.GitHubApi;
 import org.faudroids.mrhyde.github.TokenDetails;
 
