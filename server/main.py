@@ -7,12 +7,15 @@ import json
 from bottle import request, Bottle, run, abort, template
 
 import RepositoryManager
+import RequirementsChecker
 
 
 logging.basicConfig(filename='jekyll_server.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 rm = RepositoryManager.RepositoryManager()
+
+RequirementsChecker.check_requirements(logger)
 
 jekyll_server = Bottle()
 
