@@ -15,3 +15,17 @@ class ConfigManager:
         except KeyError:
             self.__logger.error('Unable to parse config file.')
             raise
+
+    def get_db_file(self):
+        try:
+            return self.__config['database']['path']
+        except KeyError:
+            self.__logger.error('Unable to parse config file.')
+            raise
+
+    def get_hash_size(self):
+        try:
+            return self.__config['repo']['id_length']
+        except KeyError:
+            self.__logger.error('Unable to parse config file.')
+            raise

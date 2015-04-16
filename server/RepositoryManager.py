@@ -1,14 +1,19 @@
 import git
 import errno
 import ConfigManager
+#import DbHandler
 import logging
 
+import string
+import random
+
 from os.path import isdir, join
-from os import makedirs, chdir, listdir, getcwd
+from os import makedirs, listdir
 
 
 class RepositoryManager:
     __cm = None
+    #__db = None
     __base_dir = ""
     __git = git.Git()
 
@@ -18,44 +23,35 @@ class RepositoryManager:
         try:
             self.__cm = ConfigManager.ConfigManager()
             self.__base_dir = self.__cm.get_base_dir()
+            #self.__db = DbHandler.DbHandler(self.__cm.get_db_file())
         except KeyError:
             raise
 
-    def init_repository(self, url):
-        if not self.repository_exists(url):
+    def init_repository(self, url, diff):
+        id = self.generateId(int(self.__cm.get_hash_size()))
+        if not self.repository_exists(id):
             if isdir(self.__base_dir):
                 try:
-                    old_dir = getcwd()
-                    chdir(self.__base_dir)
-                    self.__git.clone(url)
-                    self.__logger.info('Repository cloned.')
-                    chdir(old_dir)
-                    return join(self.__base_dir, self.get_repo_dir(url))
+                    self.__git.clone(url, join(self.__base_dir, id))
+                    self.__logger.info('Repository cloned to ' + join(self.__base_dir, id) + '.')
+                    return join(self.__base_dir, id)
                 except OSError as exception:
                     if exception.errno == errno.EPERM:
                         self.__logger.error("Permission to " + self.get_repo_dir(url) + " denied.")
                         raise
             else:
                 try:
-                    old_dir = getcwd()
                     makedirs(self.__base_dir, 0o755, True)
-                    chdir(self.__base_dir)
-                    self.__git.clone(url)
-                    self.__logger.info('Repository cloned.')
-                    chdir(old_dir)
-                    return join(self.__base_dir, self.get_repo_dir(url))
+                    self.__git.clone(url, join(self.__base_dir, id))
+                    self.__logger.info('Repository cloned to ' + join(self.__base_dir, id) + '.')
+                    return join(self.__base_dir, id)
                 except OSError as exception:
                     if exception.errno == errno.EPERM:
                         self.__logger.error("Permission to " + self.get_repo_dir(url) + " denied.")
                     raise
-        else:
-            return join(self.__base_dir, self.get_repo_dir(url))
 
-    def repository_exists(self, url):
-        repo_name = url.split('/')[-1]
-        dir_name = repo_name.split('.')[0]
-
-        if isdir(join(self.__base_dir, dir_name)):
+    def repository_exists(self, id):
+        if isdir(join(self.__base_dir, id)):
             return True
         else:
             return False
@@ -83,3 +79,6 @@ class RepositoryManager:
 
     def update_repository(self, id):
         pass
+
+    def generateId(self, length=16, chars=string.ascii_lowercase+string.digits):
+        return ''.join(random.SystemRandom().choice(chars) for _ in range(length))

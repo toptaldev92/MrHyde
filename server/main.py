@@ -9,7 +9,6 @@ from bottle import request, Bottle, run, abort, template
 import RepositoryManager
 import RequirementsChecker
 
-
 logging.basicConfig(filename='jekyll_server.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,8 @@ def list_all_repositories():
 def create_repository():
     try:
         url = request.POST.get('url')
-        return rm.init_repository(url)
+        diff = request.POST.get('diff')
+        return rm.init_repository(url, diff)
     except OSError as exception:
         if exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
@@ -50,10 +50,10 @@ def show_repository(repo_name):
             return json.dumps(files)
         else:
             if len(files) < 1:
-                return template('list_view', rows=['Empty repositor<.'], header="Repository content:")
+                return template('repo_overview', rows=[['Empty repository.', 'http://github.com/s1hofmann'], ['test', 'hi!']], header="Repository content:")
             else:
                 return template('list_view', rows=files, header="Repository content:")
     else:
         abort(404, 'Repository not found!')
 
-run(jekyll_server, host='localhost', port=8787)
+run(jekyll_server, host='127.0.0.1', port=8787)
