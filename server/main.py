@@ -4,7 +4,7 @@ import errno
 import logging
 import json
 
-from bottle import request, Bottle, run, abort, template
+from bottle import request, Bottle, run, abort, template, static_file
 
 import RepositoryManager
 import RequirementsChecker
@@ -48,6 +48,14 @@ def create_repository():
             abort(403, 'Permission denied.')
     except KeyError:
         abort(500, 'Unable to parse config file.')
+
+
+@jekyll_server.get('/jekyll/<repo_name:path>/__page/<static_path>')
+def show_jekyll_output(repo_name, static_path):
+    # TODO this does not work. Probably needs regex or something similar
+    print(repo_name+'/__page/'+static_path)
+    return static_file(repo_name+'/__page/'+static_path, root='./jekyll/')
+
 
 @jekyll_server.get('/jekyll/<repo_name:path>')
 def show_repository(repo_name):

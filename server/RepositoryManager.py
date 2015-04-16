@@ -9,7 +9,8 @@ import random
 from time import time
 
 from os.path import isdir, join
-from os import makedirs, listdir, chdir, getcwd
+from os import makedirs, listdir, chdir, getcwd, mkdir
+import subprocess
 
 
 class RepositoryManager:
@@ -38,7 +39,12 @@ class RepositoryManager:
                     self.__git.clone(url, repo_path)
                     self.__db.insertData('repo', id, repo_path, url, int(time()))
                     self.__logger.info('Repository cloned to ' + repo_path + '.')
-                    return ''.join([self.__base_url, '/', id])
+                    build_successful = self.start_jekyll_build(repo_path)
+                    if build_successful:
+                        return ''.join([self.__base_url, '/', id, '/__page'])
+                    else:
+                        # TODO proper error handling!
+                        raise Exception
                 except OSError as exception:
                     if exception.errno == errno.EPERM:
                         self.__logger.error("Permission to " + repo_path + " denied.")
@@ -49,6 +55,7 @@ class RepositoryManager:
                     self.__git.clone(url, join(self.__base_dir, id))
                     self.__db.insertData('repo', id, repo_path, url, int(time()))
                     self.__logger.info('Repository cloned to ' + repo_path + '.')
+                    self.start_jekyll_build(repo_path)
                     return ''.join([self.__base_url, '/', id])
                 except OSError as exception:
                     if exception.errno == errno.EPERM:
@@ -85,6 +92,24 @@ class RepositoryManager:
         chdir(repo_path)
         self.__git.apply(diff)
         chdir(old_dir)
+        build_successful = self.start_jekyll_build(repo_path)
+        if build_successful:
+            return ''.join([self.__base_url, '/', id, '/__page'])
+        else:
+            # TODO proper error handling!
+            raise Exception
 
     def generateId(self, length=16, chars=string.ascii_lowercase+string.digits):
         return ''.join(random.SystemRandom().choice(chars) for _ in range(length))
+
+
+    def start_jekyll_build(self, path):
+        # TODO perhaps we should do this async (big pages?)
+        mkdir(path+'/__page')
+        pagepath = path+'/__page'
+        cmd = ['jekyll', 'build', '--source', path, '--destination', pagepath]
+        try:
+            process = subprocess.check_output(cmd)
+            return True
+        except subprocess.CalledProcessError as exception:
+            return False
