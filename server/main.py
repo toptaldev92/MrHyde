@@ -26,16 +26,23 @@ def list_all_repositories():
         return json.dumps(repos)
     else:
         if len(repos) < 1:
-            return template('list_view', rows=['No repositories available.'], header="Available repositories:")
+            return template('list_view', rows=['No repositories available.'], header='Available repositories:')
         else:
-            return template('list_view', rows=repos, header="Available repositories:")
+            return template('repo_overview', rows=repos, header='Available repositories:')
 
 @jekyll_server.post('/jekyll')
 def create_repository():
     try:
-        url = request.POST.get('url')
-        diff = request.POST.get('diff')
-        return rm.init_repository(url, diff)
+        if request.content_type == 'application/json':
+            url = request.json.get('url')
+            diff = request.json.get('diff')
+            repo_url = rm.init_repository(url, diff)
+            return json.dumps(repo_url)
+        else:
+            url = request.POST.get('url')
+            diff = request.POST.get('diff')
+            repo_url = rm.init_repository(url, diff)
+            return template('list_view', rows=[repo_url], header='Your new repository is available at:')
     except OSError as exception:
         if exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
@@ -56,4 +63,4 @@ def show_repository(repo_name):
     else:
         abort(404, 'Repository not found!')
 
-run(jekyll_server, host='127.0.0.1', port=8787)
+run(jekyll_server, host='127.0.0.1', port=8787, debug=True)

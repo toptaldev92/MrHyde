@@ -9,9 +9,7 @@
         <p><strong>{{header}}</strong></p>
         <table>
         %for row in rows:
-            <tr>
-                <td>{{row}}</td>
-            </tr>
+            <tr><td>{{row}}</td></tr>
         %end
         </table>
     </body>

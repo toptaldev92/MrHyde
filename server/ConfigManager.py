@@ -16,6 +16,13 @@ class ConfigManager:
             self.__logger.error('Unable to parse config file.')
             raise
 
+    def get_base_url(self):
+        try:
+            return self.__config['default']['url']
+        except KeyError:
+            self.__logger.error('Unable to parse config file.')
+            raise
+
     def get_db_file(self):
         try:
             return self.__config['database']['path']
