@@ -72,7 +72,7 @@ class RepositoryManager:
             return False
 
     def list_repositories(self):
-        dir_list = [[f['path'], f['url']] for f in self.__db.list('repo', 'path') if isdir(f['path'])]
+        dir_list = [[f['path'], f['url']] for f in self.__db.list('repo') if isdir(f['path'])]
         #dir_list = [f for f in listdir(self.__base_dir) if isdir(join(self.__base_dir, f))]
         return dir_list
 
