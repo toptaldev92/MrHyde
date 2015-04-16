@@ -123,14 +123,16 @@ class DbHandler:
            If no specific criterion is needed,
            the 'where' parameter is an empty string."""
         if args:
-            dbString = "UPDATE '%s' SET " % table
+            dbString = "UPDATE %s SET " % table
             for elem in range(len(args)):
-                dbString = "".join([dbString, "'%s'" % args[elem]])
+                dbString = "".join([dbString, "%s" % args[elem]])
                 if elem < (len(args) - 1):
                     dbString = "".join([dbString, ","])
 
             if where:
                 dbString = "".join([dbString, " WHERE %s;" % where])
+
+            print(dbString)
 
             self.comm(dbString)
 
