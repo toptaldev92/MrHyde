@@ -7,6 +7,7 @@ import logging
 import string
 import random
 from time import time
+from shutil import rmtree
 
 from os.path import isdir, join
 from os import makedirs, listdir, chdir, getcwd, mkdir
@@ -84,7 +85,18 @@ class RepositoryManager:
             return None
 
     def cleanup_repositories(self):
-        pass
+        timestamp = int(time()-(24*3600))
+        old_repos = self.__db.list('repo', 'path', 'last_used < %s' % timestamp)
+        try:
+            for repo in old_repos:
+                rmtree(repo)
+        except OSError as exception:
+            if exception.errno == errno.ENOENT:
+                self.__logger.error('Repository ' + repo + ' not found.')
+                raise
+            elif exception.errno == errno.EPERM:
+                self.__logger.error('Insufficient permissions to remove repository ' + repo + '.')
+                raise
 
     def update_repository(self, id, diff):
         repo_path = join(self.__base_dir, id)
