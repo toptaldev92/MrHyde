@@ -73,7 +73,6 @@ class RepositoryManager:
 
     def list_repositories(self):
         dir_list = [[f['path'], f['url']] for f in self.__db.list('repo') if isdir(f['path'])]
-        #dir_list = [f for f in listdir(self.__base_dir) if isdir(join(self.__base_dir, f))]
         return dir_list
 
     def list_single_repository(self, id):
@@ -86,10 +85,11 @@ class RepositoryManager:
 
     def cleanup_repositories(self):
         timestamp = int(time()-(24*3600))
-        old_repos = self.__db.list('repo', 'path', 'last_used < %s' % timestamp)
+        old_repos = self.__db.list('repo', '', 'last_used < %s' % timestamp)
         try:
             for repo in old_repos:
-                rmtree(repo)
+                rmtree(repo['path'])
+                self.__db.deleteData('repo', "id='%s'" %repo['id'])
         except OSError as exception:
             if exception.errno == errno.ENOENT:
                 self.__logger.error('Repository ' + repo + ' not found.')
@@ -103,6 +103,7 @@ class RepositoryManager:
         old_dir = getcwd()
         chdir(repo_path)
         self.__git.apply(diff)
+        self.__db.updateData('repo', "id = '%s'" %id, 'last_used=%s' % int(time()))
         chdir(old_dir)
         build_successful = self.start_jekyll_build(repo_path)
         if build_successful:
