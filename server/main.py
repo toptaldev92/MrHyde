@@ -57,18 +57,28 @@ def show_jekyll_output(repo_name, static_path):
     return static_file(repo_name+'/__page/'+static_path, root='./jekyll/')
 
 
-@jekyll_server.get('/jekyll/<repo_name:path>')
-def show_repository(repo_name):
-    files = rm.list_single_repository(repo_name)
+@jekyll_server.get('/jekyll/<id:path>')
+def show_repository(id):
+    files = rm.list_single_repository(id)
     if files is not None:
         if request.content_type == 'application/json':
             return json.dumps(files)
         else:
             if len(files) < 1:
-                return template('repo_overview', rows=[['Empty repository.', 'http://github.com/s1hofmann'], ['test', 'hi!']], header="Repository content:")
+                return template('repo_overview', rows=[['Empty repository.', '']], header="Repository content:")
             else:
                 return template('list_view', rows=files, header="Repository content:")
     else:
         abort(404, 'Repository not found!')
+
+@jekyll_server.delete('/jekyll/<id:path>')
+def delete_repository(id):
+    try:
+        rm.delete_repository(id)
+    except OSError as exception:
+        if exception.errno == errno.ENOENT:
+            abort(404, 'Repository not found.')
+        elif exception.errno == errno.EPERM:
+            abort(403, 'Permission denied.')
 
 run(jekyll_server, host='127.0.0.1', port=8787, debug=True)

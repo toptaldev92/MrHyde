@@ -76,12 +76,27 @@ class RepositoryManager:
         return dir_list
 
     def list_single_repository(self, id):
-        repo_path = join(self.__base_dir, id)
+        repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
         if isdir(repo_path):
             file_list = [f for f in listdir(repo_path)]
             return file_list
         else:
             return None
+
+    def delete_repository(self, id):
+        repo = self.__db.list('repo', '', "id='%s'" % id)
+        try:
+            rmtree(repo[0]['path'])
+            self.__db.deleteData('repo', "id='%s'" % repo[0]['id'])
+            return
+        except OSError as exception:
+            if exception.errno == errno.ENOENT:
+                self.__logger.error('Repository ' + id + ' not found.')
+                raise
+            elif exception.errno == errno.EPERM:
+                self.__logger.error('Insufficient permissions to remove repository ' + repo + '.')
+                raise
+
 
     def cleanup_repositories(self):
         timestamp = int(time()-(24*3600))
