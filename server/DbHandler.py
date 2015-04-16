@@ -60,7 +60,10 @@ class DbHandler:
             dbString = "SELECT * FROM '%s';" % table
 
         self.comm(dbString)
-        return self.fetch()
+        if column:
+            return [c[column] for c in self.fetch()]
+        else:
+            return self.fetch()
 
     def createDatabase(self, dbFile):
         """Create a new database file"""
