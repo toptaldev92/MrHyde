@@ -6,11 +6,11 @@
     </head>
 
     <body bgcolor="white" text="black">
-        <p><strong>{{header}}</strong></p>
+        <p><strong>Available repositories:</strong></p>
         <table>
         %for row in rows:
             <tr>
-                <td>{{row}}</td>
+                <td>{{row[0]}}</td><td><a href='{{row[1]}}'>View on GitHub</a></td>
             </tr>
         %end
         </table>
