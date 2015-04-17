@@ -141,3 +141,6 @@ class RepositoryManager:
             return True
         except subprocess.CalledProcessError as exception:
             return False
+
+    def get_config(self):
+        return self.__cm
