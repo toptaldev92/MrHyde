@@ -20,6 +20,7 @@ jekyll_server = Bottle()
 
 @jekyll_server.get('/jekyll')
 def list_all_repositories():
+    logger.info(request.content_type)
     repos = rm.list_repositories()
 
     if request.content_type == 'application/json':
@@ -38,7 +39,7 @@ def create_repository():
             diff = request.json.get('diff')
             repo_url = rm.init_repository(url, diff)
             return json.dumps(repo_url)
-        else:
+        elif request.content_type == 'text/plain':
             url = request.POST.get('url')
             diff = request.POST.get('diff')
             repo_url = rm.init_repository(url, diff)
@@ -73,6 +74,23 @@ def show_repository(id):
 def delete_repository(id):
     try:
         rm.delete_repository(id)
+    except OSError as exception:
+        if exception.errno == errno.ENOENT:
+            abort(404, 'Repository not found.')
+        elif exception.errno == errno.EPERM:
+            abort(403, 'Permission denied.')
+
+@jekyll_server.put('/jekyll<id:path>')
+def update_repository(id):
+    try:
+        if request.content_type == 'application/json':
+            diff = request.json.get('diff')
+            url = rm.update_repository(id, diff)
+            return template('list_view', rows=[url], header='Repository updated.')
+        elif request.content_type == 'text/plain':
+            diff = request.POST.get('diff')
+            url = rm.update_repository(id, diff)
+            return template('list_view', rows=[url], header='Repository updated.')
     except OSError as exception:
         if exception.errno == errno.ENOENT:
             abort(404, 'Repository not found.')

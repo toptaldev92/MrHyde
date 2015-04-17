@@ -37,7 +37,9 @@ class RepositoryManager:
         if not self.repository_exists(id):
             if isdir(self.__base_dir):
                 try:
+                    # TODO error handling
                     self.__git.clone(url, repo_path)
+                    self.apply_diff(repo_path, diff)
                     self.__db.insertData('repo', id, repo_path, url, int(time()))
                     self.__logger.info('Repository cloned to ' + repo_path + '.')
                     build_successful = self.start_jekyll_build(repo_path)
@@ -52,8 +54,10 @@ class RepositoryManager:
                         raise
             else:
                 try:
+                    # TODO error handling
                     makedirs(self.__base_dir, 0o755, True)
-                    self.__git.clone(url, join(self.__base_dir, id))
+                    self.__git.clone(url, repo_path)
+                    self.apply_diff(repo_path, diff)
                     self.__db.insertData('repo', id, repo_path, url, int(time()))
                     self.__logger.info('Repository cloned to ' + repo_path + '.')
                     self.start_jekyll_build(repo_path)
@@ -84,19 +88,18 @@ class RepositoryManager:
             return None
 
     def delete_repository(self, id):
-        repo = self.__db.list('repo', '', "id='%s'" % id)
+        repo = self.__db.list('repo', '', "id='%s'" % id)[0]
         try:
-            rmtree(repo[0]['path'])
-            self.__db.deleteData('repo', "id='%s'" % repo[0]['id'])
+            rmtree(repo['path'])
+            self.__db.deleteData('repo', "id='%s'" % repo['id'])
             return
         except OSError as exception:
             if exception.errno == errno.ENOENT:
                 self.__logger.error('Repository ' + id + ' not found.')
                 raise
             elif exception.errno == errno.EPERM:
-                self.__logger.error('Insufficient permissions to remove repository ' + repo + '.')
+                self.__logger.error('Insufficient permissions to remove repository ' + id + '.')
                 raise
-
 
     def cleanup_repositories(self):
         timestamp = int(time()-(24*3600))
@@ -104,21 +107,22 @@ class RepositoryManager:
         try:
             for repo in old_repos:
                 rmtree(repo['path'])
-                self.__db.deleteData('repo', "id='%s'" %repo['id'])
+                self.__db.deleteData('repo', "id='%s'" % repo['id'])
         except OSError as exception:
             if exception.errno == errno.ENOENT:
-                self.__logger.error('Repository ' + repo + ' not found.')
+                self.__logger.error('Repository ' + repo['id'] + ' not found.')
                 raise
             elif exception.errno == errno.EPERM:
-                self.__logger.error('Insufficient permissions to remove repository ' + repo + '.')
+                self.__logger.error('Insufficient permissions to remove repository ' + repo['id'] + '.')
                 raise
 
+    # TODO error handling
     def update_repository(self, id, diff):
-        repo_path = join(self.__base_dir, id)
+        repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
         old_dir = getcwd()
         chdir(repo_path)
         self.__git.apply(diff)
-        self.__db.updateData('repo', "id = '%s'" %id, 'last_used=%s' % int(time()))
+        self.update_timestamp(id)
         chdir(old_dir)
         build_successful = self.start_jekyll_build(repo_path)
         if build_successful:
@@ -129,7 +133,6 @@ class RepositoryManager:
 
     def generateId(self, length=16, chars=string.ascii_lowercase+string.digits):
         return ''.join(random.SystemRandom().choice(chars) for _ in range(length))
-
 
     def start_jekyll_build(self, path):
         # TODO perhaps we should do this async (big pages?)
@@ -144,3 +147,12 @@ class RepositoryManager:
 
     def get_config(self):
         return self.__cm
+
+    def apply_diff(self, repo_path, diff):
+        old_dir = getcwd()
+        chdir(repo_path)
+        self.__git.apply(diff)
+        chdir(old_dir)
+
+    def update_timestamp(self, id):
+        self.__db.updateData('repo', "id = '%s'" % id, 'last_used=%s' % int(time()))
