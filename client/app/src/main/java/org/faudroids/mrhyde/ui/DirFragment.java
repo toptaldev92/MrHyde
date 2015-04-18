@@ -48,6 +48,7 @@ public final class DirFragment extends AbstractFragment {
 
 	@Inject ApiWrapper apiWrapper;
 	@InjectView(R.id.container) LinearLayout containerView;
+	private Repository repository;
 
 	public DirFragment() {
 		super(R.layout.fragment_dir);
@@ -58,7 +59,7 @@ public final class DirFragment extends AbstractFragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		final Repository repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
+		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
 
 		apiWrapper.getCommits(repository)
 				.flatMap(new Func1<List<RepositoryCommit>, Observable<Tree>>() {
@@ -79,6 +80,7 @@ public final class DirFragment extends AbstractFragment {
 						treeView.setDefaultViewHolder(PathViewHolder.class);
 						treeView.setDefaultAnimation(true);
 						treeView.setDefaultContainerStyle(R.style.TreeNodeStyleCustom);
+						treeView.setDefaultNodeClickListener(new FileClickListener());
 						containerView.addView(treeView.getView());
 					}
 				}, new Action1<Throwable>() {
@@ -133,6 +135,18 @@ public final class DirFragment extends AbstractFragment {
 
 			} else {
 				parentView.addChild(new TreeNode(node));
+			}
+		}
+	}
+
+
+	private class FileClickListener implements TreeNode.TreeNodeClickListener {
+		@Override
+		public void onClick(TreeNode treeNode, Object object) {
+			if (object instanceof FileNode) {
+				FileNode fileNode = (FileNode) object;
+				FileFragment newFragment = FileFragment.createInstance(repository, fileNode.treeEntry);
+				uiUtils.replaceFragment(DirFragment.this, newFragment);
 			}
 		}
 	}

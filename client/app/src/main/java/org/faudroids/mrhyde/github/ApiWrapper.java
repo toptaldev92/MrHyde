@@ -1,6 +1,7 @@
 package org.faudroids.mrhyde.github;
 
 
+import org.eclipse.egit.github.core.Blob;
 import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
@@ -66,6 +67,16 @@ public final class ApiWrapper {
 			@Override
 			protected Tree doWrapMethod() throws Exception {
 				return dataService.getTree(repository, sha, recursive);
+			}
+		}.wrapMethod();
+	}
+
+
+	public Observable<Blob> getBlob(final IRepositoryIdProvider repository, final String sha) {
+		return new Wrapper<Blob>() {
+			@Override
+			protected Blob doWrapMethod() throws Exception {
+				return dataService.getBlob(repository, sha);
 			}
 		}.wrapMethod();
 	}
