@@ -100,7 +100,7 @@ public final class LoginFragment extends AbstractFragment {
 					public void call(TokenDetails tokenDetails) {
 						Timber.d("gotten token " + tokenDetails.getAccessToken() + " for scope " + tokenDetails.getScope());
 						authManager.setTokenDetails(tokenDetails);
-						replaceFragment(new ReposFragment());
+						uiUtils.replaceFragment(LoginFragment.this, new ReposFragment());
 					}
 				},new Action1<Throwable>() {
 					@Override

@@ -1,14 +1,11 @@
 package org.faudroids.mrhyde.ui;
 
-import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.faudroids.mrhyde.R;
+import javax.inject.Inject;
 
 import roboguice.fragment.provided.RoboFragment;
 
@@ -16,6 +13,7 @@ import roboguice.fragment.provided.RoboFragment;
 abstract class AbstractFragment extends RoboFragment {
 
 	private final int layoutResource;
+	@Inject UiUtils uiUtils;
 
 	AbstractFragment(int layoutResource) {
 		this.layoutResource = layoutResource;
@@ -25,16 +23,6 @@ abstract class AbstractFragment extends RoboFragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		return inflater.inflate(layoutResource, container, false);
-	}
-
-
-	protected final void replaceFragment(Fragment nextFragment) {
-		FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.addToBackStack(null);
-        transaction.replace(R.id.fragment_container, nextFragment);
-        transaction.commit();
-
 	}
 
 }

@@ -1,7 +1,12 @@
 package org.faudroids.mrhyde.github;
 
 
+import org.eclipse.egit.github.core.IRepositoryIdProvider;
 import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.RepositoryCommit;
+import org.eclipse.egit.github.core.Tree;
+import org.eclipse.egit.github.core.service.CommitService;
+import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
 import java.util.List;
@@ -21,10 +26,18 @@ import rx.functions.Func0;
 public final class ApiWrapper {
 
 	private final RepositoryService repositoryService;
+	private final CommitService commitService;
+	private final DataService dataService;
 
 	@Inject
-	public ApiWrapper(RepositoryService repositoryService) {
+	public ApiWrapper(
+			RepositoryService repositoryService,
+			CommitService commitService,
+			DataService dataService) {
+
 		this.repositoryService = repositoryService;
+		this.commitService = commitService;
+		this.dataService = dataService;
 	}
 
 
@@ -33,6 +46,26 @@ public final class ApiWrapper {
 			@Override
 			protected List<Repository> doWrapMethod() throws Exception {
 				return repositoryService.getRepositories();
+			}
+		}.wrapMethod();
+	}
+
+
+	public Observable<List<RepositoryCommit>> getCommits(final IRepositoryIdProvider repository) {
+		return new Wrapper<List<RepositoryCommit>>() {
+			@Override
+			protected List<RepositoryCommit> doWrapMethod() throws Exception {
+				return commitService.getCommits(repository);
+			}
+		}.wrapMethod();
+	}
+
+
+	public Observable<Tree> getTree(final IRepositoryIdProvider repository, final String sha, final boolean recursive) {
+		return new Wrapper<Tree>() {
+			@Override
+			protected Tree doWrapMethod() throws Exception {
+				return dataService.getTree(repository, sha, recursive);
 			}
 		}.wrapMethod();
 	}

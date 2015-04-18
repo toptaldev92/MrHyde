@@ -1,31 +1,30 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.github.ApiWrapper;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import roboguice.fragment.provided.RoboListFragment;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public final class ReposFragment extends RoboListFragment {
+public final class ReposFragment extends AbstractListFragment {
 
 	@Inject ApiWrapper apiWrapper;
+
 	private RepositoryListAdapter listAdapter;
 
 	@Override
@@ -53,43 +52,24 @@ public final class ReposFragment extends RoboListFragment {
 	}
 
 
-	private final class RepositoryListAdapter extends BaseAdapter {
-
-		private final List<Repository> repositoryList = new LinkedList<>();
-
-
-		public void setItems(List<Repository> repositoryList) {
-			this.repositoryList.clear();
-			this.repositoryList.addAll(repositoryList);
-			notifyDataSetChanged();
-		}
-
-
-		@Override
-		public int getCount() {
-			return repositoryList.size();
-		}
-
-
-		@Override
-		public Repository getItem(int position) {
-			return repositoryList.get(position);
-		}
-
-
-		@Override
-		public long getItemId(int position) {
-			return position;
-		}
-
+	private final class RepositoryListAdapter extends AbstractListAdapter<Repository> {
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
+			final Repository repository = getItem(position);
 			LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View view = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
-			((TextView) view.findViewById(android.R.id.text1)).setText(getItem(position).getName());
+			((TextView) view.findViewById(android.R.id.text1)).setText(repository.getName());
+			view.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					Fragment newFragment = DirFragment.createInstance(repository);
+					uiUtils.replaceFragment(ReposFragment.this, newFragment);
+				}
+			});
 			return view;
 		}
+
 	}
 
 
