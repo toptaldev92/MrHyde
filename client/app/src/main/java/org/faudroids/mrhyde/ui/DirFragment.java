@@ -12,23 +12,20 @@ import com.unnamed.b.atv.model.TreeNode;
 import com.unnamed.b.atv.view.AndroidTreeView;
 
 import org.eclipse.egit.github.core.Repository;
-import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.Tree;
 import org.eclipse.egit.github.core.TreeEntry;
 import org.faudroids.mrhyde.R;
-import org.faudroids.mrhyde.github.ApiWrapper;
+import org.faudroids.mrhyde.git.FileManager;
+import org.faudroids.mrhyde.git.RepositoryManager;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import roboguice.inject.InjectView;
-import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
@@ -46,8 +43,8 @@ public final class DirFragment extends AbstractFragment {
 
 
 
-	@Inject ApiWrapper apiWrapper;
 	@InjectView(R.id.container) LinearLayout containerView;
+	@Inject RepositoryManager repositoryManager;
 	private Repository repository;
 
 	public DirFragment() {
@@ -60,15 +57,9 @@ public final class DirFragment extends AbstractFragment {
 		super.onViewCreated(view, savedInstanceState);
 
 		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
+		FileManager fileManager = repositoryManager.getFileManager(repository);
 
-		apiWrapper.getCommits(repository)
-				.flatMap(new Func1<List<RepositoryCommit>, Observable<Tree>>() {
-					@Override
-					public Observable<Tree> call(List<RepositoryCommit> repositoryCommits) {
-						String sha = repositoryCommits.get(0).getSha();
-						return apiWrapper.getTree(repository, sha, true);
-					}
-				})
+		fileManager.getTree()
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(new Action1<Tree>() {

@@ -2,18 +2,16 @@ package org.faudroids.mrhyde.ui;
 
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Base64;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import org.eclipse.egit.github.core.Blob;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.TreeEntry;
 import org.faudroids.mrhyde.R;
-import org.faudroids.mrhyde.github.ApiWrapper;
-
-import java.io.UnsupportedEncodingException;
+import org.faudroids.mrhyde.git.FileManager;
+import org.faudroids.mrhyde.git.RepositoryManager;
 
 import javax.inject.Inject;
 
@@ -39,8 +37,13 @@ public final class FileFragment extends AbstractFragment {
 	}
 
 
-	@Inject ApiWrapper apiWrapper;
+	@Inject RepositoryManager repositoryManager;
 	@InjectView(R.id.text) EditText editText;
+	@InjectView(R.id.submit) Button submitButton;
+
+	private FileManager fileManager;
+	private Repository repository;
+	private TreeEntry treeEntry;
 
 	public FileFragment() {
 		super(R.layout.fragment_file);
@@ -51,17 +54,26 @@ public final class FileFragment extends AbstractFragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		editText.setMovementMethod(new ScrollingMovementMethod());
-		final Repository repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
-		final TreeEntry treeEntry = (TreeEntry) getArguments().getSerializable(EXTRA_TREE_ENTRY);
+		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
+		treeEntry = (TreeEntry) getArguments().getSerializable(EXTRA_TREE_ENTRY);
+		fileManager = repositoryManager.getFileManager(repository);
 
-		apiWrapper.getBlob(repository, treeEntry.getSha())
+		editText.setMovementMethod(new ScrollingMovementMethod());
+		submitButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				fileManager.writeFile(treeEntry, editText.getText().toString());
+				getFragmentManager().popBackStack();
+			}
+		});
+
+		fileManager.getFile(treeEntry)
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
-				.subscribe(new Action1<Blob>() {
+				.subscribe(new Action1<String>() {
 					@Override
-					public void call(Blob blob) {
-						editText.setText(parseBlob(blob));
+					public void call(String content) {
+						editText.setText(content);
 					}
 				}, new Action1<Throwable>() {
 					@Override
@@ -70,20 +82,6 @@ public final class FileFragment extends AbstractFragment {
 						Timber.e(throwable, "failed to get content");
 					}
 				});
-	}
-
-
-	private String parseBlob(Blob blob) {
-		if (blob.getEncoding().equals(Blob.ENCODING_UTF8)) return blob.getContent();
-
-		// base 64 encoded otherwise
-		byte[] bytes = Base64.decode(blob.getContent(), Base64.DEFAULT);
-		try {
-			return new String(bytes, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			Timber.e(e, "failed to decode blob");
-			return e.getMessage();
-		}
 	}
 
 }
