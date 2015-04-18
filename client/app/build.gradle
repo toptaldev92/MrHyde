@@ -24,6 +24,7 @@ dependencies {
     compile 'org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5'
     compile 'com.jakewharton.timber:timber:2.7.1'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
+    compile 'com.github.bmelnychuk:atv:1.2.4'
     compile 'io.reactivex:rxjava:1.0.9'
     compile 'io.reactivex:rxandroid:0.24.0'
     compile 'org.roboguice:roboguice:3.0.1'

@@ -4,20 +4,27 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.unnamed.b.atv.model.TreeNode;
+import com.unnamed.b.atv.view.AndroidTreeView;
 
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.Tree;
 import org.eclipse.egit.github.core.TreeEntry;
+import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.github.ApiWrapper;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
+import roboguice.inject.InjectView;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -25,7 +32,7 @@ import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
-public final class DirFragment extends AbstractListFragment {
+public final class DirFragment extends AbstractFragment {
 
 	private static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
@@ -40,15 +47,16 @@ public final class DirFragment extends AbstractListFragment {
 
 
 	@Inject ApiWrapper apiWrapper;
+	@InjectView(R.id.container) LinearLayout containerView;
 
-	private FilesListAdapter listAdapter;
+	public DirFragment() {
+		super(R.layout.fragment_dir);
+	}
+
 
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-
-		listAdapter = new FilesListAdapter();
-		setListAdapter(listAdapter);
 
 		final Repository repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
 
@@ -65,7 +73,13 @@ public final class DirFragment extends AbstractListFragment {
 				.subscribe(new Action1<Tree>() {
 					@Override
 					public void call(Tree tree) {
-						listAdapter.setItems(tree.getTree());
+						DirNode rootDir = parseGitHubTree(tree);
+						TreeNode rootView = parseViewTree(rootDir);
+						AndroidTreeView treeView = new AndroidTreeView(getActivity(), rootView);
+						treeView.setDefaultViewHolder(PathViewHolder.class);
+						treeView.setDefaultAnimation(true);
+						treeView.setDefaultContainerStyle(R.style.TreeNodeStyleCustom);
+						containerView.addView(treeView.getView());
 					}
 				}, new Action1<Throwable>() {
 					@Override
@@ -77,17 +91,99 @@ public final class DirFragment extends AbstractListFragment {
 	}
 
 
-	private final class FilesListAdapter extends AbstractListAdapter<TreeEntry> {
+	private DirNode parseGitHubTree(Tree gitTree) {
+		// parse tree
+		final DirNode rootNode = new DirNode("");
+		for (TreeEntry gitEntry : gitTree.getTree()) {
+			String[] paths = gitEntry.getPath().split("/");
 
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View view = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
-			((TextView) view.findViewById(android.R.id.text1)).setText(getItem(position).getPath());
-			return view;
+			DirNode parentNode = rootNode;
+			for (int i = 0; i < paths.length; ++i) {
+				String path = paths[i];
+				if (i == paths.length - 1) {
+					// add leaf
+					if (gitEntry.getMode().equals(TreeEntry.MODE_DIRECTORY)) {
+						parentNode.entries.put(path, new DirNode(path));
+					} else {
+						parentNode.entries.put(path, new FileNode(path, gitEntry));
+					}
+
+				} else {
+					parentNode = (DirNode) parentNode.entries.get(path);
+				}
+			}
+		}
+		return rootNode;
+	}
+
+
+	private TreeNode parseViewTree(DirNode dirNode) {
+		TreeNode rootView = TreeNode.root();
+		parseViewTree(rootView, dirNode);
+		return rootView;
+	}
+
+
+	private void parseViewTree(TreeNode parentView, DirNode dirNode) {
+		for (PathNode node : dirNode.entries.values()) {
+			if (node instanceof DirNode) {
+				TreeNode newParentView = new TreeNode(node);
+				parentView.addChild(newParentView);
+				parseViewTree(newParentView, (DirNode) node);
+
+			} else {
+				parentView.addChild(new TreeNode(node));
+			}
+		}
+	}
+
+
+	private static abstract class PathNode {
+
+		private final String path;
+
+		public PathNode(String path) {
+			this.path = path;
+		}
+	}
+
+
+	private static final class DirNode extends PathNode {
+
+		private final Map<String, PathNode> entries = new HashMap<>();
+
+		public DirNode(String path) {
+			super(path);
+		}
+	}
+
+
+	private static final class FileNode extends PathNode {
+
+		private final TreeEntry treeEntry;
+
+		public FileNode(String path, TreeEntry treeEntry) {
+			super(path);
+			this.treeEntry = treeEntry;
 		}
 
 	}
 
+
+	public static final class PathViewHolder extends TreeNode.BaseNodeViewHolder<PathNode> {
+
+		public PathViewHolder(Context context) {
+			super(context);
+		}
+
+		@Override
+		public View createNodeView(TreeNode treeNode, PathNode pathNode) {
+			final LayoutInflater inflater = LayoutInflater.from(context);
+			final View view = inflater.inflate(R.layout.item_file, null, false);
+			TextView textView = (TextView) view.findViewById(R.id.name);
+			textView.setText(pathNode.path);
+			return view;
+		}
+	}
 
 }
