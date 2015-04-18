@@ -39,10 +39,12 @@ class RepositoryManager:
                 try:
                     # TODO error handling
                     self.__git.clone(url, repo_path)
-                    self.apply_diff(repo_path, diff)
+                    if diff is not None:
+                        self.apply_diff(repo_path, diff)
                     self.__db.insertData('repo', id, repo_path, url, int(time()))
                     self.__logger.info('Repository cloned to ' + repo_path + '.')
                     build_successful = self.start_jekyll_build(repo_path)
+                    #return ''.join([self.__base_url, '/', id, '/__page'])
                     if build_successful:
                         return ''.join([self.__base_url, '/', id, '/__page'])
                     else:
@@ -79,8 +81,8 @@ class RepositoryManager:
         dir_list = [[f['path'], f['url']] for f in self.__db.list('repo') if isdir(f['path'])]
         return dir_list
 
-    def list_single_repository(self, id):
-        repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
+    def list_single_directory(self, path):
+        repo_path = ''.join([self.__base_dir, '/', path])
         if isdir(repo_path):
             file_list = [f for f in listdir(repo_path)]
             return file_list
