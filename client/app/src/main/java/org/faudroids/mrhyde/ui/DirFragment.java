@@ -17,6 +17,7 @@ import org.eclipse.egit.github.core.TreeEntry;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.utils.DefaultTransformer;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -24,9 +25,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import roboguice.inject.InjectView;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 public final class DirFragment extends AbstractFragment {
@@ -60,8 +59,7 @@ public final class DirFragment extends AbstractFragment {
 		FileManager fileManager = repositoryManager.getFileManager(repository);
 
 		fileManager.getTree()
-				.subscribeOn(Schedulers.io())
-				.observeOn(AndroidSchedulers.mainThread())
+				.compose(new DefaultTransformer<Tree>())
 				.subscribe(new Action1<Tree>() {
 					@Override
 					public void call(Tree tree) {

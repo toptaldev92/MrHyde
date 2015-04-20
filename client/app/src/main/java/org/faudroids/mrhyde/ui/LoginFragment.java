@@ -12,15 +12,14 @@ import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.github.AuthApi;
 import org.faudroids.mrhyde.github.AuthManager;
 import org.faudroids.mrhyde.github.TokenDetails;
+import org.faudroids.mrhyde.utils.DefaultTransformer;
 
 import java.util.UUID;
 
 import javax.inject.Inject;
 
 import roboguice.inject.InjectView;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 
@@ -93,8 +92,7 @@ public final class LoginFragment extends AbstractFragment {
 	private void getAccessToken(String code) {
 		String clientSecret = getString(R.string.gitHubClientSecret);
 		authApi.getAccessToken(CLIENT_ID, clientSecret, code)
-				.subscribeOn(Schedulers.io())
-				.observeOn(AndroidSchedulers.mainThread())
+				.compose(new DefaultTransformer<TokenDetails>())
 				.subscribe(new Action1<TokenDetails>() {
 					@Override
 					public void call(TokenDetails tokenDetails) {

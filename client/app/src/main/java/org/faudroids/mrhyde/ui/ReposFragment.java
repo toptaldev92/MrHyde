@@ -11,14 +11,13 @@ import android.widget.Toast;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.github.ApiWrapper;
+import org.faudroids.mrhyde.utils.DefaultTransformer;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 public final class ReposFragment extends AbstractListFragment {
@@ -35,8 +34,7 @@ public final class ReposFragment extends AbstractListFragment {
 		setListAdapter(listAdapter);
 
 		apiWrapper.getRepositories()
-				.subscribeOn(Schedulers.io())
-				.observeOn(AndroidSchedulers.mainThread())
+				.compose(new DefaultTransformer<List<Repository>>())
 				.subscribe(new Action1<List<Repository>>() {
 					@Override
 					public void call(List<Repository> repositories) {

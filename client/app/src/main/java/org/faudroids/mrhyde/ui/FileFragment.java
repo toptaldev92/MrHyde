@@ -12,13 +12,12 @@ import org.eclipse.egit.github.core.TreeEntry;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.utils.DefaultTransformer;
 
 import javax.inject.Inject;
 
 import roboguice.inject.InjectView;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 import timber.log.Timber;
 
 public final class FileFragment extends AbstractFragment {
@@ -64,8 +63,7 @@ public final class FileFragment extends AbstractFragment {
 			public void onClick(View v) {
 				fileManager.writeFile(treeEntry, editText.getText().toString());
 				fileManager.getDiff()
-						.subscribeOn(Schedulers.io())
-						.observeOn(AndroidSchedulers.mainThread())
+						.compose(new DefaultTransformer<String>())
 						.subscribe(new Action1<String>() {
 							@Override
 							public void call(String diff) {
@@ -77,8 +75,7 @@ public final class FileFragment extends AbstractFragment {
 		});
 
 		fileManager.getFile(treeEntry)
-				.subscribeOn(Schedulers.io())
-				.observeOn(AndroidSchedulers.mainThread())
+				.compose(new DefaultTransformer<String>())
 				.subscribe(new Action1<String>() {
 					@Override
 					public void call(String content) {
