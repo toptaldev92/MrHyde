@@ -1,5 +1,6 @@
 import git
 import errno
+from sqlite3 import Error as SQLError
 import ConfigManager
 import DbHandler
 import logging
@@ -39,14 +40,13 @@ class RepositoryManager:
                 try:
                     # TODO error handling
                     self.__git.clone(url, repo_path)
-                    if diff is not None:
+                    if diff is not None and diff is not '':
                         self.apply_diff(repo_path, diff)
                     self.__db.insertData('repo', id, repo_path, url, int(time()))
                     self.__logger.info('Repository cloned to ' + repo_path + '.')
                     build_successful = self.start_jekyll_build(repo_path)
-                    #return ''.join([self.__base_url, '/', id, '/__page'])
                     if build_successful:
-                        return ''.join([self.__base_url, '/', id, '/__page'])
+                        return ''.join([self.__base_url, '/', id, '/__page/'])
                     else:
                         # TODO proper error handling!
                         raise Exception
@@ -54,19 +54,30 @@ class RepositoryManager:
                     if exception.errno == errno.EPERM:
                         self.__logger.error("Permission to " + repo_path + " denied.")
                         raise
+                except git.GitCommandError as exception:
+                    self.__logger.error(exception.__str__())
+                    raise
             else:
                 try:
                     # TODO error handling
                     makedirs(self.__base_dir, 0o755, True)
                     self.__git.clone(url, repo_path)
-                    self.apply_diff(repo_path, diff)
+                    if diff is not None and diff is not '':
+                        self.apply_diff(repo_path, diff)
                     self.__db.insertData('repo', id, repo_path, url, int(time()))
                     self.__logger.info('Repository cloned to ' + repo_path + '.')
-                    self.start_jekyll_build(repo_path)
-                    return ''.join([self.__base_url, '/', id])
+                    build_successful = self.start_jekyll_build(repo_path)
+                    if build_successful:
+                        return ''.join([self.__base_url, '/', id, '/__page/'])
+                    else:
+                        # TODO proper error handling
+                        raise Exception
                 except OSError as exception:
                     if exception.errno == errno.EPERM:
                         self.__logger.error("Permission to " + repo_path + " denied.")
+                    raise
+                except git.GitCommandError as exception:
+                    self.__logger.error(exception.__str__())
                     raise
         else:
             return None
@@ -82,16 +93,24 @@ class RepositoryManager:
         return dir_list
 
     def list_single_directory(self, path):
-        repo_path = ''.join([self.__base_dir, '/', path])
-        if isdir(repo_path):
+        try:
+            repo_path = ''.join([self.__base_dir, '/', path])
             file_list = [f for f in listdir(repo_path)]
             return file_list
-        else:
-            return None
+        except OSError as exception:
+            if exception.errno == errno.ENOENT:
+                self.__logger.error("Repository " + repo_path + " doesn't exist.")
+                raise
+            elif exception.errno == errno.EPERM:
+                self.__logger.error("Insufficient permissions to view " + repo_path + ".")
+                raise
+        except SQLError:
+            self.__logger.error('Database error.')
+            raise
 
     def delete_repository(self, id):
-        repo = self.__db.list('repo', '', "id='%s'" % id)[0]
         try:
+            repo = self.__db.list('repo', '', "id='%s'" % id)[0]
             rmtree(repo['path'])
             self.__db.deleteData('repo', "id='%s'" % repo['id'])
             return
@@ -102,11 +121,13 @@ class RepositoryManager:
             elif exception.errno == errno.EPERM:
                 self.__logger.error('Insufficient permissions to remove repository ' + id + '.')
                 raise
+        except SQLError:
+            raise
 
     def cleanup_repositories(self):
         timestamp = int(time()-(24*3600))
-        old_repos = self.__db.list('repo', '', 'last_used < %s' % timestamp)
         try:
+            old_repos = self.__db.list('repo', '', 'last_used < %s' % timestamp)
             for repo in old_repos:
                 rmtree(repo['path'])
                 self.__db.deleteData('repo', "id='%s'" % repo['id'])
@@ -117,21 +138,35 @@ class RepositoryManager:
             elif exception.errno == errno.EPERM:
                 self.__logger.error('Insufficient permissions to remove repository ' + repo['id'] + '.')
                 raise
+        except SQLError as exception:
+            self.__logger('Database error.')
+            raise
 
     # TODO error handling
     def update_repository(self, id, diff):
-        repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
-        old_dir = getcwd()
-        chdir(repo_path)
-        self.__git.apply(diff)
-        self.update_timestamp(id)
-        chdir(old_dir)
-        build_successful = self.start_jekyll_build(repo_path)
-        if build_successful:
-            return ''.join([self.__base_url, '/', id, '/__page'])
-        else:
-            # TODO proper error handling!
-            raise Exception
+        try:
+            repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
+            # TODO raises no error even if diff is empty
+            self.apply_diff(id, diff)
+            build_successful = self.start_jekyll_build(repo_path)
+            if build_successful:
+                return ''.join([self.__base_url, '/', id, '/__page/'])
+            else:
+                # TODO proper error handling!
+                raise Exception
+        except OSError as exception:
+            if exception.errno == errno.ENOENT:
+                self.__logger.error('Repository ' + repo['id'] + ' not found.')
+                raise
+            elif exception.errno == errno.EPERM:
+                self.__logger.error('Insufficient permissions to remove repository ' + repo['id'] + '.')
+                raise
+        except SQLError:
+            self.__logger.error('Database error.')
+            raise
+        except git.GitCommandError as exception:
+            self.__logger.error(exception.__str__())
+            raise
 
     def generateId(self, length=16, chars=string.ascii_lowercase+string.digits):
         return ''.join(random.SystemRandom().choice(chars) for _ in range(length))
@@ -150,11 +185,20 @@ class RepositoryManager:
     def get_config(self):
         return self.__cm
 
-    def apply_diff(self, repo_path, diff):
-        old_dir = getcwd()
-        chdir(repo_path)
-        self.__git.apply(diff)
-        chdir(old_dir)
+    def apply_diff(self, id, diff):
+        try:
+            repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
+            old_dir = getcwd()
+            chdir(repo_path)
+            self.__git.apply(diff)
+            self.update_timestamp(id)
+            chdir(old_dir)
+        except SQLError:
+            raise
+        except git.GitCommandError:
+            raise
+        except OSError:
+            raise
 
     def update_timestamp(self, id):
         self.__db.updateData('repo', "id = '%s'" % id, 'last_used=%s' % int(time()))
