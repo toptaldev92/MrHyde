@@ -1,9 +1,9 @@
-package org.faudroids.mrhyde.jekyll_server;
+package org.faudroids.mrhyde.jekyll;
 
 /**
  * Data given to the server in case of a put
  */
-public class JekyllInputPut {
+public class RepoDiff {
 
     private String diff;
 

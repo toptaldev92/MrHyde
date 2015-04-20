@@ -1,9 +1,9 @@
-package org.faudroids.mrhyde.jekyll_server;
+package org.faudroids.mrhyde.jekyll;
 
 /**
  * Data given to the server in case of a post
  */
-public final class JekyllInputPost {
+public final class RepoDetails {
 
     private String url;
     private String diff;

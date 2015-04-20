@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde.jekyll_server;
+package org.faudroids.mrhyde.jekyll;
 
 import java.util.Date;
 

@@ -1,10 +1,8 @@
-package org.faudroids.mrhyde.jekyll_server;
+package org.faudroids.mrhyde.jekyll;
 
 import com.google.inject.Binder;
 import com.google.inject.Module;
 import com.google.inject.Provides;
-
-import javax.inject.Inject;
 
 import retrofit.RestAdapter;
 
@@ -16,11 +14,10 @@ public class JekyllModule implements Module {
     }
 
     @Provides
-    @Inject
-    public JekyllService provideJekyllApi() {
+    public JekyllApi provideJekyllApi() {
         RestAdapter restAdapter = new RestAdapter.Builder()
                 .setEndpoint("https://faudroid.markab.uberspace.de")
                 .build();
-        return restAdapter.create(JekyllService.class);
+        return restAdapter.create(JekyllApi.class);
     }
 }
