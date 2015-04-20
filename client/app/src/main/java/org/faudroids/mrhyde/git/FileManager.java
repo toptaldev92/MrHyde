@@ -27,6 +27,7 @@ import timber.log.Timber;
 
 public final class FileManager {
 
+	private final GitManager gitManager;
 	private final ApiWrapper apiWrapper;
 	private final Repository repository;
 	private final File rootDir;
@@ -38,7 +39,7 @@ public final class FileManager {
 		this.apiWrapper = apiWrapper;
 		this.repository = repository;
 		this.rootDir = new File(context.getFilesDir(), repository.getName());
-		Timber.d("creating root dir successful " + this.rootDir.mkdirs());
+		this.gitManager = new GitManager(rootDir);
 	}
 
 
@@ -61,7 +62,8 @@ public final class FileManager {
 						FileManager.this.tree = tree;
 						return Observable.just(tree);
 					}
-				});
+				})
+				.compose(new InitRepoTransformer<Tree>());
 	}
 
 
@@ -99,7 +101,8 @@ public final class FileManager {
 							writeFile(file, content);
 							return Observable.just(content);
 						}
-					});
+					})
+					.flatMap(gitManager.<String>commit(file));
 		}
 	}
 
@@ -110,6 +113,13 @@ public final class FileManager {
 	public void writeFile(TreeEntry treeEntry, String content) {
 		writeFile(new File(rootDir, treeEntry.getPath()), content);
 	}
+
+
+	public Observable<String> getDiff() {
+		return gitManager.diff();
+	}
+
+
 
 
 	private String readFile(File file) {
@@ -162,4 +172,22 @@ public final class FileManager {
 		}
 	}
 
+
+
+	private final class InitRepoTransformer<T> implements Observable.Transformer<T, T> {
+		@Override
+		public Observable<T> call(Observable<T> observable) {
+			if (!rootDir.exists() && !rootDir.mkdirs()) {
+				Timber.w("failed to create root dir");
+			}
+
+			try {
+				if (!gitManager.exists()) gitManager.init();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+
+			return observable;
+		}
+	}
 }

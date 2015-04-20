@@ -63,6 +63,15 @@ public final class FileFragment extends AbstractFragment {
 			@Override
 			public void onClick(View v) {
 				fileManager.writeFile(treeEntry, editText.getText().toString());
+				fileManager.getDiff()
+						.subscribeOn(Schedulers.io())
+						.observeOn(AndroidSchedulers.mainThread())
+						.subscribe(new Action1<String>() {
+							@Override
+							public void call(String diff) {
+								Timber.d(diff);
+							}
+						});
 				getFragmentManager().popBackStack();
 			}
 		});

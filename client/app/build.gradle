@@ -22,10 +22,12 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:22.0.0'
     compile 'org.eclipse.mylyn.github:org.eclipse.egit.github.core:2.1.5'
+    compile 'org.eclipse.jgit:org.eclipse.jgit:3.7.0.201502260915-r'
     compile 'com.jakewharton.timber:timber:2.7.1'
     compile 'com.squareup.retrofit:retrofit:1.9.0'
     compile 'com.github.bmelnychuk:atv:1.2.4'
     compile 'io.reactivex:rxjava:1.0.9'
+
     compile 'io.reactivex:rxandroid:0.24.0'
     compile 'org.roboguice:roboguice:3.0.1'
     provided 'org.roboguice:roboblender:3.0.1'

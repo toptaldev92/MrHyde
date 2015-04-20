@@ -94,7 +94,7 @@ public final class DirFragment extends AbstractFragment {
 			for (int i = 0; i < paths.length; ++i) {
 				String path = paths[i];
 				if (i == paths.length - 1) {
-					// add leaf
+					// commit leaf
 					if (gitEntry.getMode().equals(TreeEntry.MODE_DIRECTORY)) {
 						parentNode.entries.put(path, new DirNode(path));
 					} else {
