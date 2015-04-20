@@ -1,7 +1,5 @@
 package org.faudroids.mrhyde.jekyll_server;
 
-import com.google.gson.annotations.SerializedName;
-
 import java.util.Date;
 
 /**
@@ -9,9 +7,7 @@ import java.util.Date;
  */
 public class JekyllOutput {
 
-    @SerializedName("URL")
     private String url;
-    @SerializedName("expiration_date")
     private Date expirationDate;
 
     public String getURL()

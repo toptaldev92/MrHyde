@@ -18,7 +18,7 @@ public interface JekyllService {
      */
     @POST(JEKYLL_URL)
     public Observable<JekyllOutput> post(
-            @Body JekyllInput input);
+            @Body JekyllInputPost input);
 
 
     /**
@@ -27,7 +27,7 @@ public interface JekyllService {
     @PUT(ID_URL)
     public Observable<JekyllOutput> post(
             @Path("id") String id,
-            @Body JekyllInput input);
+            @Body JekyllInputPut input);
 
 
     /**
