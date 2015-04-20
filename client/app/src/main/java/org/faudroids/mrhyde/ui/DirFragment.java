@@ -1,8 +1,12 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -52,6 +56,13 @@ public final class DirFragment extends AbstractFragment {
 
 
 	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setHasOptionsMenu(true);
+	}
+
+
+	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
@@ -79,6 +90,24 @@ public final class DirFragment extends AbstractFragment {
 						Timber.e(throwable, "failed to get content");
 					}
 				});
+	}
+
+
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+		inflater.inflate(R.menu.editor, menu);
+	}
+
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+			case R.id.action_commit:
+				Fragment commitFragment = CommitFragment.createInstance(repository);
+				uiUtils.replaceFragment(this, commitFragment);
+				return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 

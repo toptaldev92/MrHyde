@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Set;
 
 import rx.Observable;
 import rx.functions.Func0;
@@ -120,6 +121,9 @@ public final class FileManager {
 	}
 
 
+	public Observable<Set<String>> getChangedFiles() {
+		return gitManager.getChangedFiles();
+	}
 
 
 	private String readFile(File file) {

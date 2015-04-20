@@ -11,7 +11,7 @@ import roboguice.inject.ContentView;
 
 
 @ContentView(R.layout.activity_main)
-public final class MainActivity extends RoboActivity{
+public final class MainActivity extends RoboActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

@@ -1,6 +1,7 @@
 package org.faudroids.mrhyde.git;
 
 import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
@@ -18,6 +19,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import rx.Observable;
 import rx.functions.Func0;
@@ -80,6 +82,26 @@ public final class GitManager {
 					List<DiffEntry> diffs = formatter.scan(commitTreeIterator, workTreeIterator);
 					formatter.format(diffs);
 					return Observable.just(outputStream.toString());
+
+				} catch (IOException | GitAPIException e) {
+					throw new RuntimeException(e);
+				} finally {
+					if (git != null) git.close();
+				}
+			}
+		});
+	}
+
+
+	public Observable<Set<String>> getChangedFiles() {
+		return Observable.defer(new Func0<Observable<Set<String>>>() {
+			@Override
+			public Observable<Set<String>> call() {
+				Git git = null;
+				try {
+					git = Git.open(rootDir);
+					Status status = git.status().call();
+					return Observable.just(status.getUncommittedChanges());
 
 				} catch (IOException | GitAPIException e) {
 					throw new RuntimeException(e);
