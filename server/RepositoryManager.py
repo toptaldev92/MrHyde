@@ -10,7 +10,7 @@ import random
 from time import time
 from shutil import rmtree
 
-from os.path import isdir, join
+from os.path import isdir, join, isfile
 from os import makedirs, listdir, chdir, getcwd, mkdir
 import subprocess
 
@@ -142,7 +142,6 @@ class RepositoryManager:
             self.__logger('Database error.')
             raise
 
-    # TODO error handling
     def update_repository(self, id, diff):
         try:
             repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
@@ -190,7 +189,8 @@ class RepositoryManager:
             repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
             old_dir = getcwd()
             chdir(repo_path)
-            self.__git.apply(diff)
+            diff_file = self.create_diff_file(id, diff)
+            self.__git.apply(diff_file)
             self.update_timestamp(id)
             chdir(old_dir)
         except SQLError:
@@ -202,3 +202,32 @@ class RepositoryManager:
 
     def update_timestamp(self, id):
         self.__db.updateData('repo', "id = '%s'" % id, 'last_used=%s' % int(time()))
+
+    def create_diff_file(self, id, diff):
+        try:
+            file_name = ''.join(['/tmp/', id, '_patch.diff'])
+            file_out = open(file_name, 'w')
+        except IOError:
+            self.__logger.error('Unable to create diff file.')
+            raise
+        else:
+            file_out.write(diff)
+            file_out.close()
+            return file_name
+
+    def file_download(self, id, file_name):
+        try:
+            repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
+            file_path = '/'.join([repo_path, file_name])
+            if isfile(file_path):
+                return True
+            else:
+                return False
+        except OSError as exception:
+            if exception.errno == errno.ENOENT:
+                self.__logger.error('File' + file_path + ' not found.')
+                raise
+            elif exception.errno == errno.EPERM:
+                self.__logger.error('Insufficient permissions to access file ' + file_path + '.')
+                raise
+
