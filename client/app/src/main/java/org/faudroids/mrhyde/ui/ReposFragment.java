@@ -27,16 +27,27 @@ import timber.log.Timber;
 
 public final class ReposFragment extends AbstractListFragment {
 
+	private static final String EXTRA_REPOSITORIES = "EXTRA_REPOSITORIES";
+
 	@Inject ApiWrapper apiWrapper;
 
 	private RepositoryListAdapter listAdapter;
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
 		listAdapter = new RepositoryListAdapter();
 		setListAdapter(listAdapter);
+
+		if (savedInstanceState != null) {
+			List<Repository> repositories = (List<Repository>) savedInstanceState.getSerializable(EXTRA_REPOSITORIES);
+			if (repositories != null) {
+				listAdapter.setItems(repositories);
+				return;
+			}
+		}
 
 		Observable.zip(
 				apiWrapper.getRepositories(),
@@ -75,6 +86,14 @@ public final class ReposFragment extends AbstractListFragment {
 						Timber.e(throwable, "failed to get repos");
 					}
 				});
+	}
+
+
+	@Override
+	public void onSaveInstanceState(Bundle state) {
+		super.onSaveInstanceState(state);
+		if (listAdapter == null) return;
+		state.putSerializable(EXTRA_REPOSITORIES, new ArrayList<>(listAdapter.getItems()));
 	}
 
 

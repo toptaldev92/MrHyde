@@ -39,6 +39,10 @@ abstract class AbstractListFragment extends RoboListFragment {
 			return position;
 		}
 
+		public List<T> getItems() {
+			return items;
+		}
+
 	}
 
 }
