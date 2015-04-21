@@ -25,16 +25,9 @@ import timber.log.Timber;
 
 public final class LoginFragment extends AbstractFragment {
 
-	private static final  String
-			OAUTH_URL = "https://github.com/login/oauth/authorize",
-			OAUTH_SCOPE = "user%2Crepo",
-			CLIENT_ID = "bec1da051d782d9fc8b6";
-
-
 	@InjectView(R.id.login_button) Button loginButton;
 	@Inject AuthApi authApi;
 	@Inject AuthManager authManager;
-
 
 	public LoginFragment() {
 		super(R.layout.fragment_login);
@@ -54,10 +47,9 @@ public final class LoginFragment extends AbstractFragment {
 				loginDialog = new Dialog(getActivity());
 				loginDialog.setContentView(R.layout.dialog_login);
 				WebView webView = (WebView) loginDialog.findViewById(R.id.webview);
-				// webView.getSettings().setJavaScriptEnabled(true);
-				webView.loadUrl(OAUTH_URL + "?"
-						+ "&client_id=" + CLIENT_ID
-						+ "&scope=" + OAUTH_SCOPE
+				webView.loadUrl("https://github.com/login/oauth/authorize?"
+						+ "&client_id=" + getString(R.string.gitHubClientId)
+						+ "&scope=user%2Crepo"
 						+ "&state=" + state);
 				webView.setWebViewClient(new WebViewClient() {
 					@Override
@@ -90,8 +82,9 @@ public final class LoginFragment extends AbstractFragment {
 
 
 	private void getAccessToken(String code) {
+		String clientId = getString(R.string.gitHubClientId);
 		String clientSecret = getString(R.string.gitHubClientSecret);
-		compositeSubscription.add(authApi.getAccessToken(CLIENT_ID, clientSecret, code)
+		compositeSubscription.add(authApi.getAccessToken(clientId, clientSecret, code)
 				.compose(new DefaultTransformer<TokenDetails>())
 				.subscribe(new Action1<TokenDetails>() {
 					@Override
