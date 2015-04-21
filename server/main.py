@@ -4,6 +4,9 @@ import errno
 import logging
 import json
 
+from git import GitCommandError
+from sqlite3 import Error as SQLError
+
 from bottle import request, Bottle, run, abort, template, static_file
 
 import RepositoryManager
@@ -41,16 +44,17 @@ def create_repository():
         else:
             url = request.POST.get('url')
             diff = request.POST.get('diff')
-            if url is not None:
-                repo_url = rm.init_repository(url, diff)
-                return template('list_view', rows=[repo_url], header='Your new repository is available at:')
-            else:
-                abort(400, 'Bad request.')
+            repo_url = rm.init_repository(url, diff)
+            return template('list_view', rows=[repo_url], header='Your new repository is available at:')
     except OSError as exception:
         if exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
     except KeyError:
-        abort(500, 'Unable to parse config file.')
+        abort(500, 'Internal error. Sorry for that!')
+    except GitCommandError as exception:
+        abort(400, 'Bad request')
+    except IOError:
+        abort(500, 'Internal error. Sorry for that!')
 
 
 @jekyll_server.get('/jekyll/<repo_name:path>/__page/<static_path>')
@@ -72,6 +76,18 @@ def show_repository(id):
     else:
         abort(404, 'Repository not found!')
 
+@jekyll_server.get('/jekyll/<id:path>/<static_path>')
+def download_file(id, static_path):
+    try:
+        file = rm.file_download(id, static_path)
+        if file is True:
+            return static_file('/'.join([id, static_path]), root=rm.get_config().get_base_dir(), download=True)
+    except OSError as exception:
+        if exception.errno == errno.ENOENT:
+            abort(404, 'File not found.')
+        elif exception.errno == errno.EPERM:
+            abort(403, 'Permission denied.')
+
 @jekyll_server.delete('/jekyll/<id:path>/')
 def delete_repository(id):
     try:
@@ -81,8 +97,10 @@ def delete_repository(id):
             abort(404, 'Repository not found.')
         elif exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
+    except SQLError:
+        abort(500, 'Internal error. Sorry for that!')
 
-@jekyll_server.put('/jekyll/<id:path>')
+@jekyll_server.put('/jekyll/<id:path>/')
 def update_repository(id):
     try:
         if request.content_type == 'application/json':
@@ -92,14 +110,15 @@ def update_repository(id):
         else:
             diff = request.POST.get('diff')
             url = rm.update_repository(id, diff)
-            if url is not None and diff is not None:
-                return template('list_view', rows=[url], header='Repository updated.')
-            else:
-                abort(400, 'Bad request.')
+            return template('list_view', rows=[url], header='Repository updated.')
     except OSError as exception:
         if exception.errno == errno.ENOENT:
             abort(404, 'Repository not found.')
         elif exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
+    except GitCommandError as exception:
+        abort(500, 'Failed to apply patch.')
+    except SQLError:
+        abort(500, 'Internal error. Sorry for that!')
 
 run(jekyll_server, host='127.0.0.1', port=8787, debug=True)
