@@ -56,12 +56,6 @@ def create_repository():
     except IOError:
         abort(500, 'Internal error. Sorry for that!')
 
-
-@jekyll_server.get('/jekyll/<repo_name:path>/__page/<static_path>')
-def show_jekyll_output(repo_name, static_path):
-    return static_file(repo_name+'/__page/'+static_path, root=rm.get_config().get_base_dir())
-
-
 @jekyll_server.get('/jekyll/<id:path>/')
 def show_repository(id):
     files = rm.list_single_directory(id)

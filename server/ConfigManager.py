@@ -36,3 +36,17 @@ class ConfigManager:
         except KeyError:
             self.__logger.error('Unable to parse config file.')
             raise
+
+    def get_deploy_base_path(self):
+        try:
+            return self.__config['default']['deploy_path']
+        except KeyError:
+            self.__logger.error('Unable to parse config file.')
+            raise
+
+    def get_deploy_append_path(self):
+        try:
+            return self.__config['default']['deploy_path_append']
+        except KeyError:
+            self.__logger.error('Unable to parse config file.')
+            raise

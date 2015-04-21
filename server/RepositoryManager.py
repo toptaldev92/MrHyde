@@ -35,50 +35,29 @@ class RepositoryManager:
     def init_repository(self, url, diff):
         id = self.generateId(int(self.__cm.get_hash_size()))
         repo_path = join(self.__base_dir, id)
+        if not isdir(self.__base_dir):
+            makedirs(self.__base_dir, 0o755, True)
         if not self.repository_exists(id):
-            if isdir(self.__base_dir):
-                try:
-                    # TODO error handling
-                    self.__git.clone(url, repo_path)
-                    if diff is not None and diff is not '':
-                        self.apply_diff(repo_path, diff)
-                    self.__db.insertData('repo', id, repo_path, url, int(time()))
-                    self.__logger.info('Repository cloned to ' + repo_path + '.')
-                    build_successful = self.start_jekyll_build(repo_path)
-                    if build_successful:
-                        return ''.join([self.__base_url, '/', id, '/__page/'])
-                    else:
-                        # TODO proper error handling!
-                        raise Exception
-                except OSError as exception:
-                    if exception.errno == errno.EPERM:
-                        self.__logger.error("Permission to " + repo_path + " denied.")
-                        raise
-                except git.GitCommandError as exception:
-                    self.__logger.error(exception.__str__())
+            try:
+                # TODO error handling
+                self.__git.clone(url, repo_path)
+                if diff is not None and diff is not '':
+                    self.apply_diff(repo_path, diff)
+                self.__db.insertData('repo', id, repo_path, url, int(time()))
+                self.__logger.info('Repository cloned to ' + repo_path + '.')
+                build_successful = self.start_jekyll_build(repo_path)
+                if build_successful:
+                    return ''.join([id, '.', self.get_config().get_base_url()])
+                else:
+                    # TODO proper error handling!
+                    raise Exception
+            except OSError as exception:
+                if exception.errno == errno.EPERM:
+                    self.__logger.error("Permission to " + repo_path + " denied.")
                     raise
-            else:
-                try:
-                    # TODO error handling
-                    makedirs(self.__base_dir, 0o755, True)
-                    self.__git.clone(url, repo_path)
-                    if diff is not None and diff is not '':
-                        self.apply_diff(repo_path, diff)
-                    self.__db.insertData('repo', id, repo_path, url, int(time()))
-                    self.__logger.info('Repository cloned to ' + repo_path + '.')
-                    build_successful = self.start_jekyll_build(repo_path)
-                    if build_successful:
-                        return ''.join([self.__base_url, '/', id, '/__page/'])
-                    else:
-                        # TODO proper error handling
-                        raise Exception
-                except OSError as exception:
-                    if exception.errno == errno.EPERM:
-                        self.__logger.error("Permission to " + repo_path + " denied.")
-                    raise
-                except git.GitCommandError as exception:
-                    self.__logger.error(exception.__str__())
-                    raise
+            except git.GitCommandError as exception:
+                self.__logger.error(exception.__str__())
+                raise
         else:
             return None
 
@@ -170,10 +149,10 @@ class RepositoryManager:
     def generateId(self, length=16, chars=string.ascii_lowercase+string.digits):
         return ''.join(random.SystemRandom().choice(chars) for _ in range(length))
 
-    def start_jekyll_build(self, path):
+    def start_jekyll_build(self, id):
         # TODO perhaps we should do this async (big pages?)
-        mkdir(path+'/__page')
-        pagepath = path+'/__page'
+        pagepath = self.setup_deployment(id)
+        path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
         cmd = ['jekyll', 'build', '--source', path, '--destination', pagepath]
         try:
             process = subprocess.check_output(cmd)
@@ -230,4 +209,13 @@ class RepositoryManager:
             elif exception.errno == errno.EPERM:
                 self.__logger.error('Insufficient permissions to access file ' + file_path + '.')
                 raise
+
+    def setup_deployment(self, id):
+        try:
+            deploy_path = ''.join([self.get_config().get_deploy_base_path(), id, self.get_config().get_deploy_append_path()])
+            makedirs(deploy_path, 0o755, True)
+            self.__logger.info('Created deploy path ' + deploy_path)
+            return deploy_path
+        except OSError:
+            pass
 
