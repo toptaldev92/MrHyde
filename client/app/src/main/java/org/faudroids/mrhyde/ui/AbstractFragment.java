@@ -1,5 +1,6 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,9 +17,17 @@ abstract class AbstractFragment extends RoboFragment {
 	private final int layoutResource;
 	@Inject UiUtils uiUtils;
 	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
+	protected ActionBarListener actionBarListener;
 
 	AbstractFragment(int layoutResource) {
 		this.layoutResource = layoutResource;
+	}
+
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		actionBarListener = UiUtils.activityToActionBarListener(activity);
 	}
 
 

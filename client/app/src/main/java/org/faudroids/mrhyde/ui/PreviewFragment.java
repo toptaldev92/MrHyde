@@ -32,6 +32,8 @@ public class PreviewFragment extends AbstractFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        actionBarListener.setTitle(getString(R.string.title_preview));
+
         url = (String) getArguments().getSerializable(EXTRA_URL);
         webView.loadUrl(url);
         webView.setWebViewClient(new WebViewClient() {

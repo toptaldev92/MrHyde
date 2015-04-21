@@ -1,5 +1,6 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.Activity;
 import android.widget.BaseAdapter;
 
 import java.util.LinkedList;
@@ -14,6 +15,14 @@ abstract class AbstractListFragment extends RoboListFragment {
 
 	@Inject UiUtils uiUtils;
 	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
+	protected ActionBarListener actionBarListener;
+
+
+	@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		actionBarListener = UiUtils.activityToActionBarListener(activity);
+	}
 
 
 	@Override

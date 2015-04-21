@@ -11,7 +11,7 @@ import roboguice.inject.ContentView;
 
 
 @ContentView(R.layout.activity_main)
-public final class MainActivity extends RoboActivity {
+public final class MainActivity extends RoboActivity implements ActionBarListener {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -24,6 +24,12 @@ public final class MainActivity extends RoboActivity {
 			transaction.addToBackStack(null);
 			transaction.commit();
 		}
+	}
+
+
+	@Override
+	public void setTitle(String title) {
+		getActionBar().setTitle(title);
 	}
 
 }

@@ -42,28 +42,29 @@ public final class ReposFragment extends AbstractListFragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		actionBarListener.setTitle(getString(R.string.title_repos));
 		listAdapter = new RepositoryListAdapter();
 		setListAdapter(listAdapter);
 
 		progressBar.setVisibility(View.VISIBLE);
 		emptyView.setVisibility(View.GONE);
 		compositeSubscription.add(repositoryManager.getRepositories()
-						.compose(new DefaultTransformer<List<Repository>>())
-						.subscribe(new Action1<List<Repository>>() {
-							@Override
-							public void call(List<Repository> repositories) {
-								listAdapter.setItems(repositories);
-								progressBar.setVisibility(View.GONE);
-							}
-						}, new Action1<Throwable>() {
-							@Override
-							public void call(Throwable throwable) {
-								Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
-								progressBar.setVisibility(View.GONE);
-								emptyView.setVisibility(View.VISIBLE);
-								Timber.e(throwable, "failed to get repos");
-							}
-						}));
+				.compose(new DefaultTransformer<List<Repository>>())
+				.subscribe(new Action1<List<Repository>>() {
+					@Override
+					public void call(List<Repository> repositories) {
+						listAdapter.setItems(repositories);
+						progressBar.setVisibility(View.GONE);
+					}
+				}, new Action1<Throwable>() {
+					@Override
+					public void call(Throwable throwable) {
+						Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
+						progressBar.setVisibility(View.GONE);
+						emptyView.setVisibility(View.VISIBLE);
+						Timber.e(throwable, "failed to get repos");
+					}
+				}));
 	}
 
 

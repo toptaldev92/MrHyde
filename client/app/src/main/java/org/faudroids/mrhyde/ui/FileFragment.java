@@ -56,6 +56,7 @@ public final class FileFragment extends AbstractFragment {
 		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
 		treeEntry = (TreeEntry) getArguments().getSerializable(EXTRA_TREE_ENTRY);
 		fileManager = repositoryManager.getFileManager(repository);
+		actionBarListener.setTitle(treeEntry.getPath());
 
 		editText.setMovementMethod(new ScrollingMovementMethod());
 		submitButton.setOnClickListener(new View.OnClickListener() {

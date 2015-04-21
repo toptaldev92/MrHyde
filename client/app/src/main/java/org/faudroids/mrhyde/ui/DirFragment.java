@@ -68,6 +68,7 @@ public final class DirFragment extends AbstractFragment {
 
 		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
 		FileManager fileManager = repositoryManager.getFileManager(repository);
+		actionBarListener.setTitle(repository.getOwner().getLogin() + "/" + repository.getName());
 
 		compositeSubscription.add(fileManager.getTree()
 				.compose(new DefaultTransformer<Tree>())
