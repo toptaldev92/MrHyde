@@ -6,11 +6,13 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.User;
+import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.github.ApiWrapper;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
@@ -19,6 +21,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import roboguice.inject.InjectView;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func1;
@@ -29,9 +32,17 @@ public final class ReposFragment extends AbstractListFragment {
 
 	private static final String EXTRA_REPOSITORIES = "EXTRA_REPOSITORIES";
 
+	@InjectView(R.id.progressbar) ProgressBar progressBar;
+	@InjectView(android.R.id.empty) TextView emptyView;
 	@Inject ApiWrapper apiWrapper;
-
 	private RepositoryListAdapter listAdapter;
+
+
+	@Override
+	public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle bundle) {
+		return inflater.inflate(R.layout.fragment_repos, parent, false);
+	}
+
 
 	@Override
 	@SuppressWarnings("unchecked")
@@ -49,6 +60,8 @@ public final class ReposFragment extends AbstractListFragment {
 			}
 		}
 
+		progressBar.setVisibility(View.VISIBLE);
+		emptyView.setVisibility(View.GONE);
 		Observable.zip(
 				apiWrapper.getRepositories(),
 				apiWrapper.getOrganizations()
@@ -78,11 +91,14 @@ public final class ReposFragment extends AbstractListFragment {
 					@Override
 					public void call(List<Repository> repositories) {
 						listAdapter.setItems(repositories);
+						progressBar.setVisibility(View.GONE);
 					}
 				}, new Action1<Throwable>() {
 					@Override
 					public void call(Throwable throwable) {
 						Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
+						progressBar.setVisibility(View.GONE);
+						emptyView.setVisibility(View.VISIBLE);
 						Timber.e(throwable, "failed to get repos");
 					}
 				});
