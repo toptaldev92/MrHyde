@@ -33,7 +33,7 @@ def list_all_repositories():
         else:
             return template('repo_overview', rows=repos, header='Available repositories:')
 
-@jekyll_server.post('/jekyll')
+@jekyll_server.post('/jekyll/')
 def create_repository():
     try:
         if request.content_type == 'application/json':
@@ -45,7 +45,10 @@ def create_repository():
             url = request.POST.get('url')
             diff = request.POST.get('diff')
             repo_url = rm.init_repository(url, diff)
-            return template('list_view', rows=[repo_url], header='Your new repository is available at:')
+            if repo_url is not None:
+                return template('list_view', rows=[repo_url], header='Your new repository is available at:')
+            else:
+                abort(500, 'Internal error. Sorry for that!')
     except OSError as exception:
         if exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')

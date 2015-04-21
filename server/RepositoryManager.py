@@ -45,7 +45,7 @@ class RepositoryManager:
                     self.apply_diff(repo_path, diff)
                 self.__db.insertData('repo', id, repo_path, url, int(time()))
                 self.__logger.info('Repository cloned to ' + repo_path + '.')
-                build_successful = self.start_jekyll_build(repo_path)
+                build_successful = self.start_jekyll_build(id)
                 if build_successful:
                     return ''.join([id, '.', self.get_config().get_base_url()])
                 else:
@@ -128,16 +128,16 @@ class RepositoryManager:
             self.apply_diff(id, diff)
             build_successful = self.start_jekyll_build(repo_path)
             if build_successful:
-                return ''.join([self.__base_url, '/', id, '/__page/'])
+                return ''.join([id, '.', self.__base_url])
             else:
                 # TODO proper error handling!
                 raise Exception
         except OSError as exception:
             if exception.errno == errno.ENOENT:
-                self.__logger.error('Repository ' + repo['id'] + ' not found.')
+                self.__logger.error('Repository ' + repo_path['id'] + ' not found.')
                 raise
             elif exception.errno == errno.EPERM:
-                self.__logger.error('Insufficient permissions to remove repository ' + repo['id'] + '.')
+                self.__logger.error('Insufficient permissions to remove repository ' + repo_path['id'] + '.')
                 raise
         except SQLError:
             self.__logger.error('Database error.')
@@ -216,6 +216,8 @@ class RepositoryManager:
             makedirs(deploy_path, 0o755, True)
             self.__logger.info('Created deploy path ' + deploy_path)
             return deploy_path
-        except OSError:
-            pass
+        except OSError as exception:
+            if exception.errno == errno.EPERM:
+                self.__logger.error('Insufficient permissions to create directory: ' + deploy_path)
+                return None
 
