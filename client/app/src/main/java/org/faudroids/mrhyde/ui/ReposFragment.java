@@ -10,14 +10,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.eclipse.egit.github.core.Repository;
+import org.eclipse.egit.github.core.User;
 import org.faudroids.mrhyde.github.ApiWrapper;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import rx.Observable;
 import rx.functions.Action1;
+import rx.functions.Func1;
+import rx.functions.Func2;
 import timber.log.Timber;
 
 public final class ReposFragment extends AbstractListFragment {
@@ -33,7 +38,30 @@ public final class ReposFragment extends AbstractListFragment {
 		listAdapter = new RepositoryListAdapter();
 		setListAdapter(listAdapter);
 
-		apiWrapper.getRepositories()
+		Observable.zip(
+				apiWrapper.getRepositories(),
+				apiWrapper.getOrganizations()
+						.flatMap(new Func1<List<User>, Observable<User>>() {
+							@Override
+							public Observable<User> call(List<User> users) {
+								return Observable.from(users);
+							}
+						})
+						.flatMap(new Func1<User, Observable<List<Repository>>>() {
+							@Override
+							public Observable<List<Repository>> call(User org) {
+								return apiWrapper.getOrgRepositories(org.getLogin());
+							}
+						})
+						.toList(),
+				new Func2<List<Repository>, List<List<Repository>>, List<Repository>>() {
+					@Override
+					public List<Repository> call(List<Repository> userRepos, List<List<Repository>> orgRepos) {
+						List<Repository> allRepos = new ArrayList<>(userRepos);
+						for (List<Repository> repos : orgRepos) allRepos.addAll(repos);
+						return allRepos;
+					}
+				})
 				.compose(new DefaultTransformer<List<Repository>>())
 				.subscribe(new Action1<List<Repository>>() {
 					@Override

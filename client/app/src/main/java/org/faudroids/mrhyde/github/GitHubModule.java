@@ -8,6 +8,7 @@ import com.google.inject.Provides;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.GitHubService;
+import org.eclipse.egit.github.core.service.OrganizationService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
 import javax.inject.Inject;
@@ -55,6 +56,13 @@ public final class GitHubModule implements Module {
 	@Inject
 	public DataService provideDataService(AuthManager authManager) {
 		return setAuthToken(new DataService(), authManager);
+	}
+
+
+	@Provides
+	@Inject
+	public OrganizationService provideOrganizationService(AuthManager authManager) {
+		return setAuthToken(new OrganizationService(), authManager);
 	}
 
 

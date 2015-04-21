@@ -9,8 +9,10 @@ import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.Tree;
 import org.eclipse.egit.github.core.TreeEntry;
+import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.DataService;
+import org.eclipse.egit.github.core.service.OrganizationService;
 import org.eclipse.egit.github.core.service.RepositoryService;
 
 import java.util.Collection;
@@ -33,16 +35,19 @@ public final class ApiWrapper {
 	private final RepositoryService repositoryService;
 	private final CommitService commitService;
 	private final DataService dataService;
+	private final OrganizationService organizationService;
 
 	@Inject
 	public ApiWrapper(
 			RepositoryService repositoryService,
 			CommitService commitService,
-			DataService dataService) {
+			DataService dataService,
+			OrganizationService organizationService) {
 
 		this.repositoryService = repositoryService;
 		this.commitService = commitService;
 		this.dataService = dataService;
+		this.organizationService = organizationService;
 	}
 
 
@@ -51,6 +56,26 @@ public final class ApiWrapper {
 			@Override
 			protected List<Repository> doWrapMethod() throws Exception {
 				return repositoryService.getRepositories();
+			}
+		}.wrapMethod();
+	}
+
+
+	public Observable<List<Repository>> getOrgRepositories(final String orgName) {
+		return new Wrapper<List<Repository>>() {
+			@Override
+			protected List<Repository> doWrapMethod() throws Exception {
+				return repositoryService.getOrgRepositories(orgName);
+			}
+		}.wrapMethod();
+	}
+
+
+	public Observable<List<User>> getOrganizations() {
+		return new Wrapper<List<User>>() {
+			@Override
+			protected List<User> doWrapMethod() throws Exception {
+				return organizationService.getOrganizations();
 			}
 		}.wrapMethod();
 	}
