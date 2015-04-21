@@ -91,7 +91,7 @@ public final class LoginFragment extends AbstractFragment {
 
 	private void getAccessToken(String code) {
 		String clientSecret = getString(R.string.gitHubClientSecret);
-		authApi.getAccessToken(CLIENT_ID, clientSecret, code)
+		compositeSubscription.add(authApi.getAccessToken(CLIENT_ID, clientSecret, code)
 				.compose(new DefaultTransformer<TokenDetails>())
 				.subscribe(new Action1<TokenDetails>() {
 					@Override
@@ -105,6 +105,6 @@ public final class LoginFragment extends AbstractFragment {
 					public void call(Throwable throwable)  {
 						Timber.d(throwable, "failed to get token");
 					}
-				});
+				}));
 	}
 }

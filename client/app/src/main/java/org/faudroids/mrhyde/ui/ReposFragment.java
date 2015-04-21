@@ -62,7 +62,7 @@ public final class ReposFragment extends AbstractListFragment {
 
 		progressBar.setVisibility(View.VISIBLE);
 		emptyView.setVisibility(View.GONE);
-		Observable.zip(
+		compositeSubscription.add(Observable.zip(
 				apiWrapper.getRepositories(),
 				apiWrapper.getOrganizations()
 						.flatMap(new Func1<List<User>, Observable<User>>() {
@@ -101,14 +101,14 @@ public final class ReposFragment extends AbstractListFragment {
 						emptyView.setVisibility(View.VISIBLE);
 						Timber.e(throwable, "failed to get repos");
 					}
-				});
+				}));
 	}
 
 
 	@Override
 	public void onSaveInstanceState(Bundle state) {
 		super.onSaveInstanceState(state);
-		if (listAdapter == null) return;
+		if (listAdapter == null || listAdapter.getItems().isEmpty()) return;
 		state.putSerializable(EXTRA_REPOSITORIES, new ArrayList<>(listAdapter.getItems()));
 	}
 

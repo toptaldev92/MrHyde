@@ -8,10 +8,19 @@ import java.util.List;
 import javax.inject.Inject;
 
 import roboguice.fragment.provided.RoboListFragment;
+import rx.subscriptions.CompositeSubscription;
 
 abstract class AbstractListFragment extends RoboListFragment {
 
 	@Inject UiUtils uiUtils;
+	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
+
+
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		compositeSubscription.unsubscribe();
+	}
 
 
 	protected abstract class AbstractListAdapter<T> extends BaseAdapter {
