@@ -85,7 +85,7 @@ public final class ReposFragment extends AbstractListFragment {
 			final Repository repository = getItem(position);
 			LayoutInflater inflater = (LayoutInflater) getActivity().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View view = inflater.inflate(android.R.layout.simple_list_item_1, parent, false);
-			((TextView) view.findViewById(android.R.id.text1)).setText(repository.getName());
+			((TextView) view.findViewById(android.R.id.text1)).setText(repository.getOwner().getLogin() + "/" + repository.getName());
 			view.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {

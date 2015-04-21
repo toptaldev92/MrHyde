@@ -47,7 +47,7 @@ public final class FileManager {
 	FileManager(Context context, ApiWrapper apiWrapper, Repository repository) {
 		this.apiWrapper = apiWrapper;
 		this.repository = repository;
-		this.rootDir = new File(context.getFilesDir(), repository.getName());
+		this.rootDir = new File(context.getFilesDir(), repository.getOwner().getLogin() + "/" + repository.getName());
 		this.gitManager = new GitManager(rootDir);
 	}
 

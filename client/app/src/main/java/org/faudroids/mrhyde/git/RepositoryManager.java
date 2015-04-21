@@ -29,12 +29,17 @@ public final class RepositoryManager {
 
 
 	public FileManager getFileManager(Repository repository) {
-		FileManager fileManager = fileManagerMap.get(repository.getName());
+		FileManager fileManager = fileManagerMap.get(getFullRepoName(repository));
 		if (fileManager == null) {
 			fileManager = new FileManager(context, apiWrapper, repository);
-			fileManagerMap.put(repository.getName(), fileManager);
+			fileManagerMap.put(getFullRepoName(repository), fileManager);
 		}
 		return fileManager;
+	}
+
+
+	private String getFullRepoName(Repository repository) {
+		return repository.getOwner().getLogin() + "/" + repository.getName();
 	}
 
 }
