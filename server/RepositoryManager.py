@@ -42,7 +42,7 @@ class RepositoryManager:
                 # TODO error handling
                 self.__git.clone(url, repo_path)
                 if diff is not None and diff is not '':
-                    self.apply_diff(repo_path, diff)
+                    self.apply_diff(id, diff)
                 self.__db.insertData('repo', id, repo_path, url, int(time()))
                 self.__logger.info('Repository cloned to ' + repo_path + '.')
                 build_successful = self.start_jekyll_build(id)
@@ -124,8 +124,8 @@ class RepositoryManager:
     def update_repository(self, id, diff):
         try:
             repo_path = self.__db.list('repo', 'path', "id='%s'" % id)[0]
-            # TODO raises no error even if diff is empty
-            self.apply_diff(id, diff)
+            diff_file = self.create_diff_file(id, diff)
+            self.apply_diff(id, diff_file)
             build_successful = self.start_jekyll_build(repo_path)
             if build_successful:
                 return ''.join([id, '.', self.__base_url])
@@ -175,6 +175,7 @@ class RepositoryManager:
         except SQLError:
             raise
         except git.GitCommandError:
+            self.__logger.error('Unable to apply diff.')
             raise
         except OSError:
             raise

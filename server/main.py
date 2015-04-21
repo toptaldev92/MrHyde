@@ -25,7 +25,7 @@ jekyll_server = Bottle()
 def list_all_repositories():
     repos = rm.list_repositories()
 
-    if request.content_type == 'application/json':
+    if request.content_type.startswith('application/json'):
         return json.dumps(repos)
     else:
         if len(repos) < 1:
@@ -36,7 +36,7 @@ def list_all_repositories():
 @jekyll_server.post('/jekyll/')
 def create_repository():
     try:
-        if request.content_type == 'application/json':
+        if request.content_type.startswith('application/json'):
             url = request.json.get('url')
             diff = request.json.get('diff')
             repo_url = rm.init_repository(url, diff)
@@ -63,7 +63,7 @@ def create_repository():
 def show_repository(id):
     files = rm.list_single_directory(id)
     if files is not None:
-        if request.content_type == 'application/json':
+        if request.content_type.startswith('application/json'):
             return json.dumps(files)
         else:
             if len(files) < 1:
@@ -100,7 +100,7 @@ def delete_repository(id):
 @jekyll_server.put('/jekyll/<id:path>/')
 def update_repository(id):
     try:
-        if request.content_type == 'application/json':
+        if request.content_type.startswith('application/json'):
             diff = request.json.get('diff')
             url = rm.update_repository(id, diff)
             return template('list_view', rows=[url], header='Repository updated.')
