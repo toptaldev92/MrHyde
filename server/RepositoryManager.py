@@ -45,9 +45,9 @@ class RepositoryManager:
             try:
                 # TODO error handling
                 self.__git.clone(url, repo_path)
+                self.database().insertData('repo', id, repo_path, deploy_path, url, int(time()))
                 if diff is not None and diff is not '':
                     self.apply_diff(id, diff)
-                self.database().insertData('repo', id, repo_path, deploy_path, url, int(time()))
                 self.log().info('Repository cloned to ' + repo_path + '.')
                 build_successful = self.start_jekyll_build(id)
                 if build_successful:
