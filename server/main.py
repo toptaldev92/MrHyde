@@ -6,8 +6,10 @@ import json
 
 from git import GitCommandError
 from sqlite3 import Error as SQLError
+from configparser import Error as ConfigError
 
 from bottle import request, Bottle, run, abort, template, static_file
+import sys
 
 import RepositoryManager
 import RequirementsChecker
@@ -15,7 +17,18 @@ import RequirementsChecker
 logging.basicConfig(filename='jekyll_server.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-rm = RepositoryManager.RepositoryManager()
+if len(sys.argv) < 2:
+    logger.error('Config file missing!\nUsage: %s <config_file>' % sys.argv[0])
+    exit('Config file missing!\nUsage: %s <config_file>' % sys.argv[0])
+else:
+    config_file = sys.argv[1]
+
+try:
+    rm = RepositoryManager.RepositoryManager(config_file)
+except ConfigError:
+    exit('Unable to parse config file.')
+except SQLError:
+    exit('Error connecting to database.')
 
 RequirementsChecker.check_requirements(logger)
 
