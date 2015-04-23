@@ -6,6 +6,7 @@ package org.faudroids.mrhyde.jekyll;
 public class RepoDiff {
 
     private String diff;
+    private String secret;
 
     public String getDiff()
     {
@@ -14,5 +15,14 @@ public class RepoDiff {
 
     public void setDiff(String diff) {
         this.diff = diff;
+    }
+
+    public String getSecret()
+    {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 }

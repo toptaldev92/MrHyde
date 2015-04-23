@@ -7,6 +7,7 @@ public final class RepoDetails {
 
     private String url;
     private String diff;
+    private String secret;
 
     public String getURL()
     {
@@ -25,5 +26,14 @@ public final class RepoDetails {
 
     public void setDiff(String diff) {
         this.diff = diff;
+    }
+
+    public String getSecret()
+    {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
     }
 }

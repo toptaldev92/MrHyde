@@ -10,8 +10,8 @@ import rx.Observable;
 public interface JekyllApi {
 
     static final String
-            JEKYLL_URL = "/jekyll",
-            ID_URL = JEKYLL_URL + "/{previewId}";
+            JEKYLL_URL = "/jekyll/",
+            ID_URL = JEKYLL_URL + "{previewId}/";
 
     /**
      * Returns the repo URL and the expiration date encoded in {@link JekyllOutput}.

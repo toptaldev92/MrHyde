@@ -49,6 +49,7 @@ public final class DirFragment extends AbstractFragment {
 	@InjectView(R.id.container) LinearLayout containerView;
 	@Inject RepositoryManager repositoryManager;
 	private Repository repository;
+	private FileManager fileManager;
 
 	public DirFragment() {
 		super(R.layout.fragment_dir);
@@ -106,6 +107,22 @@ public final class DirFragment extends AbstractFragment {
 				Fragment commitFragment = CommitFragment.createInstance(repository);
 				uiUtils.replaceFragment(this, commitFragment);
 				return true;
+			case R.id.action_preview:
+				fileManager = repositoryManager.getFileManager(repository);
+				fileManager.getDiff().subscribe(new Action1<String>() {
+					@Override
+					public void call(String s) {
+						Fragment previewFragment = PreviewFragment.createInstance(repository.getCloneUrl(), s);
+						uiUtils.replaceFragment(DirFragment.this, previewFragment);
+					}
+				}, new Action1<Throwable>() {
+							@Override
+							public void call(Throwable throwable) {
+								Timber.e(throwable, "failed to load changes");
+							}
+				});
+				return true;
+
 		}
 		return super.onOptionsItemSelected(item);
 	}

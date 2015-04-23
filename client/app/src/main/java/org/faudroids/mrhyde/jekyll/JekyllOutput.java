@@ -1,14 +1,13 @@
 package org.faudroids.mrhyde.jekyll;
 
-import java.util.Date;
-
 /**
  * Result returned from the server
  */
 public class JekyllOutput {
 
     private String url;
-    private Date expirationDate;
+    private long expirationDate;
+    private String id;
 
     public String getURL()
     {
@@ -20,13 +19,23 @@ public class JekyllOutput {
         this.url = url;
     }
 
-    public Date getExpirationDatexpirationDate()
+    public long getExpirationDatexpirationDate()
     {
         return expirationDate;
     }
 
-    public void setExpireDatation(Date expirationDate)
+    public void setExpireDatation(long expirationDate)
     {
         this.expirationDate = expirationDate;
+    }
+
+    public String getID()
+    {
+        return id;
+    }
+
+    public void setID(String id)
+    {
+        this.id = id;
     }
 }
