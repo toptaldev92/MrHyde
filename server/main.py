@@ -50,18 +50,18 @@ def list_all_repositories():
 def create_repository():
     try:
         if request.content_type.startswith('application/json'):
-            url = request.json.get('url')
-            diff = request.json.get('diff')
-            client_secret = request.json.get('secret')
+            url = request.json.get('gitCheckoutUrl')
+            diff = request.json.get('gitDiff')
+            client_secret = request.json.get('clientSecret')
             if client_secret != rm.get_config().get_client_secret():
                 abort(400, 'Bad request')
             (repo_id, repo_url) = rm.init_repository(url, diff)
             expires = rm.get_expiration_date(repo_id)
-            return json.dumps({'url': repo_url, 'expirationDate': expires, 'repoId': repo_id, 'errors': 'Wir machen keine Fehler!'})
+            return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': repo_id, 'jekyllErrors': 'Wir machen keine Fehler!'})
         else:
-            url = request.POST.get('url')
-            diff = request.POST.get('diff')
-            client_secret = request.POST.get('secret')
+            url = request.POST.get('gitCheckoutUrl')
+            diff = request.POST.get('gitDiff')
+            client_secret = request.POST.get('clientSecret')
             if client_secret != rm.get_config().get_client_secret():
                 abort(400, 'Bad request')
             (repo_id, repo_url) = rm.init_repository(url, diff)
@@ -121,16 +121,16 @@ def delete_repository(id):
 def update_repository(id):
     try:
         if request.content_type.startswith('application/json'):
-            diff = request.json.get('diff')
-            client_secret = request.json.get('secret')
+            diff = request.json.get('gitDiff')
+            client_secret = request.json.get('clientSecret')
             if client_secret != rm.get_config().get_client_secret():
                 abort(400, 'Bad request')
             repo_url = rm.update_repository(id, diff)
             expires = rm.get_expiration_date(id)
-            return json.dumps({'url': repo_url, 'expirationDate': expires, 'id': id, 'errors': 'Wir machen keine Fehler!'})
+            return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': id, 'jekyllErrors': 'Wir machen keine Fehler!'})
         else:
-            diff = request.POST.get('diff')
-            client_secret = request.POST.get('secret')
+            diff = request.POST.get('gitDiff')
+            client_secret = request.POST.get('clientSecret')
             if client_secret != rm.get_config().get_client_secret():
                 abort(400, 'Bad request')
             url = rm.update_repository(id, diff)
