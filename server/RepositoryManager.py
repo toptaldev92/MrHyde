@@ -214,3 +214,6 @@ class RepositoryManager:
                 self.log().error('Insufficient permissions to create directory: ' + deploy_path)
                 return None
 
+    def get_expiration_date(self, id):
+        last_used = self.database().list('repo', 'last_used', "id='%s'" % id)[0]
+        return last_used + (24 * 3600)

@@ -56,7 +56,8 @@ def create_repository():
             if client_secret != rm.get_config().get_client_secret():
                 abort(400, 'Bad request')
             (repo_id, repo_url) = rm.init_repository(url, diff)
-            return json.dumps({'url': repo_url, 'ExpirationDate': 0, 'id': repo_id})
+            expires = rm.get_expiration_date(repo_id)
+            return json.dumps({'url': repo_url, 'expirationDate': expires, 'repoId': repo_id, 'errors': 'Wir machen keine Fehler!'})
         else:
             url = request.POST.get('url')
             diff = request.POST.get('diff')
@@ -124,8 +125,9 @@ def update_repository(id):
             client_secret = request.json.get('secret')
             if client_secret != rm.get_config().get_client_secret():
                 abort(400, 'Bad request')
-            url = rm.update_repository(id, diff)
-            return template('list_view', rows=[url], header='Repository updated.')
+            repo_url = rm.update_repository(id, diff)
+            expires = rm.get_expiration_date(id)
+            return json.dumps({'url': repo_url, 'expirationDate': expires, 'id': id, 'errors': 'Wir machen keine Fehler!'})
         else:
             diff = request.POST.get('diff')
             client_secret = request.POST.get('secret')
