@@ -188,10 +188,13 @@ class RepositoryManager:
             return file_name
 
     def file_download(self, id, file_name):
+        repo_id = id.split('/')[0]
+        file_path = id.split('/')[1:][0]
+
         try:
-            repo_path = self.database().list('repo', 'path', "id='%s'" % id)[0]
-            file_path = '/'.join([repo_path, file_name])
-            if isfile(file_path):
+            repo_path = self.database().list('repo', 'path', "id='%s'" % repo_id)[0]
+            abs_path = '/'.join([repo_path, ''.join(file_path), file_name])
+            if isfile(abs_path):
                 return True
             else:
                 return False
