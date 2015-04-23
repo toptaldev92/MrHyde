@@ -55,17 +55,17 @@ def create_repository():
             client_secret = request.json.get('secret')
             if client_secret != rm.get_config().get_client_secret():
                 abort(400, 'Bad request')
-            repo_url = rm.init_repository(url, diff)
-            return json.dumps({'url': repo_url, 'ExpirationDate': 0})
+            (repo_id, repo_url) = rm.init_repository(url, diff)
+            return json.dumps({'url': repo_url, 'ExpirationDate': 0, 'id': repo_id})
         else:
             url = request.POST.get('url')
             diff = request.POST.get('diff')
             client_secret = request.POST.get('secret')
             if client_secret != rm.get_config().get_client_secret():
                 abort(400, 'Bad request')
-            repo_url = rm.init_repository(url, diff)
+            (repo_id, repo_url) = rm.init_repository(url, diff)
             if repo_url is not None:
-                return template('list_view', rows=[repo_url], header='Your new repository is available at:')
+                return template('list_view', rows=[repo_url, repo_id], header='Your new repository is available at:')
             else:
                 abort(500, 'Internal error. Sorry for that!')
     except OSError as exception:
