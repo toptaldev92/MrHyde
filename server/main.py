@@ -6,8 +6,10 @@ import json
 
 from git import GitCommandError
 from sqlite3 import Error as SQLError
+from configparser import Error as ConfigError
 
 from bottle import request, Bottle, run, abort, template, static_file
+import sys
 
 import RepositoryManager
 import RequirementsChecker
@@ -15,7 +17,18 @@ import RequirementsChecker
 logging.basicConfig(filename='jekyll_server.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-rm = RepositoryManager.RepositoryManager()
+if len(sys.argv) < 2:
+    logger.error('Config file missing!\nUsage: %s <config_file>' % sys.argv[0])
+    exit('Config file missing!\nUsage: %s <config_file>' % sys.argv[0])
+else:
+    config_file = sys.argv[1]
+
+try:
+    rm = RepositoryManager.RepositoryManager(config_file)
+except ConfigError:
+    exit('Unable to parse config file.')
+except SQLError:
+    exit('Error connecting to database.')
 
 RequirementsChecker.check_requirements(logger)
 
@@ -25,7 +38,7 @@ jekyll_server = Bottle()
 def list_all_repositories():
     repos = rm.list_repositories()
 
-    if request.content_type == 'application/json':
+    if request.content_type.startswith('application/json'):
         return json.dumps(repos)
     else:
         if len(repos) < 1:
@@ -33,19 +46,28 @@ def list_all_repositories():
         else:
             return template('repo_overview', rows=repos, header='Available repositories:')
 
-@jekyll_server.post('/jekyll')
+@jekyll_server.post('/jekyll/')
 def create_repository():
     try:
-        if request.content_type == 'application/json':
+        if request.content_type.startswith('application/json'):
             url = request.json.get('url')
             diff = request.json.get('diff')
+            client_secret = request.json.get('secret')
+            if client_secret != rm.get_config().get_client_secret():
+                abort(400, 'Bad request')
             repo_url = rm.init_repository(url, diff)
-            return json.dumps(repo_url)
+            return json.dumps({'url': repo_url, 'ExpirationDate': 0})
         else:
             url = request.POST.get('url')
             diff = request.POST.get('diff')
+            client_secret = request.POST.get('secret')
+            if client_secret != rm.get_config().get_client_secret():
+                abort(400, 'Bad request')
             repo_url = rm.init_repository(url, diff)
-            return template('list_view', rows=[repo_url], header='Your new repository is available at:')
+            if repo_url is not None:
+                return template('list_view', rows=[repo_url], header='Your new repository is available at:')
+            else:
+                abort(500, 'Internal error. Sorry for that!')
     except OSError as exception:
         if exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
@@ -56,17 +78,11 @@ def create_repository():
     except IOError:
         abort(500, 'Internal error. Sorry for that!')
 
-
-@jekyll_server.get('/jekyll/<repo_name:path>/__page/<static_path>')
-def show_jekyll_output(repo_name, static_path):
-    return static_file(repo_name+'/__page/'+static_path, root=rm.get_config().get_base_dir())
-
-
 @jekyll_server.get('/jekyll/<id:path>/')
 def show_repository(id):
     files = rm.list_single_directory(id)
     if files is not None:
-        if request.content_type == 'application/json':
+        if request.content_type.startswith('application/json'):
             return json.dumps(files)
         else:
             if len(files) < 1:
@@ -103,12 +119,18 @@ def delete_repository(id):
 @jekyll_server.put('/jekyll/<id:path>/')
 def update_repository(id):
     try:
-        if request.content_type == 'application/json':
+        if request.content_type.startswith('application/json'):
             diff = request.json.get('diff')
+            client_secret = request.json.get('secret')
+            if client_secret != rm.get_config().get_client_secret():
+                abort(400, 'Bad request')
             url = rm.update_repository(id, diff)
             return template('list_view', rows=[url], header='Repository updated.')
         else:
             diff = request.POST.get('diff')
+            client_secret = request.POST.get('secret')
+            if client_secret != rm.get_config().get_client_secret():
+                abort(400, 'Bad request')
             url = rm.update_repository(id, diff)
             return template('list_view', rows=[url], header='Repository updated.')
     except OSError as exception:

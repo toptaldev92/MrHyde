@@ -2,7 +2,9 @@ package org.faudroids.mrhyde.ui;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
@@ -35,6 +37,7 @@ public final class CommitFragment extends AbstractFragment {
 
 	@Inject RepositoryManager repositoryManager;
 	@InjectView(R.id.changes) TextView changesView;
+	@InjectView(R.id.commit) Button commitButton;
 
 	private FileManager fileManager;
 	private Repository repository;
@@ -48,6 +51,7 @@ public final class CommitFragment extends AbstractFragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		actionBarListener.setTitle(getString(R.string.title_commit));
 		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
 		fileManager = repositoryManager.getFileManager(repository);
 
@@ -78,6 +82,27 @@ public final class CommitFragment extends AbstractFragment {
 						Timber.e(throwable, "failed to load changes");
 					}
 				});
+
+		commitButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				fileManager.commit()
+						.compose(new DefaultTransformer<Void>())
+						.subscribe(new Action1<Void>() {
+							@Override
+							public void call(Void nothing) {
+								Toast.makeText(CommitFragment.this.getActivity(), "Commit success", Toast.LENGTH_SHORT).show();
+							}
+						}, new Action1<Throwable>() {
+							@Override
+							public void call(Throwable throwable) {
+								Timber.e(throwable, "commit failed");
+								Toast.makeText(CommitFragment.this.getActivity(), "Commit error", Toast.LENGTH_SHORT).show();
+
+							}
+						});
+			}
+		});
 	}
 
 

@@ -56,25 +56,26 @@ public final class FileFragment extends AbstractFragment {
 		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
 		treeEntry = (TreeEntry) getArguments().getSerializable(EXTRA_TREE_ENTRY);
 		fileManager = repositoryManager.getFileManager(repository);
+		actionBarListener.setTitle(treeEntry.getPath());
 
 		editText.setMovementMethod(new ScrollingMovementMethod());
 		submitButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				fileManager.writeFile(treeEntry, editText.getText().toString());
-				fileManager.getDiff()
+				compositeSubscription.add(fileManager.getDiff()
 						.compose(new DefaultTransformer<String>())
 						.subscribe(new Action1<String>() {
 							@Override
 							public void call(String diff) {
 								Timber.d(diff);
 							}
-						});
+						}));
 				getFragmentManager().popBackStack();
 			}
 		});
 
-		fileManager.getFile(treeEntry)
+		compositeSubscription.add(fileManager.getFile(treeEntry)
 				.compose(new DefaultTransformer<String>())
 				.subscribe(new Action1<String>() {
 					@Override
@@ -87,7 +88,7 @@ public final class FileFragment extends AbstractFragment {
 						Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
 						Timber.e(throwable, "failed to get content");
 					}
-				});
+				}));
 	}
 
 }

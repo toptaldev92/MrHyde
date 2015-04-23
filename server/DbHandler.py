@@ -132,8 +132,6 @@ class DbHandler:
             if where:
                 dbString = "".join([dbString, " WHERE %s;" % where])
 
-            print(dbString)
-
             self.comm(dbString)
 
     def deleteData(self, table, where):

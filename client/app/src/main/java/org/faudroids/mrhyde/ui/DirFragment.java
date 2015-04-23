@@ -69,8 +69,9 @@ public final class DirFragment extends AbstractFragment {
 
 		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
 		FileManager fileManager = repositoryManager.getFileManager(repository);
+		actionBarListener.setTitle(repository.getOwner().getLogin() + "/" + repository.getName());
 
-		fileManager.getTree()
+		compositeSubscription.add(fileManager.getTree()
 				.compose(new DefaultTransformer<Tree>())
 				.subscribe(new Action1<Tree>() {
 					@Override
@@ -90,7 +91,7 @@ public final class DirFragment extends AbstractFragment {
 						Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
 						Timber.e(throwable, "failed to get content");
 					}
-				});
+				}));
 	}
 
 
