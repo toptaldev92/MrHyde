@@ -51,7 +51,7 @@ class RepositoryManager:
                 self.log().info('Repository cloned to ' + repo_path + '.')
                 build_successful = self.start_jekyll_build(id)
                 if build_successful:
-                    return (id, ''.join([id, '.', self.get_config().get_base_url()]))
+                    return (id, ''.join(['https://', id, '.', self.get_config().get_base_url()]))
                 else:
                     # TODO proper error handling!
                     raise Exception
@@ -114,7 +114,7 @@ class RepositoryManager:
             self.apply_diff(id, diff_file)
             build_successful = self.start_jekyll_build(repo_path)
             if build_successful:
-                return ''.join([id, '.', self.__base_url])
+                return ''.join(['https://', id, '.', self.__base_url])
             else:
                 # TODO proper error handling!
                 raise Exception
