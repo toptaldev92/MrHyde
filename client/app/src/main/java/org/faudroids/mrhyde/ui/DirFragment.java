@@ -112,8 +112,8 @@ public final class DirFragment extends AbstractFragment {
 				fileManager = repositoryManager.getFileManager(repository);
 				fileManager.getDiff().subscribe(new Action1<String>() {
 					@Override
-					public void call(String s) {
-						Fragment previewFragment = PreviewFragment.createInstance(repository.getCloneUrl(), s);
+					public void call(String diff) {
+						Fragment previewFragment = PreviewFragment.createInstance(repository.getCloneUrl(), diff);
 						uiUtils.replaceFragment(DirFragment.this, previewFragment);
 					}
 				}, new Action1<Throwable>() {
