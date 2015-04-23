@@ -55,3 +55,10 @@ class ConfigManager:
         except configparser.Error:
             self.__logger.error('Unable to parse config file.')
             raise
+
+    def get_client_secret(self):
+        try:
+            return self.__config['default']['client_secret']
+        except configparser.Error:
+            self.__logger.error('Unable to parse config file.')
+            raise

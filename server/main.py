@@ -52,11 +52,17 @@ def create_repository():
         if request.content_type.startswith('application/json'):
             url = request.json.get('url')
             diff = request.json.get('diff')
+            client_secret = request.json.get('secret')
+            if client_secret != rm.get_config().get_client_secret():
+                abort(400, 'Bad request')
             repo_url = rm.init_repository(url, diff)
-            return json.dumps(repo_url)
+            return json.dumps({'url': repo_url, 'ExpirationDate': 0})
         else:
             url = request.POST.get('url')
             diff = request.POST.get('diff')
+            client_secret = request.POST.get('secret')
+            if client_secret != rm.get_config().get_client_secret():
+                abort(400, 'Bad request')
             repo_url = rm.init_repository(url, diff)
             if repo_url is not None:
                 return template('list_view', rows=[repo_url], header='Your new repository is available at:')
@@ -115,10 +121,16 @@ def update_repository(id):
     try:
         if request.content_type.startswith('application/json'):
             diff = request.json.get('diff')
+            client_secret = request.json.get('secret')
+            if client_secret != rm.get_config().get_client_secret():
+                abort(400, 'Bad request')
             url = rm.update_repository(id, diff)
             return template('list_view', rows=[url], header='Repository updated.')
         else:
             diff = request.POST.get('diff')
+            client_secret = request.POST.get('secret')
+            if client_secret != rm.get_config().get_client_secret():
+                abort(400, 'Bad request')
             url = rm.update_repository(id, diff)
             return template('list_view', rows=[url], header='Repository updated.')
     except OSError as exception:
