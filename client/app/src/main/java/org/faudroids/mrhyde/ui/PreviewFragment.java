@@ -75,6 +75,9 @@ public class PreviewFragment extends AbstractFragment {
                     public void call(PreviewResult previewResult) {
                         Timber.d("getting url " + previewResult.getPreviewUrl());
                         webView.loadUrl(previewResult.getPreviewUrl());
+                        for (String error : previewResult.getJekyllErrors()) {
+                            Timber.w("Jekyll error: " + error);
+                        }
                     }
                 }, new Action1<Throwable>() {
                     @Override
