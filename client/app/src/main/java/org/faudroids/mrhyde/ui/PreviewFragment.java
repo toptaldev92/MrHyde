@@ -13,7 +13,7 @@ import android.webkit.WebViewClient;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.JekyllApi;
 import org.faudroids.mrhyde.jekyll.JekyllModule;
-import org.faudroids.mrhyde.jekyll.JekyllOutput;
+import org.faudroids.mrhyde.jekyll.PreviewResult;
 import org.faudroids.mrhyde.jekyll.RepoDetails;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
@@ -23,18 +23,17 @@ import timber.log.Timber;
 
 public class PreviewFragment extends AbstractFragment {
 
-    private static final String EXTRA_URLREPO = "EXTRA_URLREPO";
+    private static final String EXTRA_REPO_CHECKOUT_URL = "EXTRA_REPO_CHECKOUT_URL";
     private static final String EXTRA_DIFF = "EXTRA_DIFF";
 
-    private String urlRepo;
-    private String diff;
-    private long expirationDate;
     @InjectView(R.id.web_view) WebView webView;
+    private String repoUrl;
+    private String diff;
 
-    public static PreviewFragment createInstance(String urlRepo, String diff) {
+    public static PreviewFragment createInstance(String repoCheckoutUrl, String diff) {
         PreviewFragment fragment = new PreviewFragment();
         Bundle extras = new Bundle();
-        extras.putSerializable(EXTRA_URLREPO, urlRepo);
+        extras.putSerializable(EXTRA_REPO_CHECKOUT_URL, repoCheckoutUrl);
         extras.putSerializable(EXTRA_DIFF, diff);
         fragment.setArguments(extras);
         return fragment;
@@ -63,23 +62,19 @@ public class PreviewFragment extends AbstractFragment {
                 });
 
         // load arguments
-        urlRepo = (String) getArguments().getSerializable(EXTRA_URLREPO);
+        repoUrl = (String) getArguments().getSerializable(EXTRA_REPO_CHECKOUT_URL);
         diff = (String) getArguments().getSerializable(EXTRA_DIFF);
 
         // load preview
         JekyllApi jekyllApi = new JekyllModule().provideJekyllApi();
-        RepoDetails repoDetails = new RepoDetails();
-        repoDetails.setDiff(diff);
-        repoDetails.setURL(urlRepo);
-        repoDetails.setSecret(getString(R.string.jekyllServerClientSecret));
+        RepoDetails repoDetails = new RepoDetails(repoUrl, diff, getString(R.string.jekyllServerClientSecret));
         jekyllApi.createPreview(repoDetails)
-                .compose(new DefaultTransformer<JekyllOutput>())
-                .subscribe(new Action1<JekyllOutput>() {
+                .compose(new DefaultTransformer<PreviewResult>())
+                .subscribe(new Action1<PreviewResult>() {
                     @Override
-                    public void call(JekyllOutput jekyllOutput) {
-                        expirationDate = jekyllOutput.getExpirationDatexpirationDate();
-                        Timber.d("getting url " + jekyllOutput.getURL());
-                        webView.loadUrl(jekyllOutput.getURL());
+                    public void call(PreviewResult previewResult) {
+                        Timber.d("getting url " + previewResult.getPreviewUrl());
+                        webView.loadUrl(previewResult.getPreviewUrl());
                     }
                 }, new Action1<Throwable>() {
                     @Override

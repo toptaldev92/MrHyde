@@ -5,24 +5,29 @@ package org.faudroids.mrhyde.jekyll;
  */
 public class RepoDiff {
 
-    private String diff;
-    private String secret;
+    private String gitDiff;
+    private String clientSecret;
 
-    public String getDiff()
-    {
-        return diff;
+    public RepoDiff() { }
+
+    public RepoDiff(String gitDiff, String clientSecret) {
+        this.gitDiff = gitDiff;
+        this.clientSecret = clientSecret;
     }
 
-    public void setDiff(String diff) {
-        this.diff = diff;
+    public String getGitDiff() {
+        return gitDiff;
     }
 
-    public String getSecret()
-    {
-        return secret;
+    public void setGitDiff(String gitDiff) {
+        this.gitDiff = gitDiff;
     }
 
-    public void setSecret(String secret) {
-        this.secret = secret;
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 }

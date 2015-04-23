@@ -14,17 +14,17 @@ public interface JekyllApi {
             ID_URL = JEKYLL_URL + "{previewId}/";
 
     /**
-     * Returns the repo URL and the expiration date encoded in {@link JekyllOutput}.
+     * Returns the repo URL and the expiration date encoded in {@link PreviewResult}.
      */
     @POST(JEKYLL_URL)
-    public Observable<JekyllOutput> createPreview(@Body RepoDetails input);
+    public Observable<PreviewResult> createPreview(@Body RepoDetails input);
 
 
     /**
-     * Returns the repo URL and the expiration date encoded in {@link JekyllOutput}.
+     * Returns the repo URL and the expiration date encoded in {@link PreviewResult}.
      */
     @PUT(ID_URL)
-    public Observable<JekyllOutput> updatePreview(
+    public Observable<PreviewResult> updatePreview(
             @Path("previewId") String previewId,
             @Body RepoDiff input);
 

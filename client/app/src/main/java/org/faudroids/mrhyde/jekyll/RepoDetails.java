@@ -5,35 +5,39 @@ package org.faudroids.mrhyde.jekyll;
  */
 public final class RepoDetails {
 
-    private String url;
-    private String diff;
-    private String secret;
+    private String gitCheckoutUrl;
+    private String gitDiff;
+    private String clientSecret;
 
-    public String getURL()
-    {
-        return url;
+    public RepoDetails() { }
+
+    public RepoDetails(String gitCheckoutUrl, String gitDiff, String clientSecret) {
+        this.gitCheckoutUrl = gitCheckoutUrl;
+        this.gitDiff = gitDiff;
+        this.clientSecret = clientSecret;
     }
 
-    public void setURL(String url)
-    {
-        this.url = url;
+    public String getGitCheckoutUrl() {
+        return gitCheckoutUrl;
     }
 
-    public String getDiff()
-    {
-        return diff;
+    public void setGitCheckoutUrl(String gitCheckoutUrl) {
+        this.gitCheckoutUrl = gitCheckoutUrl;
     }
 
-    public void setDiff(String diff) {
-        this.diff = diff;
+    public String getGitDiff() {
+        return gitDiff;
     }
 
-    public String getSecret()
-    {
-        return secret;
+    public void setGitDiff(String gitDiff) {
+        this.gitDiff = gitDiff;
     }
 
-    public void setSecret(String secret) {
-        this.secret = secret;
+    public String getClientSecret() {
+        return clientSecret;
+    }
+
+    public void setClientSecret(String clientSecret) {
+        this.clientSecret = clientSecret;
     }
 }
