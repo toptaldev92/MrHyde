@@ -37,6 +37,11 @@ public final class LoginActivity extends AbstractActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		if (authManager.getAccessToken() != null) {
+			onLoginSuccess();
+			return;
+		}
+
 		loginButton.setOnClickListener(new View.OnClickListener() {
 			private Dialog loginDialog;
 
@@ -89,9 +94,8 @@ public final class LoginActivity extends AbstractActivity {
 					@Override
 					public void call(TokenDetails tokenDetails) {
 						Timber.d("gotten token " + tokenDetails.getAccessToken() + " for scope " + tokenDetails.getScope());
-						authManager.setTokenDetails(tokenDetails);
-						startActivity(new Intent(LoginActivity.this, MainActivity.class));
-						finish();
+						authManager.setAccessToken(tokenDetails.getAccessToken());
+						onLoginSuccess();
 					}
 				},new Action1<Throwable>() {
 					@Override
@@ -100,4 +104,12 @@ public final class LoginActivity extends AbstractActivity {
 					}
 				}));
 	}
+
+
+	private void onLoginSuccess() {
+		startActivity(new Intent(LoginActivity.this, MainActivity.class));
+		finish();
+	}
+
+
 }

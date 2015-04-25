@@ -67,7 +67,7 @@ public final class GitHubModule implements Module {
 
 
 	private <T extends GitHubService> T setAuthToken(T service, AuthManager authManager) {
-		service.getClient().setOAuth2Token(authManager.getTokenDetails().getAccessToken());
+		service.getClient().setOAuth2Token(authManager.getAccessToken());
 		return service;
 	}
 
