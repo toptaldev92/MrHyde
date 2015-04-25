@@ -1,6 +1,7 @@
 package org.faudroids.mrhyde.ui;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -18,25 +19,23 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 import rx.functions.Action1;
 import timber.log.Timber;
 
 
-public final class LoginFragment extends AbstractFragment {
+@ContentView(R.layout.activity_login)
+public final class LoginActivity extends AbstractActivity {
 
 	@InjectView(R.id.login_button) Button loginButton;
 	@Inject AuthApi authApi;
 	@Inject AuthManager authManager;
 
-	public LoginFragment() {
-		super(R.layout.fragment_login);
-	}
-
 
 	@Override
-	public void onViewCreated(View view, Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
 		loginButton.setOnClickListener(new View.OnClickListener() {
 			private Dialog loginDialog;
@@ -44,7 +43,7 @@ public final class LoginFragment extends AbstractFragment {
 			@Override
 			public void onClick(View arg0) {
 				final String state = UUID.randomUUID().toString();
-				loginDialog = new Dialog(getActivity());
+				loginDialog = new Dialog(LoginActivity.this);
 				loginDialog.setContentView(R.layout.dialog_login);
 				WebView webView = (WebView) loginDialog.findViewById(R.id.webview);
 				webView.loadUrl("https://github.com/login/oauth/authorize?"
@@ -91,7 +90,8 @@ public final class LoginFragment extends AbstractFragment {
 					public void call(TokenDetails tokenDetails) {
 						Timber.d("gotten token " + tokenDetails.getAccessToken() + " for scope " + tokenDetails.getScope());
 						authManager.setTokenDetails(tokenDetails);
-						uiUtils.replaceFragment(LoginFragment.this, new ReposFragment());
+						startActivity(new Intent(LoginActivity.this, MainActivity.class));
+						finish();
 					}
 				},new Action1<Throwable>() {
 					@Override

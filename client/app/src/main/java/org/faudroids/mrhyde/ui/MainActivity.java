@@ -18,7 +18,7 @@ public final class MainActivity extends RoboActivity implements ActionBarListene
 		super.onCreate(savedInstanceState);
 
 		if (savedInstanceState == null) {
-			Fragment fragment = new LoginFragment();
+			Fragment fragment = new ReposFragment();
 			FragmentTransaction transaction = getFragmentManager().beginTransaction();
 			transaction.replace(R.id.fragment_container, fragment);
 			transaction.addToBackStack(null);
