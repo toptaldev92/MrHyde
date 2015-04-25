@@ -1,5 +1,6 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -71,14 +72,13 @@ public final class LoginActivity extends AbstractActivity {
 							loginDialog.dismiss();
 
 						} else if (url.contains("error=access_denied")) {
-							Timber.d("access denied");
 							loginDialog.dismiss();
-							// TODO show to user
+							onAccessDenied();
 						}
 					}
 				});
 				loginDialog.show();
-				loginDialog.setTitle("Authorize me!!");
+				loginDialog.setTitle(getString(R.string.login_title));
 				loginDialog.setCancelable(true);
 			}
 		});
@@ -97,9 +97,9 @@ public final class LoginActivity extends AbstractActivity {
 						authManager.setAccessToken(tokenDetails.getAccessToken());
 						onLoginSuccess();
 					}
-				},new Action1<Throwable>() {
+				}, new Action1<Throwable>() {
 					@Override
-					public void call(Throwable throwable)  {
+					public void call(Throwable throwable) {
 						Timber.d(throwable, "failed to get token");
 					}
 				}));
@@ -111,5 +111,13 @@ public final class LoginActivity extends AbstractActivity {
 		finish();
 	}
 
+
+	private void onAccessDenied() {
+		new AlertDialog.Builder(this)
+				.setTitle(R.string.login_error_title)
+				.setMessage(R.string.login_error_message)
+				.setPositiveButton(android.R.string.ok, null)
+				.show();
+	}
 
 }
