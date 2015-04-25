@@ -9,6 +9,7 @@
     <string name="title_preview">Preview</string>
     <string name="title_commit">Commit changes</string>
 
+    <string name="login_button">Login with GitHub</string>
     <string name="login_title">Login</string>
     <string name="login_error_title">Access denied</string>
     <string name="login_error_message">Sorry, but it looks like username or password are incorrect.</string>
