@@ -10,6 +10,7 @@ import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.GitHubService;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.eclipse.egit.github.core.service.RepositoryService;
+import org.eclipse.egit.github.core.service.UserService;
 
 import javax.inject.Inject;
 
@@ -35,6 +36,13 @@ public final class GitHubModule implements Module {
 	@Inject
 	public AuthApi provideGitHubApi(RestAdapter restAdapter) {
 		return restAdapter.create(AuthApi.class);
+	}
+
+
+	@Provides
+	@Inject
+	public UserService provideUserService(AuthManager authManager) {
+		return setAuthToken(new UserService(), authManager);
 	}
 
 

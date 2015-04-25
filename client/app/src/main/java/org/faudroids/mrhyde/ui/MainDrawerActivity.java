@@ -1,146 +1,202 @@
 package org.faudroids.mrhyde.ui;
 
 import android.app.Activity;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
+import android.app.Fragment;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-import android.support.v4.widget.DrawerLayout;
 
-import org.faudroids.mrhyde.R;
+import com.google.inject.Key;
+
+import org.eclipse.egit.github.core.User;
+import org.faudroids.mrhyde.github.ApiWrapper;
+import org.faudroids.mrhyde.utils.DefaultTransformer;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+import javax.net.ssl.HttpsURLConnection;
+
+import it.neokree.materialnavigationdrawer.MaterialNavigationDrawer;
+import it.neokree.materialnavigationdrawer.elements.MaterialAccount;
+import roboguice.RoboGuice;
+import roboguice.activity.event.OnActivityResultEvent;
+import roboguice.activity.event.OnContentChangedEvent;
+import roboguice.activity.event.OnNewIntentEvent;
+import roboguice.activity.event.OnPauseEvent;
+import roboguice.activity.event.OnRestartEvent;
+import roboguice.activity.event.OnResumeEvent;
+import roboguice.activity.event.OnSaveInstanceStateEvent;
+import roboguice.activity.event.OnStopEvent;
+import roboguice.context.event.OnConfigurationChangedEvent;
+import roboguice.context.event.OnCreateEvent;
+import roboguice.context.event.OnDestroyEvent;
+import roboguice.context.event.OnStartEvent;
+import roboguice.event.EventManager;
+import roboguice.inject.ContentViewListener;
+import roboguice.inject.RoboInjector;
+import roboguice.util.RoboContext;
+import rx.Observable;
+import rx.functions.Action1;
+import rx.functions.Func1;
 
 
-public class MainDrawerActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks {
+public class MainDrawerActivity extends MaterialNavigationDrawer<Fragment> implements ActionBarListener, RoboContext {
 
-    /**
-     * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
+    @Inject ApiWrapper apiWrapper;
+
+    @Override
+    public void init(Bundle savedInstanceState) {
+        addSection(newSection("Repositories", new ReposFragment()));
+        final MaterialAccount account = new MaterialAccount(getResources(), "", "", null, null);
+        addAccount(account);
+        setBackPattern(MaterialNavigationDrawer.BACKPATTERN_BACK_TO_FIRST);
+
+        apiWrapper
+                .getUser()
+                .flatMap(new Func1<User, Observable<Void>>() {
+                    @Override
+                    public Observable<Void> call(User user) {
+                        // load avatar
+                        try {
+                            URL url = new URL(user.getAvatarUrl());
+                            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+                            connection.setDoInput(true);
+                            connection.connect();
+                            InputStream input = connection.getInputStream();
+                            Bitmap avatar = BitmapFactory.decodeStream(input);
+                            account.setTitle(user.getLogin());
+                            account.setSubTitle(user.getEmail());
+                            account.setPhoto(avatar);
+                            return Observable.just(null);
+
+                        } catch (IOException e) {
+                            return Observable.error(e);
+                        }
+                    }
+                })
+                .compose(new DefaultTransformer<Void>())
+                .subscribe(new Action1<Void>() {
+                    @Override
+                    public void call(Void nothing) {
+                        notifyAccountDataChanged();
+                    }
+                });
+    }
+
+
+    @Override
+    public void setTitle(String title) {
+        getToolbar().setTitle(title);
+    }
+
+
+    /*
+    NOTE: the following is copied from https://github.com/roboguice/roboguice/blob/master/roboguice/src/main/java/roboguice/activity/RoboActionBarActivity.java
+    to enable DI in this class. For the most part it should probably not be modified and ignored ...
      */
-    private NavigationDrawerFragment mNavigationDrawerFragment;
+    protected EventManager eventManager;
+    protected HashMap<Key<?>,Object> scopedObjects = new HashMap<Key<?>, Object>();
 
-    /**
-     * Used to store the last screen title. For use in {@link #restoreActionBar()}.
-     */
-    private CharSequence mTitle;
+    @Inject
+    ContentViewListener ignored; // BUG find a better place to put this
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        final RoboInjector injector = RoboGuice.getInjector(this);
+        eventManager = injector.getInstance(EventManager.class);
+        injector.injectMembersWithoutViews(this);
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_drawer);
-
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
+        eventManager.fire(new OnCreateEvent<Activity>(this,savedInstanceState));
     }
 
     @Override
-    public void onNavigationDrawerItemSelected(int position) {
-        // update the main content by replacing fragments
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
-    }
-
-    public void onSectionAttached(int number) {
-        switch (number) {
-            case 1:
-                mTitle = getString(R.string.title_section1);
-                break;
-            case 2:
-                mTitle = getString(R.string.title_section2);
-                break;
-            case 3:
-                mTitle = getString(R.string.title_section3);
-                break;
-        }
-    }
-
-    public void restoreActionBar() {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        actionBar.setDisplayShowTitleEnabled(true);
-        actionBar.setTitle(mTitle);
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
-            // Only show items in the action bar relevant to this screen
-            // if the drawer is not showing. Otherwise, let the drawer
-            // decide what to show in the action bar.
-            getMenuInflater().inflate(R.menu.main, menu);
-            restoreActionBar();
-            return true;
-        }
-        return super.onCreateOptionsMenu(menu);
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        eventManager.fire(new OnSaveInstanceStateEvent(this, outState));
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+    protected void onRestart() {
+        super.onRestart();
+        eventManager.fire(new OnRestartEvent(this));
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
+    @Override
+    protected void onStart() {
+        super.onStart();
+        eventManager.fire(new OnStartEvent<Activity>(this));
+    }
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static PlaceholderFragment newInstance(int sectionNumber) {
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        eventManager.fire(new OnResumeEvent(this));
+    }
 
-        public PlaceholderFragment() {
-        }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        eventManager.fire(new OnPauseEvent(this));
+    }
 
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
+    @Override
+    protected void onNewIntent( Intent intent ) {
+        super.onNewIntent(intent);
+        eventManager.fire(new OnNewIntentEvent(this));
+    }
 
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((MainDrawerActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
+    @Override
+    protected void onStop() {
+        try {
+            eventManager.fire(new OnStopEvent(this));
+        } finally {
+            super.onStop();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        try {
+            eventManager.fire(new OnDestroyEvent<Activity>(this));
+        } finally {
+            try {
+                RoboGuice.destroyInjector(this);
+            } finally {
+                super.onDestroy();
+            }
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        final Configuration currentConfig = getResources().getConfiguration();
+        super.onConfigurationChanged(newConfig);
+        eventManager.fire(new OnConfigurationChangedEvent<Activity>(this,currentConfig, newConfig));
+    }
+
+    @Override
+    public void onSupportContentChanged() {
+        super.onSupportContentChanged();
+        RoboGuice.getInjector(this).injectViewMembers(this);
+        eventManager.fire(new OnContentChangedEvent(this));
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        eventManager.fire(new OnActivityResultEvent(this, requestCode, resultCode, data));
+    }
+
+    @Override
+    public Map<Key<?>, Object> getScopedObjectMap() {
+        return scopedObjects;
     }
 
 }

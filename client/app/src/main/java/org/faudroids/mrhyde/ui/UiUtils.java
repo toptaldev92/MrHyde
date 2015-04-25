@@ -2,12 +2,10 @@ package org.faudroids.mrhyde.ui;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
-
-import org.faudroids.mrhyde.R;
 
 import javax.inject.Inject;
+
+import it.neokree.materialnavigationdrawer.MaterialNavigationDrawer;
 
 
 final class UiUtils {
@@ -15,17 +13,14 @@ final class UiUtils {
     @Inject
     UiUtils() { }
 
+    @SuppressWarnings("unchecked")
     public void replaceFragment(Fragment currentFragment, Fragment nextFragment) {
-		FragmentManager fragmentManager = currentFragment.getFragmentManager();
-        FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.addToBackStack(null);
-        transaction.replace(R.id.fragment_container, nextFragment);
-        transaction.commit();
+        ((MaterialNavigationDrawer<Fragment>) currentFragment.getActivity()).setFragmentChild(nextFragment, "Foobar");
 	}
 
 
     /**
-     * Methods is static as it is required before dependencyinjection has taken place (yes, hack ...)
+     * Methods is static as it is required before dependency injection has taken place (yes, hack ...)
      */
     public static ActionBarListener activityToActionBarListener(Activity activity) {
         try {

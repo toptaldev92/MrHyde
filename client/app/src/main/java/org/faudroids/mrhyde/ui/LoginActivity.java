@@ -107,7 +107,7 @@ public final class LoginActivity extends AbstractActivity {
 
 
 	private void onLoginSuccess() {
-		startActivity(new Intent(LoginActivity.this, MainActivity.class));
+		startActivity(new Intent(LoginActivity.this, MainDrawerActivity.class));
 		finish();
 	}
 
