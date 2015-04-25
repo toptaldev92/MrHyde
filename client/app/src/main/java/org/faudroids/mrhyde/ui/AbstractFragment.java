@@ -16,7 +16,7 @@ abstract class AbstractFragment extends RoboFragment {
 
 	private final int layoutResource;
 	@Inject UiUtils uiUtils;
-	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
+	protected CompositeSubscription compositeSubscription = new CompositeSubscription();
 	protected ActivityListener activityListener;
 
 	AbstractFragment(int layoutResource) {
@@ -39,8 +39,9 @@ abstract class AbstractFragment extends RoboFragment {
 
 	@Override
 	public void onDestroy() {
-		super.onDestroy();
 		compositeSubscription.unsubscribe();
+		compositeSubscription = new CompositeSubscription();
+		super.onDestroy();
 	}
 
 }
