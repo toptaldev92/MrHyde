@@ -51,7 +51,7 @@ public final class CommitFragment extends AbstractFragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
-		actionBarListener.setTitle(getString(R.string.title_commit));
+		activityListener.setTitle(getString(R.string.title_commit));
 		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
 		fileManager = repositoryManager.getFileManager(repository);
 

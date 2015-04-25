@@ -17,7 +17,7 @@ abstract class AbstractFragment extends RoboFragment {
 	private final int layoutResource;
 	@Inject UiUtils uiUtils;
 	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
-	protected ActionBarListener actionBarListener;
+	protected ActivityListener activityListener;
 
 	AbstractFragment(int layoutResource) {
 		this.layoutResource = layoutResource;
@@ -27,7 +27,7 @@ abstract class AbstractFragment extends RoboFragment {
 	@Override
 	public void onAttach(Activity activity) {
 		super.onAttach(activity);
-		actionBarListener = UiUtils.activityToActionBarListener(activity);
+		activityListener = UiUtils.activityToActionBarListener(activity);
 	}
 
 

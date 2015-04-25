@@ -52,7 +52,7 @@ public final class ReposFragment extends AbstractFragment {
 		super.onViewCreated(view, savedInstanceState);
 
 		// set title
-		actionBarListener.setTitle(getString(R.string.title_repos));
+		activityListener.setTitle(getString(R.string.title_repos));
 
 		// setup list
 		layoutManager = new LinearLayoutManager(getActivity());

@@ -22,11 +22,11 @@ final class UiUtils {
     /**
      * Methods is static as it is required before dependency injection has taken place (yes, hack ...)
      */
-    public static ActionBarListener activityToActionBarListener(Activity activity) {
+    public static ActivityListener activityToActionBarListener(Activity activity) {
         try {
-            return (ActionBarListener) activity;
+            return (ActivityListener) activity;
         } catch (ClassCastException e) {
-            throw new ClassCastException(activity.toString() + " must implement " + ActionBarListener.class.getName());
+            throw new ClassCastException(activity.toString() + " must implement " + ActivityListener.class.getName());
         }
     }
 

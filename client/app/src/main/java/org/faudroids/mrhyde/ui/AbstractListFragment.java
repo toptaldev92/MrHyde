@@ -1,6 +1,10 @@
 package org.faudroids.mrhyde.ui;
 
 import android.app.Activity;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 
 import java.util.LinkedList;
@@ -13,15 +17,27 @@ import rx.subscriptions.CompositeSubscription;
 
 abstract class AbstractListFragment extends RoboListFragment {
 
+	private final int layoutResource;
+
 	@Inject UiUtils uiUtils;
 	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
-	protected ActionBarListener actionBarListener;
+	protected ActivityListener activityListener;
+
+
+	AbstractListFragment(int layoutResource) {
+		this.layoutResource = layoutResource;
+	}
+
+		@Override
+	public void onAttach(Activity activity) {
+		super.onAttach(activity);
+		activityListener = UiUtils.activityToActionBarListener(activity);
+	}
 
 
 	@Override
-	public void onAttach(Activity activity) {
-		super.onAttach(activity);
-		actionBarListener = UiUtils.activityToActionBarListener(activity);
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+		return inflater.inflate(layoutResource, container, false);
 	}
 
 
