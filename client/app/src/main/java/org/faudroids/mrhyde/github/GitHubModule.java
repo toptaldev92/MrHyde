@@ -10,7 +10,6 @@ import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.GitHubService;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.eclipse.egit.github.core.service.RepositoryService;
-import org.eclipse.egit.github.core.service.UserService;
 
 import javax.inject.Inject;
 
@@ -41,41 +40,34 @@ public final class GitHubModule implements Module {
 
 	@Provides
 	@Inject
-	public UserService provideUserService(AuthManager authManager) {
-		return setAuthToken(new UserService(), authManager);
+	public RepositoryService provideRepositoryService(LoginManager loginManager) {
+		return setAuthToken(new RepositoryService(), loginManager);
 	}
 
 
 	@Provides
 	@Inject
-	public RepositoryService provideRepositoryService(AuthManager authManager) {
-		return setAuthToken(new RepositoryService(), authManager);
+	public CommitService provideCommitService(LoginManager loginManager) {
+		return setAuthToken(new CommitService(), loginManager);
 	}
 
 
 	@Provides
 	@Inject
-	public CommitService provideCommitService(AuthManager authManager) {
-		return setAuthToken(new CommitService(), authManager);
+	public DataService provideDataService(LoginManager loginManager) {
+		return setAuthToken(new DataService(), loginManager);
 	}
 
 
 	@Provides
 	@Inject
-	public DataService provideDataService(AuthManager authManager) {
-		return setAuthToken(new DataService(), authManager);
+	public OrganizationService provideOrganizationService(LoginManager loginManager) {
+		return setAuthToken(new OrganizationService(), loginManager);
 	}
 
 
-	@Provides
-	@Inject
-	public OrganizationService provideOrganizationService(AuthManager authManager) {
-		return setAuthToken(new OrganizationService(), authManager);
-	}
-
-
-	private <T extends GitHubService> T setAuthToken(T service, AuthManager authManager) {
-		service.getClient().setOAuth2Token(authManager.getAccessToken());
+	private <T extends GitHubService> T setAuthToken(T service, LoginManager loginManager) {
+		service.getClient().setOAuth2Token(loginManager.getAccount().getAccessToken());
 		return service;
 	}
 

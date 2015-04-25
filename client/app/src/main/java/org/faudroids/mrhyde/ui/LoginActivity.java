@@ -3,6 +3,8 @@ package org.faudroids.mrhyde.ui;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
@@ -10,19 +12,27 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
 
+import org.eclipse.egit.github.core.User;
+import org.eclipse.egit.github.core.service.UserService;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.github.AuthApi;
-import org.faudroids.mrhyde.github.AuthManager;
+import org.faudroids.mrhyde.github.LoginManager;
 import org.faudroids.mrhyde.github.TokenDetails;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.net.ssl.HttpsURLConnection;
 
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
+import rx.Observable;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 
@@ -31,14 +41,15 @@ public final class LoginActivity extends AbstractActivity {
 
 	@InjectView(R.id.login_button) Button loginButton;
 	@Inject AuthApi authApi;
-	@Inject AuthManager authManager;
+	@Inject
+	LoginManager loginManager;
 
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		if (authManager.getAccessToken() != null) {
+		if (loginManager.getAccount() != null) {
 			onLoginSuccess();
 			return;
 		}
@@ -89,12 +100,35 @@ public final class LoginActivity extends AbstractActivity {
 		String clientId = getString(R.string.gitHubClientId);
 		String clientSecret = getString(R.string.gitHubClientSecret);
 		compositeSubscription.add(authApi.getAccessToken(clientId, clientSecret, code)
-				.compose(new DefaultTransformer<TokenDetails>())
-				.subscribe(new Action1<TokenDetails>() {
+				.flatMap(new Func1<TokenDetails, Observable<LoginManager.Account>>() {
 					@Override
-					public void call(TokenDetails tokenDetails) {
-						Timber.d("gotten token " + tokenDetails.getAccessToken() + " for scope " + tokenDetails.getScope());
-						authManager.setAccessToken(tokenDetails.getAccessToken());
+					public Observable<LoginManager.Account> call(TokenDetails tokenDetails) {
+						try {
+							// load user
+							UserService service = new UserService();
+							service.getClient().setOAuth2Token(tokenDetails.getAccessToken());
+							User user = service.getUser();
+
+							// load avatar
+							URL url = new URL(user.getAvatarUrl());
+							HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+							connection.setDoInput(true);
+							connection.connect();
+							InputStream input = connection.getInputStream();
+							Bitmap avatar = BitmapFactory.decodeStream(input);
+							return Observable.just(new LoginManager.Account(tokenDetails.getAccessToken(), user.getLogin(), user.getEmail(), avatar));
+
+						} catch (IOException e) {
+							return Observable.error(e);
+						}
+					}
+				})
+				.compose(new DefaultTransformer<LoginManager.Account>())
+				.subscribe(new Action1<LoginManager.Account>() {
+					@Override
+					public void call(LoginManager.Account account) {
+						Timber.d("gotten token " + account.getAccessToken());
+						loginManager.setAccount(account);
 						onLoginSuccess();
 					}
 				}, new Action1<Throwable>() {

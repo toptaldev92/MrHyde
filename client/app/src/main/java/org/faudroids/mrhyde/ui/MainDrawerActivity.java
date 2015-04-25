@@ -4,24 +4,16 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 
 import com.google.inject.Key;
 
-import org.eclipse.egit.github.core.User;
-import org.faudroids.mrhyde.github.ApiWrapper;
-import org.faudroids.mrhyde.utils.DefaultTransformer;
+import org.faudroids.mrhyde.github.LoginManager;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.net.ssl.HttpsURLConnection;
 
 import it.neokree.materialnavigationdrawer.MaterialNavigationDrawer;
 import it.neokree.materialnavigationdrawer.elements.MaterialAccount;
@@ -42,52 +34,24 @@ import roboguice.event.EventManager;
 import roboguice.inject.ContentViewListener;
 import roboguice.inject.RoboInjector;
 import roboguice.util.RoboContext;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func1;
 
 
 public class MainDrawerActivity extends MaterialNavigationDrawer<Fragment> implements ActionBarListener, RoboContext {
 
-    @Inject ApiWrapper apiWrapper;
+    @Inject LoginManager loginManager;
 
     @Override
     public void init(Bundle savedInstanceState) {
         addSection(newSection("Repositories", new ReposFragment()));
-        final MaterialAccount account = new MaterialAccount(getResources(), "", "", null, null);
-        addAccount(account);
+
+        LoginManager.Account account = loginManager.getAccount();
+        addAccount(new MaterialAccount(
+                getResources(),
+                account.getLogin(),
+                account.getEmail(),
+                account.getAvatar(),
+                null));
         setBackPattern(MaterialNavigationDrawer.BACKPATTERN_BACK_TO_FIRST);
-
-        apiWrapper
-                .getUser()
-                .flatMap(new Func1<User, Observable<Void>>() {
-                    @Override
-                    public Observable<Void> call(User user) {
-                        // load avatar
-                        try {
-                            URL url = new URL(user.getAvatarUrl());
-                            HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-                            connection.setDoInput(true);
-                            connection.connect();
-                            InputStream input = connection.getInputStream();
-                            Bitmap avatar = BitmapFactory.decodeStream(input);
-                            account.setTitle(user.getLogin());
-                            account.setSubTitle(user.getEmail());
-                            account.setPhoto(avatar);
-                            return Observable.just(null);
-
-                        } catch (IOException e) {
-                            return Observable.error(e);
-                        }
-                    }
-                })
-                .compose(new DefaultTransformer<Void>())
-                .subscribe(new Action1<Void>() {
-                    @Override
-                    public void call(Void nothing) {
-                        notifyAccountDataChanged();
-                    }
-                });
     }
 
 

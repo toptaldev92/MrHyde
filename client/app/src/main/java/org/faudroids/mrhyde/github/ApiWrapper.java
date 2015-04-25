@@ -14,7 +14,6 @@ import org.eclipse.egit.github.core.service.CommitService;
 import org.eclipse.egit.github.core.service.DataService;
 import org.eclipse.egit.github.core.service.OrganizationService;
 import org.eclipse.egit.github.core.service.RepositoryService;
-import org.eclipse.egit.github.core.service.UserService;
 
 import java.util.Collection;
 import java.util.List;
@@ -33,7 +32,6 @@ import rx.functions.Func0;
  */
 public final class ApiWrapper {
 
-	private final UserService userService;
 	private final RepositoryService repositoryService;
 	private final CommitService commitService;
 	private final DataService dataService;
@@ -41,27 +39,15 @@ public final class ApiWrapper {
 
 	@Inject
 	public ApiWrapper(
-			UserService userService,
 			RepositoryService repositoryService,
 			CommitService commitService,
 			DataService dataService,
 			OrganizationService organizationService) {
 
-		this.userService = userService;
 		this.repositoryService = repositoryService;
 		this.commitService = commitService;
 		this.dataService = dataService;
 		this.organizationService = organizationService;
-	}
-
-
-	public Observable<User> getUser() {
-		return new Wrapper<User>() {
-			@Override
-			protected User doWrapMethod() throws Exception {
-				return userService.getUser();
-			}
-		}.wrapMethod();
 	}
 
 
