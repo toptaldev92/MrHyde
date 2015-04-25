@@ -1,6 +1,6 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/DefaultActivity"
+    style="@style/DefaultLayout"
     >
 
     <Button

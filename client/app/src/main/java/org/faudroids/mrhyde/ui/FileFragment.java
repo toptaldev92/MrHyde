@@ -37,7 +37,7 @@ public final class FileFragment extends AbstractFragment {
 
 
 	@Inject RepositoryManager repositoryManager;
-	@InjectView(R.id.text) EditText editText;
+	@InjectView(R.id.title) EditText editText;
 	@InjectView(R.id.submit) Button submitButton;
 
 	private FileManager fileManager;
