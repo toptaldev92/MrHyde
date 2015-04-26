@@ -16,24 +16,17 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func2;
 import timber.log.Timber;
 
-public final class CommitFragment extends AbstractFragment {
+@ContentView(R.layout.activity_commit)
+public final class CommitActivity extends AbstractActionBarActivity {
 
-	private static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
-
-	public static CommitFragment createInstance(Repository repository) {
-		CommitFragment fragment = new CommitFragment();
-		Bundle extras = new Bundle();
-		extras.putSerializable(EXTRA_REPOSITORY, repository);
-		fragment.setArguments(extras);
-		return fragment;
-	}
-
+	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
 	@Inject RepositoryManager repositoryManager;
 	@InjectView(R.id.changes) TextView changesView;
@@ -42,17 +35,12 @@ public final class CommitFragment extends AbstractFragment {
 	private FileManager fileManager;
 	private Repository repository;
 
-	public CommitFragment() {
-		super(R.layout.fragment_commit);
-	}
-
-
 	@Override
-	public void onViewCreated(View view, Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-		activityListener.setTitle(getString(R.string.title_commit));
-		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
+		setTitle(getString(R.string.title_commit));
+		repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		fileManager = repositoryManager.getFileManager(repository);
 
 		Observable.zip(
@@ -91,13 +79,13 @@ public final class CommitFragment extends AbstractFragment {
 						.subscribe(new Action1<Void>() {
 							@Override
 							public void call(Void nothing) {
-								Toast.makeText(CommitFragment.this.getActivity(), "Commit success", Toast.LENGTH_SHORT).show();
+								Toast.makeText(CommitActivity.this, "Commit success", Toast.LENGTH_SHORT).show();
 							}
 						}, new Action1<Throwable>() {
 							@Override
 							public void call(Throwable throwable) {
 								Timber.e(throwable, "commit failed");
-								Toast.makeText(CommitFragment.this.getActivity(), "Commit error", Toast.LENGTH_SHORT).show();
+								Toast.makeText(CommitActivity.this, "Commit error", Toast.LENGTH_SHORT).show();
 
 							}
 						});

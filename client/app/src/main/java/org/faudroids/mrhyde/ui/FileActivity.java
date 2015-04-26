@@ -16,24 +16,17 @@ import org.faudroids.mrhyde.utils.DefaultTransformer;
 
 import javax.inject.Inject;
 
+import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 import rx.functions.Action1;
 import timber.log.Timber;
 
-public final class FileFragment extends AbstractFragment {
+@ContentView(R.layout.activity_file)
+public final class FileActivity extends AbstractActionBarActivity {
 
-	private static final String
+	static final String
 			EXTRA_REPOSITORY = "EXTRA_REPOSITORY",
 			EXTRA_TREE_ENTRY = "EXTRA_TREE_ENTRY";
-
-	public static FileFragment createInstance(Repository repository, TreeEntry treeEntry) {
-		FileFragment fragment = new FileFragment();
-		Bundle extras = new Bundle();
-		extras.putSerializable(EXTRA_REPOSITORY, repository);
-		extras.putSerializable(EXTRA_TREE_ENTRY, treeEntry);
-		fragment.setArguments(extras);
-		return fragment;
-	}
 
 
 	@Inject RepositoryManager repositoryManager;
@@ -44,19 +37,15 @@ public final class FileFragment extends AbstractFragment {
 	private Repository repository;
 	private TreeEntry treeEntry;
 
-	public FileFragment() {
-		super(R.layout.fragment_file);
-	}
-
 
 	@Override
-	public void onViewCreated(View view, Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
-		treeEntry = (TreeEntry) getArguments().getSerializable(EXTRA_TREE_ENTRY);
+		repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
+		treeEntry = (TreeEntry) getIntent().getSerializableExtra(EXTRA_TREE_ENTRY);
 		fileManager = repositoryManager.getFileManager(repository);
-		activityListener.setTitle(treeEntry.getPath());
+		setTitle(treeEntry.getPath());
 
 		editText.setMovementMethod(new ScrollingMovementMethod());
 		submitButton.setOnClickListener(new View.OnClickListener() {
@@ -85,7 +74,7 @@ public final class FileFragment extends AbstractFragment {
 				}, new Action1<Throwable>() {
 					@Override
 					public void call(Throwable throwable) {
-						Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
+						Toast.makeText(FileActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
 						Timber.e(throwable, "failed to get content");
 					}
 				}));

@@ -10,10 +10,9 @@ import it.neokree.materialnavigationdrawer.MaterialNavigationDrawer;
 import it.neokree.materialnavigationdrawer.elements.MaterialAccount;
 
 
-public class MainDrawerActivity extends AbstractRoboDrawerActivity implements ActivityListener {
+public class MainDrawerActivity extends AbstractRoboDrawerActivity {
 
     @Inject LoginManager loginManager;
-    private OnBackPressedListener onBackPressedListener;
 
     @Override
     public void init(Bundle savedInstanceState) {
@@ -27,32 +26,6 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity implements Ac
                 account.getAvatar(),
                 null));
         setBackPattern(MaterialNavigationDrawer.BACKPATTERN_BACK_TO_FIRST);
-    }
-
-
-    @Override
-    public void onBackPressed() {
-        if (onBackPressedListener == null || !onBackPressedListener.onBackPressed()) {
-            super.onBackPressed();
-        }
-    }
-
-
-    @Override
-    public void setTitle(String title) {
-        getToolbar().setTitle(title);
-    }
-
-
-    @Override
-    public void setOnBackPressedListener(OnBackPressedListener listener) {
-        this.onBackPressedListener = listener;
-    }
-
-
-    @Override
-    public void removeOnBackPressedListener() {
-        this.onBackPressedListener = null;
     }
 
 }

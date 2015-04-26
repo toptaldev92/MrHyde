@@ -34,7 +34,6 @@ public final class ReposFragment extends AbstractFragment {
 	private static final DateFormat dateFormat = DateFormat.getDateInstance();
 
 	@Inject RepositoryManager repositoryManager;
-	@Inject UiUtils uiUtils;
 
 	@InjectView(R.id.progressbar) ProgressBar progressBar;
 	@InjectView(R.id.list) RecyclerView recyclerView;
@@ -50,9 +49,6 @@ public final class ReposFragment extends AbstractFragment {
 	@Override
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
-
-		// set title
-		activityListener.setTitle(getString(R.string.title_repos));
 
 		// setup list
 		layoutManager = new LinearLayoutManager(getActivity());

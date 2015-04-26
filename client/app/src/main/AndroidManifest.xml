@@ -27,6 +27,15 @@
         <activity
             android:name=".ui.DirActivity"
             />
+        <activity
+            android:name=".ui.FileActivity"
+            />
+        <activity
+            android:name=".ui.CommitActivity"
+            />
+        <activity
+            android:name=".ui.PreviewActivity"
+            />
     </application>
 
 </manifest>

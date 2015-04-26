@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.net.http.SslError;
 import android.os.Build;
 import android.os.Bundle;
-import android.view.View;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -17,36 +16,27 @@ import org.faudroids.mrhyde.jekyll.PreviewResult;
 import org.faudroids.mrhyde.jekyll.RepoDetails;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
+import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 import rx.functions.Action1;
 import timber.log.Timber;
 
-public class PreviewFragment extends AbstractFragment {
+@ContentView(R.layout.activity_preview)
+public class PreviewActivity extends AbstractActionBarActivity {
 
-    private static final String EXTRA_REPO_CHECKOUT_URL = "EXTRA_REPO_CHECKOUT_URL";
-    private static final String EXTRA_DIFF = "EXTRA_DIFF";
+    static final String
+            EXTRA_REPO_CHECKOUT_URL = "EXTRA_REPO_CHECKOUT_URL",
+            EXTRA_DIFF = "EXTRA_DIFF";
 
     @InjectView(R.id.web_view) WebView webView;
     private String repoUrl;
     private String diff;
 
-    public static PreviewFragment createInstance(String repoCheckoutUrl, String diff) {
-        PreviewFragment fragment = new PreviewFragment();
-        Bundle extras = new Bundle();
-        extras.putSerializable(EXTRA_REPO_CHECKOUT_URL, repoCheckoutUrl);
-        extras.putSerializable(EXTRA_DIFF, diff);
-        fragment.setArguments(extras);
-        return fragment;
-    }
-
-    public PreviewFragment() {
-        super(R.layout.fragment_preview);
-    }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         // enable javascript + ignore SSL errors
         webView.getSettings().setJavaScriptEnabled(true);
@@ -62,8 +52,8 @@ public class PreviewFragment extends AbstractFragment {
                 });
 
         // load arguments
-        repoUrl = (String) getArguments().getSerializable(EXTRA_REPO_CHECKOUT_URL);
-        diff = (String) getArguments().getSerializable(EXTRA_DIFF);
+        repoUrl = getIntent().getStringExtra(EXTRA_REPO_CHECKOUT_URL);
+        diff = getIntent().getStringExtra(EXTRA_DIFF);
 
         // load preview
         JekyllApi jekyllApi = new JekyllModule().provideJekyllApi();

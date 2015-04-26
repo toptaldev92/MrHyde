@@ -1,6 +1,6 @@
 package org.faudroids.mrhyde.ui;
 
-import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -125,18 +125,20 @@ public final class DirActivity extends AbstractActionBarActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch(item.getItemId()) {
 			case R.id.action_commit:
-				Fragment commitFragment = CommitFragment.createInstance(repository);
-				// TODO
-				// uiUtils.replaceFragment(this, commitFragment);
+				Intent commitIntent = new Intent(this, CommitActivity.class);
+				commitIntent.putExtra(CommitActivity.EXTRA_REPOSITORY, repository);
+				startActivity(commitIntent);
 				return true;
+
 			case R.id.action_preview:
 				fileManager = repositoryManager.getFileManager(repository);
 				fileManager.getDiff().subscribe(new Action1<String>() {
 					@Override
 					public void call(String diff) {
-						Fragment previewFragment = PreviewFragment.createInstance(repository.getCloneUrl(), diff);
-						// uiUtils.replaceFragment(DirActivity.this, previewFragment);
-						// TODO
+						Intent previewIntent = new Intent(DirActivity.this, PreviewActivity.class);
+						previewIntent.putExtra(PreviewActivity.EXTRA_REPO_CHECKOUT_URL, repository.getCloneUrl());
+						previewIntent.putExtra(PreviewActivity.EXTRA_DIFF, diff);
+						startActivity(previewIntent);
 					}
 				}, new Action1<Throwable>() {
 							@Override
@@ -226,16 +228,16 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 
 		public void onSaveInstanceState(Bundle outState) {
-			String selectedPath = "";
-
 			AbstractNode iter = selectedNode;
-			do {
-				selectedPath = "/" + iter.getPath() + selectedPath;
+			String selectedPath = iter.getPath();
+			iter = iter.getParent();
+
+			while (iter != null) {
+				selectedPath = iter.getPath() + "/" + selectedPath;
 				Timber.d(selectedPath);
 				iter = iter.getParent();
-			} while (iter.getParent() != null);
+			}
 
-			Timber.d("saving path " + selectedPath);
 			outState.putString(STATE_SELECTED_NODE, selectedPath);
 		}
 
@@ -245,7 +247,6 @@ public final class DirActivity extends AbstractActionBarActivity {
 			String[] paths = selectedPath.split("/");
 			DirNode iter = selectedNode;
 			for (int i = 1; i < paths.length; ++i) {
-				Timber.d("found node " + iter.getPath());
 				iter = (DirNode) iter.getEntries().get(paths[i]);
 			}
 			setSelectedNode(iter);
@@ -274,9 +275,10 @@ public final class DirActivity extends AbstractActionBarActivity {
 						} else {
 							// open file
 							FileNode fileNode = (FileNode) pathNode;
-							FileFragment newFragment = FileFragment.createInstance(repository, fileNode.getTreeEntry());
-							// uiUtils.replaceFragment(DirActivity.this, newFragment);
-							// TODO
+							Intent fileIntent = new Intent(DirActivity.this, FileActivity.class);
+							fileIntent.putExtra(FileActivity.EXTRA_REPOSITORY, repository);
+							fileIntent.putExtra(FileActivity.EXTRA_TREE_ENTRY, fileNode.getTreeEntry());
+							startActivity(fileIntent);
 						}
 					}
 				});

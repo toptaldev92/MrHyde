@@ -92,6 +92,7 @@ public final class FileManager {
 			});
 
 		} else {
+			Timber.d("getting file with sha " + treeEntry.getSha());
 			return apiWrapper.getBlob(repository, treeEntry.getSha())
 					.flatMap(new Func1<Blob, Observable<String>>() {
 						@Override
