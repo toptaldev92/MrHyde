@@ -15,11 +15,11 @@
 
     <EditText
         android:id="@+id/title"
-        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@id/submit"
+        android:layout_margin="10dp"
         />
 
-    </RelativeLayout>
+</RelativeLayout>
 

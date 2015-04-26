@@ -14,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
+
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.Tree;
 import org.eclipse.egit.github.core.TreeEntry;
@@ -48,6 +51,11 @@ public final class DirActivity extends AbstractActionBarActivity {
 	private PathNodeAdapter pathNodeAdapter;
 	private RecyclerView.LayoutManager layoutManager;
 
+	@InjectView(R.id.tint) View tintView;
+	@InjectView(R.id.add) FloatingActionsMenu addButton;
+	@InjectView(R.id.add_file) FloatingActionButton addFileButton;
+	@InjectView(R.id.add_folder) FloatingActionButton addFolderButton;
+
 	@Inject RepositoryManager repositoryManager;
 	private Repository repository;
 	private FileManager fileManager;
@@ -62,6 +70,37 @@ public final class DirActivity extends AbstractActionBarActivity {
 		// show action bar back button
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setHomeButtonEnabled(true);
+
+		// setup add buttons
+		addButton.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
+			@Override
+			public void onMenuExpanded() {
+				// tintView.setVisibility(View.VISIBLE);
+				tintView.animate().alpha(1).setDuration(200).start();
+			}
+			@Override
+			public void onMenuCollapsed() {
+				tintView.animate().alpha(0).setDuration(200).start();
+			}
+		});
+		addFileButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addButton.collapse();
+			}
+		});
+		addFolderButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addButton.collapse();
+			}
+		});
+		tintView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addButton.collapse();
+			}
+		});
 
 		// get arguments
 		repository = (Repository) this.getIntent().getSerializableExtra(EXTRA_REPOSITORY);
