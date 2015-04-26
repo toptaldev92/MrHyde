@@ -3,9 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?android:attr/selectableItemBackground"
+    android:layout_marginRight="@dimen/list_horizontal_margin"
+    android:layout_marginLeft="@dimen/list_horizontal_margin"
+    android:background="@drawable/item_selector"
     android:clickable="true"
-    android:orientation="horizontal"
     android:padding="20dp"
     >
 

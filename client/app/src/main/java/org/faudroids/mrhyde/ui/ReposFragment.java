@@ -109,13 +109,13 @@ public final class ReposFragment extends AbstractFragment {
 
 		public class RepoViewHolder extends RecyclerView.ViewHolder {
 
-			private final View view;
+			private final View containerView;
 			private final ImageView iconView;
 			private final TextView titleView, subTitleView;
 
 			public RepoViewHolder(View view) {
 				super(view);
-				this.view = view;
+				this.containerView = view.findViewById(R.id.container);
 				this.iconView = (ImageView) view.findViewById(R.id.icon);
 				this.titleView = (TextView) view.findViewById(R.id.title);
 				this.subTitleView = (TextView) view.findViewById(R.id.subtitle);
@@ -130,7 +130,7 @@ public final class ReposFragment extends AbstractFragment {
 						.into(iconView);
 				titleView.setText(repo.getOwner().getLogin() + "/" + repo.getName());
 				subTitleView.setText(getString(R.string.repos_last_update, dateFormat.format(repo.getUpdatedAt())));
-				view.setOnClickListener(new View.OnClickListener() {
+				containerView.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
 						Intent intent = new Intent(ReposFragment.this.getActivity(), DirActivity.class);
