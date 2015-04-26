@@ -1,6 +1,6 @@
 package org.faudroids.mrhyde.ui;
 
-import android.app.Fragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,7 +19,7 @@ import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,7 +31,7 @@ import timber.log.Timber;
 
 public final class ReposFragment extends AbstractFragment {
 
-	private static final SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yy");
+	private static final DateFormat dateFormat = DateFormat.getDateInstance();
 
 	@Inject RepositoryManager repositoryManager;
 	@Inject UiUtils uiUtils;
@@ -137,8 +137,9 @@ public final class ReposFragment extends AbstractFragment {
 				view.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						Fragment newFragment = DirFragment.createInstance(repo);
-						uiUtils.replaceFragment(ReposFragment.this, newFragment);
+						Intent intent = new Intent(ReposFragment.this.getActivity(), DirActivity.class);
+						intent.putExtra(DirActivity.EXTRA_REPOSITORY, repo);
+						startActivity(intent);
 					}
 				});
 			}

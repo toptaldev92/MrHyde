@@ -1,12 +1,10 @@
 package org.faudroids.mrhyde.ui;
 
-import javax.inject.Inject;
-
-import roboguice.activity.RoboActivity;
+import roboguice.activity.RoboActionBarActivity;
 import rx.subscriptions.CompositeSubscription;
 
 
-abstract class AbstractActivity extends RoboActivity {
+abstract class AbstractActionBarActivity extends RoboActionBarActivity {
 
 	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
 

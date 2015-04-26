@@ -23,8 +23,10 @@
         <activity
             android:name=".ui.MainDrawerActivity"
             android:theme="@style/NavigationDrawerTheme"
-            >
-        </activity>
+            />
+        <activity
+            android:name=".ui.DirActivity"
+            />
     </application>
 
 </manifest>

@@ -28,21 +28,16 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 import rx.functions.Action1;
 import timber.log.Timber;
 
-public final class DirFragment extends AbstractFragment {
+@ContentView(R.layout.activity_dir)
+public final class DirActivity extends AbstractActionBarActivity {
 
-	private static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
+	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
-	public static DirFragment createInstance(Repository repository) {
-		DirFragment fragment = new DirFragment();
-		Bundle extras = new Bundle();
-		extras.putSerializable(EXTRA_REPOSITORY, repository);
-		fragment.setArguments(extras);
-		return fragment;
-	}
 
 	@InjectView(R.id.list) RecyclerView recyclerView;
 	private PathNodeAdapter pathNodeAdapter;
@@ -52,29 +47,22 @@ public final class DirFragment extends AbstractFragment {
 	private Repository repository;
 	private FileManager fileManager;
 
-	public DirFragment() {
-		super(R.layout.fragment_dir);
-	}
-
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setHasOptionsMenu(true);
-	}
 
-
-	@Override
-	public void onViewCreated(View view, Bundle savedInstanceState) {
-		super.onViewCreated(view, savedInstanceState);
+		// show action bar back button
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setHomeButtonEnabled(true);
 
 		// get arguments
-		repository = (Repository) getArguments().getSerializable(EXTRA_REPOSITORY);
+		repository = (Repository) this.getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		FileManager fileManager = repositoryManager.getFileManager(repository);
-		activityListener.setTitle(repository.getName());
+		setTitle(repository.getName());
 
 		// setup list
-		layoutManager = new LinearLayoutManager(getActivity());
+		layoutManager = new LinearLayoutManager(this);
 		recyclerView.setLayoutManager(layoutManager);
 		pathNodeAdapter = new PathNodeAdapter();
 		recyclerView.setAdapter(pathNodeAdapter);
@@ -90,7 +78,7 @@ public final class DirFragment extends AbstractFragment {
 				}, new Action1<Throwable>() {
 					@Override
 					public void call(Throwable throwable) {
-						Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
+						Toast.makeText(DirActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
 						Timber.e(throwable, "failed to get content");
 					}
 				}));
@@ -98,22 +86,19 @@ public final class DirFragment extends AbstractFragment {
 
 
 	@Override
-	public void onResume() {
-		super.onResume();
-		activityListener.setOnBackPressedListener(pathNodeAdapter);
-	}
-
-
-	@Override
-	public void onPause() {
-		activityListener.removeOnBackPressedListener();
-		super.onPause();
-	}
-
-
-	@Override
-	public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.editor, menu);
+		return true;
+	}
+
+
+	@Override
+	public void onBackPressed() {
+		// only go back when at the top dir
+		if (!pathNodeAdapter.onBackPressed()) {
+			super.onBackPressed();
+		}
 	}
 
 
@@ -122,7 +107,8 @@ public final class DirFragment extends AbstractFragment {
 		switch(item.getItemId()) {
 			case R.id.action_commit:
 				Fragment commitFragment = CommitFragment.createInstance(repository);
-				uiUtils.replaceFragment(this, commitFragment);
+				// TODO
+				// uiUtils.replaceFragment(this, commitFragment);
 				return true;
 			case R.id.action_preview:
 				fileManager = repositoryManager.getFileManager(repository);
@@ -130,7 +116,8 @@ public final class DirFragment extends AbstractFragment {
 					@Override
 					public void call(String diff) {
 						Fragment previewFragment = PreviewFragment.createInstance(repository.getCloneUrl(), diff);
-						uiUtils.replaceFragment(DirFragment.this, previewFragment);
+						// uiUtils.replaceFragment(DirActivity.this, previewFragment);
+						// TODO
 					}
 				}, new Action1<Throwable>() {
 							@Override
@@ -138,6 +125,10 @@ public final class DirFragment extends AbstractFragment {
 								Timber.e(throwable, "failed to load changes");
 							}
 				});
+				return true;
+
+			case android.R.id.home:
+				onBackPressed();
 				return true;
 
 		}
@@ -170,8 +161,7 @@ public final class DirFragment extends AbstractFragment {
 	}
 
 
-	public class PathNodeAdapter extends RecyclerView.Adapter<PathNodeAdapter.PathNodeViewHolder>
-			implements OnBackPressedListener {
+	public class PathNodeAdapter extends RecyclerView.Adapter<PathNodeAdapter.PathNodeViewHolder> {
 
 		private final List<PathNode> nodeList = new ArrayList<>();
 		private DirNode selectedNode;
@@ -196,7 +186,6 @@ public final class DirFragment extends AbstractFragment {
 		}
 
 
-		@Override
 		public boolean onBackPressed() {
 			// if no parent let activity handle back press
 			if (selectedNode.parent == null) return false;
@@ -207,7 +196,7 @@ public final class DirFragment extends AbstractFragment {
 
 
 		public void setSelectedNode(DirNode newSelectedNode) {
-			activityListener.setTitle(newSelectedNode.path);
+			setTitle(newSelectedNode.path);
 			selectedNode = newSelectedNode;
 			nodeList.clear();
 			nodeList.addAll(newSelectedNode.entries.values());
@@ -238,7 +227,8 @@ public final class DirFragment extends AbstractFragment {
 							// open file
 							FileNode fileNode = (FileNode) pathNode;
 							FileFragment newFragment = FileFragment.createInstance(repository, fileNode.treeEntry);
-							uiUtils.replaceFragment(DirFragment.this, newFragment);
+							// uiUtils.replaceFragment(DirActivity.this, newFragment);
+							// TODO
 						}
 					}
 				});

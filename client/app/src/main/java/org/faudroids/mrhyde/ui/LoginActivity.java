@@ -37,7 +37,7 @@ import timber.log.Timber;
 
 
 @ContentView(R.layout.activity_login)
-public final class LoginActivity extends AbstractActivity {
+public final class LoginActivity extends AbstractActionBarActivity {
 
 	@InjectView(R.id.login_button) Button loginButton;
 	@Inject AuthApi authApi;
