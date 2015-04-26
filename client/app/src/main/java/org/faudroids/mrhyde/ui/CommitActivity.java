@@ -79,7 +79,9 @@ public final class CommitActivity extends AbstractActionBarActivity {
 						.subscribe(new Action1<Void>() {
 							@Override
 							public void call(Void nothing) {
-								Toast.makeText(CommitActivity.this, "Commit success", Toast.LENGTH_SHORT).show();
+								Timber.d("commit success");
+								setResult(RESULT_OK);
+								finish();
 							}
 						}, new Action1<Throwable>() {
 							@Override

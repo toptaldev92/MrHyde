@@ -41,14 +41,25 @@ public final class GitManager {
 	}
 
 
-	public void init() throws IOException, GitAPIException {
-		Timber.d("init repository " + rootDir.getPath());
-		Git git = null;
-		try {
-			git = Git.init().setDirectory(rootDir).call();
-		} finally {
-			if (git != null) git.close();
-		}
+	public Observable<Void> init() {
+		return Observable.defer(new Func0<Observable<Void>>() {
+			@Override
+			public Observable<Void> call() {
+				Timber.d("init repository " + rootDir.getPath());
+				Git git = null;
+				try {
+					git = Git.init().setDirectory(rootDir).call();
+					git.commit().setMessage("initial empty commit").call();
+					return Observable.just(null);
+
+				} catch (GitAPIException e) {
+					return Observable.error(e);
+
+				} finally {
+					if (git != null) git.close();
+				}
+			}
+		});
 	}
 
 
@@ -93,24 +104,53 @@ public final class GitManager {
 	}
 
 
+	/**
+	 * Returns all files that have been changed, regardless if they are new or not.
+	 */
 	public Observable<Set<String>> getChangedFiles() {
-		return Observable.defer(new Func0<Observable<Set<String>>>() {
+		return getStatus().flatMap(new Func1<Status, Observable<Set<String>>>() {
 			@Override
-			public Observable<Set<String>> call() {
+			public Observable<Set<String>> call(Status status) {
+				Set<String> allFiles = status.getUncommittedChanges();
+				allFiles.addAll(status.getUntracked());
+				return Observable.just(allFiles);
+			}
+		});
+	}
+
+
+	/**
+	 * Returns only new files.
+	 */
+	public Observable<Set<String>> getNewFiles() {
+		return getStatus().flatMap(new Func1<Status, Observable<Set<String>>>() {
+			@Override
+			public Observable<Set<String>> call(Status status) {
+				return Observable.just(status.getUntracked());
+			}
+		});
+	}
+
+
+	private Observable<Status> getStatus() {
+		return Observable.defer(new Func0<Observable<Status>>() {
+			@Override
+			public Observable<Status> call() {
 				Git git = null;
 				try {
 					git = Git.open(rootDir);
 					Status status = git.status().call();
-					return Observable.just(status.getUncommittedChanges());
+					return Observable.just(status);
 
 				} catch (IOException | GitAPIException e) {
-					throw new RuntimeException(e);
+					return Observable.error(e);
 				} finally {
 					if (git != null) git.close();
 				}
 			}
 		});
 	}
+
 
 
 	/**

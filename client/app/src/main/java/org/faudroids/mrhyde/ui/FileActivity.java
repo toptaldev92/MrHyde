@@ -14,6 +14,8 @@ import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 
 import roboguice.inject.ContentView;
@@ -26,7 +28,8 @@ public final class FileActivity extends AbstractActionBarActivity {
 
 	static final String
 			EXTRA_REPOSITORY = "EXTRA_REPOSITORY",
-			EXTRA_TREE_ENTRY = "EXTRA_TREE_ENTRY";
+			EXTRA_TREE_ENTRY = "EXTRA_TREE_ENTRY",
+			EXTRA_IS_NEW_FILE = "EXTRA_IS_NEW_FILE";
 
 
 	@Inject RepositoryManager repositoryManager;
@@ -42,6 +45,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		boolean isNewFile = getIntent().getBooleanExtra(EXTRA_IS_NEW_FILE, false);
 		repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		treeEntry = (TreeEntry) getIntent().getSerializableExtra(EXTRA_TREE_ENTRY);
 		fileManager = repositoryManager.getFileManager(repository);
@@ -51,33 +55,33 @@ public final class FileActivity extends AbstractActionBarActivity {
 		submitButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				fileManager.writeFile(treeEntry, editText.getText().toString());
-				compositeSubscription.add(fileManager.getDiff()
-						.compose(new DefaultTransformer<String>())
-						.subscribe(new Action1<String>() {
-							@Override
-							public void call(String diff) {
-								Timber.d(diff);
-							}
-						}));
-				getFragmentManager().popBackStack();
+				try {
+					fileManager.writeFile(treeEntry, editText.getText().toString());
+				} catch (IOException ioe) {
+					Timber.e(ioe, "failed to write file");
+					// TODO
+				}
+				setResult(RESULT_OK);
+				finish();
 			}
 		});
 
-		compositeSubscription.add(fileManager.getFile(treeEntry)
-				.compose(new DefaultTransformer<String>())
-				.subscribe(new Action1<String>() {
-					@Override
-					public void call(String content) {
-						editText.setText(content);
-					}
-				}, new Action1<Throwable>() {
-					@Override
-					public void call(Throwable throwable) {
-						Toast.makeText(FileActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
-						Timber.e(throwable, "failed to get content");
-					}
-				}));
+		if (!isNewFile) {
+			compositeSubscription.add(fileManager.getFile(treeEntry)
+					.compose(new DefaultTransformer<String>())
+					.subscribe(new Action1<String>() {
+						@Override
+						public void call(String content) {
+							editText.setText(content);
+						}
+					}, new Action1<Throwable>() {
+						@Override
+						public void call(Throwable throwable) {
+							Toast.makeText(FileActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
+							Timber.e(throwable, "failed to get content");
+						}
+					}));
+		}
 	}
 
 }

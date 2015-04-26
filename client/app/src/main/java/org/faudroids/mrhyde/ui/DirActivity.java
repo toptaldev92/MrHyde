@@ -1,15 +1,20 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
+import android.text.method.DigitsKeyListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,9 +48,11 @@ import timber.log.Timber;
 @ContentView(R.layout.activity_dir)
 public final class DirActivity extends AbstractActionBarActivity {
 
-	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
-	private static final String STATE_TREE = "STATE_TREE";
+	private static final int
+			REQUEST_COMMIT = 42,
+			REQUEST_EDIT_FILE = 43;
 
+	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
 	@InjectView(R.id.list) RecyclerView recyclerView;
 	private PathNodeAdapter pathNodeAdapter;
@@ -60,12 +67,15 @@ public final class DirActivity extends AbstractActionBarActivity {
 	private Repository repository;
 	private FileManager fileManager;
 
-	private Tree filesTree; // gotten from github, used to restore state
-
 
 	@Override
-	public void onCreate(Bundle savedInstanceState) {
+	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// get arguments
+		repository = (Repository) this.getIntent().getSerializableExtra(EXTRA_REPOSITORY);
+		fileManager = repositoryManager.getFileManager(repository);
+		setTitle(repository.getName());
 
 		// show action bar back button
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -75,9 +85,9 @@ public final class DirActivity extends AbstractActionBarActivity {
 		addButton.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
 			@Override
 			public void onMenuExpanded() {
-				// tintView.setVisibility(View.VISIBLE);
 				tintView.animate().alpha(1).setDuration(200).start();
 			}
+
 			@Override
 			public void onMenuCollapsed() {
 				tintView.animate().alpha(0).setDuration(200).start();
@@ -87,6 +97,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 			@Override
 			public void onClick(View v) {
 				addButton.collapse();
+				addAndOpenFile();
 			}
 		});
 		addFolderButton.setOnClickListener(new View.OnClickListener() {
@@ -102,11 +113,6 @@ public final class DirActivity extends AbstractActionBarActivity {
 			}
 		});
 
-		// get arguments
-		repository = (Repository) this.getIntent().getSerializableExtra(EXTRA_REPOSITORY);
-		FileManager fileManager = repositoryManager.getFileManager(repository);
-		setTitle(repository.getName());
-
 		// setup list
 		layoutManager = new LinearLayoutManager(this);
 		pathNodeAdapter = new PathNodeAdapter();
@@ -114,36 +120,13 @@ public final class DirActivity extends AbstractActionBarActivity {
 		recyclerView.setAdapter(pathNodeAdapter);
 		recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
 
-
 		// get tree
-		if (savedInstanceState != null) {
-			filesTree = (Tree) savedInstanceState.getSerializable(STATE_TREE);
-			pathNodeAdapter.setSelectedNode(parseGitHubTree(filesTree));
-			pathNodeAdapter.onRestoreInstanceState(savedInstanceState);
-
-		} else {
-			compositeSubscription.add(fileManager.getTree()
-					.compose(new DefaultTransformer<Tree>())
-					.subscribe(new Action1<Tree>() {
-						@Override
-						public void call(Tree tree) {
-							filesTree = tree;
-							pathNodeAdapter.setSelectedNode(parseGitHubTree(tree));
-						}
-					}, new Action1<Throwable>() {
-						@Override
-						public void call(Throwable throwable) {
-							Toast.makeText(DirActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
-							Timber.e(throwable, "failed to get content");
-						}
-					}));
-		}
+		updateTree(savedInstanceState);
 	}
 
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		outState.putSerializable(STATE_TREE, filesTree);
 		pathNodeAdapter.onSaveInstanceState(outState);
 	}
 
@@ -171,7 +154,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 			case R.id.action_commit:
 				Intent commitIntent = new Intent(this, CommitActivity.class);
 				commitIntent.putExtra(CommitActivity.EXTRA_REPOSITORY, repository);
-				startActivity(commitIntent);
+				startActivityForResult(commitIntent, REQUEST_COMMIT);
 				return true;
 
 			case R.id.action_preview:
@@ -201,8 +184,65 @@ public final class DirActivity extends AbstractActionBarActivity {
 	}
 
 
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode != RESULT_OK) return;
+		switch (requestCode) {
+			case REQUEST_COMMIT:
+			case REQUEST_EDIT_FILE:
+				// refresh tree after successful commit or updated file (in case of new files)
+				Bundle tmpSavedState = new Bundle();
+				pathNodeAdapter.onSaveInstanceState(tmpSavedState);
+				updateTree(tmpSavedState);
+		}
+	}
+
+
+	private void addAndOpenFile() {
+		final EditText inputView = new EditText(this);
+		// posix compatible files names :P
+		inputView.setKeyListener(DigitsKeyListener.getInstance("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._-"));
+		inputView.setInputType(InputType.TYPE_CLASS_TEXT);
+
+		new AlertDialog.Builder(this)
+				.setTitle("New file")
+				.setMessage("Enter file name")
+				.setView(inputView)
+				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						String value = inputView.getText().toString();
+						TreeEntry newEntry = fileManager.createNewTreeEntry(pathNodeAdapter.getSelectedNode().getTreeEntry(), value);
+						startFileActivity(newEntry, true);
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, null)
+				.show();
+	}
+
+
+	private void updateTree(final Bundle savedInstanceState) {
+		compositeSubscription.add(fileManager.getTree()
+				.compose(new DefaultTransformer<Tree>())
+				.subscribe(new Action1<Tree>() {
+					@Override
+					public void call(Tree tree) {
+						pathNodeAdapter.setSelectedNode(parseGitHubTree(tree));
+						if (savedInstanceState != null)
+							pathNodeAdapter.onRestoreInstanceState(savedInstanceState);
+					}
+				}, new Action1<Throwable>() {
+					@Override
+					public void call(Throwable throwable) {
+						Toast.makeText(DirActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
+						Timber.e(throwable, "failed to get content");
+					}
+				}));
+	}
+
+
 	private DirNode parseGitHubTree(Tree gitTree) {
-		final DirNode rootNode = new DirNode(null, "");
+		final DirNode rootNode = new DirNode(null, "", null);
 		for (TreeEntry gitEntry : gitTree.getTree()) {
 			String[] paths = gitEntry.getPath().split("/");
 
@@ -212,7 +252,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 				if (i == paths.length - 1) {
 					// commit leaf
 					if (gitEntry.getMode().equals(TreeEntry.MODE_DIRECTORY)) {
-						parentNode.getEntries().put(path, new DirNode(parentNode, path));
+						parentNode.getEntries().put(path, new DirNode(parentNode, path, gitEntry));
 					} else {
 						parentNode.getEntries().put(path, new FileNode(parentNode, path, gitEntry));
 					}
@@ -223,6 +263,15 @@ public final class DirActivity extends AbstractActionBarActivity {
 			}
 		}
 		return rootNode;
+	}
+
+
+	private void startFileActivity(TreeEntry entry, boolean isNewFile) {
+		Intent fileIntent = new Intent(DirActivity.this, FileActivity.class);
+		fileIntent.putExtra(FileActivity.EXTRA_REPOSITORY, repository);
+		fileIntent.putExtra(FileActivity.EXTRA_TREE_ENTRY, entry);
+		fileIntent.putExtra(FileActivity.EXTRA_IS_NEW_FILE, isNewFile);
+		startActivityForResult(fileIntent, REQUEST_EDIT_FILE);
 	}
 
 
@@ -269,6 +318,11 @@ public final class DirActivity extends AbstractActionBarActivity {
 			nodeList.clear();
 			nodeList.addAll(sortEntries(newSelectedNode.getEntries().values()));
 			notifyDataSetChanged();
+		}
+
+
+		public DirNode getSelectedNode() {
+			return selectedNode;
 		}
 
 
@@ -341,11 +395,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 							setSelectedNode((DirNode) pathNode);
 						} else {
 							// open file
-							FileNode fileNode = (FileNode) pathNode;
-							Intent fileIntent = new Intent(DirActivity.this, FileActivity.class);
-							fileIntent.putExtra(FileActivity.EXTRA_REPOSITORY, repository);
-							fileIntent.putExtra(FileActivity.EXTRA_TREE_ENTRY, fileNode.getTreeEntry());
-							startActivity(fileIntent);
+							startFileActivity(pathNode.getTreeEntry(), false);
 						}
 					}
 				});

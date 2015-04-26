@@ -40,8 +40,8 @@ public final class FileManager {
 	private final Repository repository;
 	private final File rootDir;
 
-	private Tree tree = null;
-	private String baseCommitSha = null;
+	private Tree cachedTree = null;
+	private String cachedBaseCommitSha = null;
 
 
 	FileManager(Context context, ApiWrapper apiWrapper, Repository repository) {
@@ -56,24 +56,28 @@ public final class FileManager {
 	 * Gets and stores a tree in memory (!).
 	 */
 	public Observable<Tree> getTree() {
-		if (tree != null) return Observable.just(tree)
-				.compose(new InitRepoTransformer<Tree>());
+		if (cachedTree != null) return Observable.just(cachedTree)
+				.compose(new InitRepoTransformer<Tree>())
+				.flatMap(new LoadLocalFilesFunc());
 		else return apiWrapper.getCommits(repository)
 				.flatMap(new Func1<List<RepositoryCommit>, Observable<Tree>>() {
 					@Override
 					public Observable<Tree> call(List<RepositoryCommit> repositoryCommits) {
-						baseCommitSha = repositoryCommits.get(0).getSha();
-						return apiWrapper.getTree(repository, baseCommitSha, true);
+						Timber.d("loaded last commit");
+						cachedBaseCommitSha = repositoryCommits.get(0).getSha();
+						return apiWrapper.getTree(repository, cachedBaseCommitSha, true);
 					}
 				})
 				.flatMap(new Func1<Tree, Observable<Tree>>() {
 					@Override
 					public Observable<Tree> call(Tree tree) {
-						FileManager.this.tree = tree;
+						Timber.d("loaded tree");
+						FileManager.this.cachedTree = tree;
 						return Observable.just(tree);
 					}
 				})
-				.compose(new InitRepoTransformer<Tree>());
+				.compose(new InitRepoTransformer<Tree>())
+				.flatMap(new LoadLocalFilesFunc());
 	}
 
 
@@ -109,7 +113,11 @@ public final class FileManager {
 								}
 							}
 
-							writeFile(file, content);
+							try {
+								writeFile(file, content);
+							} catch (IOException e) {
+								return Observable.error(e);
+							}
 							return Observable.just(content);
 						}
 					})
@@ -119,10 +127,24 @@ public final class FileManager {
 
 
 	/**
+	 * Creates a new tree entry which can be used later on to save content. It does NOT
+	 * touch the file system.
+	 */
+	public TreeEntry createNewTreeEntry(TreeEntry parentEntry, String fileName) {
+		String path = fileName;
+		if (parentEntry != null) path = parentEntry.getPath() + "/" + path;
+		return new DummyTreeEntry(path, TreeEntry.MODE_BLOB);
+	}
+
+
+	/**
 	 * Stores the content on disk.
 	 */
-	public void writeFile(TreeEntry treeEntry, String content) {
-		writeFile(new File(rootDir, treeEntry.getPath()), content);
+	public void writeFile(TreeEntry treeEntry, String content) throws IOException {
+		Timber.d("writing file " + treeEntry.getPath());
+		File file = new File(rootDir, treeEntry.getPath());
+		if (!file.exists()) file.createNewFile();
+		writeFile(file, content);
 	}
 
 
@@ -132,6 +154,7 @@ public final class FileManager {
 				.flatMap(new Func1<Set<String>, Observable<String>>() {
 					@Override
 					public Observable<String> call(Set<String> filePaths) {
+						for (String file : filePaths) Timber.d("committing file " + file);
 						return Observable.from(filePaths);
 					}
 				})
@@ -167,7 +190,7 @@ public final class FileManager {
 							treeEntry.setSize(savedBlob.blob.getContent().length());
 							treeEntries.add(treeEntry);
 						}
-						return apiWrapper.createTree(repository, treeEntries, tree.getSha());
+						return apiWrapper.createTree(repository, treeEntries, cachedTree.getSha());
 					}
 				})
 				// create new commit on GitHub
@@ -186,7 +209,7 @@ public final class FileManager {
 						commit.setCommitter(author);
 
 						List<Commit> commitList = new ArrayList<>();
-						commitList.add(new Commit().setSha(baseCommitSha));
+						commitList.add(new Commit().setSha(cachedBaseCommitSha));
 						commit.setParents(commitList);
 						return apiWrapper.createCommit(repository, commit);
 					}
@@ -214,8 +237,8 @@ public final class FileManager {
 				.flatMap(new Func1<Reference, Observable<Void>>() {
 					@Override
 					public Observable<Void> call(Reference reference) {
-						tree = null;
-						baseCommitSha = null;
+						cachedTree = null;
+						cachedBaseCommitSha = null;
 						try {
 							delete(rootDir);
 						} catch (IOException ioe) {
@@ -263,7 +286,7 @@ public final class FileManager {
 	}
 
 
-	private void writeFile(File file, String content) {
+	private void writeFile(File file, String content) throws IOException {
 		File parentDir = file.getParentFile();
 		if (parentDir != null && !parentDir.exists()) {
 			if (!parentDir.mkdirs()) Timber.w("failed to create dirs " + parentDir.getPath());
@@ -274,8 +297,6 @@ public final class FileManager {
 			writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
 			writer.write(content);
 			writer.close();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		} finally {
 			if (writer != null) {
 				try {
@@ -300,19 +321,66 @@ public final class FileManager {
 
 	private final class InitRepoTransformer<T> implements Observable.Transformer<T, T> {
 		@Override
-		public Observable<T> call(Observable<T> observable) {
+		public Observable<T> call(final Observable<T> observable) {
 			if (!rootDir.exists() && !rootDir.mkdirs()) {
 				Timber.w("failed to create root dir");
 			}
-
-			try {
-				if (!gitManager.exists()) gitManager.init();
-			} catch (Exception e) {
-				throw new RuntimeException(e);
+			if (!gitManager.exists()) {
+				return gitManager.init()
+						.flatMap(new Func1<Void, Observable<T>>() {
+							@Override
+							public Observable<T> call(Void aVoid) {
+								return observable;
+							}
+						});
+			} else {
+				return observable;
 			}
-
-			return observable;
 		}
+	}
+
+
+	private final class LoadLocalFilesFunc implements Func1<Tree, Observable<Tree>> {
+		@Override
+		public Observable<Tree> call(final Tree tree) {
+			return gitManager.getNewFiles().flatMap(new Func1<Set<String>, Observable<Tree>>() {
+				@Override
+				public Observable<Tree> call(Set<String> files) {
+					Timber.d("loading local files");
+					List<TreeEntry> entries = tree.getTree();
+					for (String file : files) {
+						entries.add(new DummyTreeEntry(file, TreeEntry.MODE_BLOB));
+					}
+					Tree newTree = new Tree();
+					newTree.setTree(entries);
+					newTree.setUrl(tree.getUrl());
+					newTree.setSha(tree.getSha());
+					return Observable.just(newTree);
+				}
+			});
+		}
+	}
+
+
+	private static final class DummyTreeEntry extends TreeEntry {
+
+		public DummyTreeEntry(String path, String mode) {
+			setPath(path);
+			setMode(mode);
+		}
+
+		@Override
+		public String getSha() { throw new UnsupportedOperationException("dummy"); }
+
+		@Override
+		public long getSize() { throw new UnsupportedOperationException("dummy"); }
+
+		@Override
+		public String getType() { throw new UnsupportedOperationException("dummy"); }
+
+		@Override
+		public String getUrl() { throw new UnsupportedOperationException("dummy"); }
+
 	}
 
 
