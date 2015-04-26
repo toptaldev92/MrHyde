@@ -26,6 +26,8 @@ import org.faudroids.mrhyde.ui.tree.FileNode;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -226,7 +228,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 			else setTitle(newSelectedNode.getPath());
 			selectedNode = newSelectedNode;
 			nodeList.clear();
-			nodeList.addAll(newSelectedNode.getEntries().values());
+			nodeList.addAll(sortEntries(newSelectedNode.getEntries().values()));
 			notifyDataSetChanged();
 		}
 
@@ -254,6 +256,20 @@ public final class DirActivity extends AbstractActionBarActivity {
 				iter = (DirNode) iter.getEntries().get(paths[i]);
 			}
 			setSelectedNode(iter);
+		}
+
+
+		private List<AbstractNode> sortEntries(Collection<AbstractNode> entries) {
+			List<AbstractNode> dirs = new ArrayList<>();
+			List<AbstractNode> files = new ArrayList<>();
+			for (AbstractNode node : entries) {
+				if (node instanceof DirNode) dirs.add(node);
+				else files.add(node);
+			}
+			Collections.sort(dirs);
+			Collections.sort(files);
+			dirs.addAll(files);
+			return dirs;
 		}
 
 
