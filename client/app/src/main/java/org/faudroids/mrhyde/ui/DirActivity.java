@@ -219,7 +219,8 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 
 		public void setSelectedNode(DirNode newSelectedNode) {
-			setTitle(newSelectedNode.getPath());
+			if (newSelectedNode.getPath().equals("")) setTitle(repository.getName());
+			else setTitle(newSelectedNode.getPath());
 			selectedNode = newSelectedNode;
 			nodeList.clear();
 			nodeList.addAll(newSelectedNode.getEntries().values());
