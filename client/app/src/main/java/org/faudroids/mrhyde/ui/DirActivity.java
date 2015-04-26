@@ -19,12 +19,13 @@ import org.eclipse.egit.github.core.TreeEntry;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.ui.tree.AbstractNode;
+import org.faudroids.mrhyde.ui.tree.DirNode;
+import org.faudroids.mrhyde.ui.tree.FileNode;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -37,6 +38,7 @@ import timber.log.Timber;
 public final class DirActivity extends AbstractActionBarActivity {
 
 	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
+	private static final String STATE_TREE = "STATE_TREE";
 
 
 	@InjectView(R.id.list) RecyclerView recyclerView;
@@ -46,6 +48,8 @@ public final class DirActivity extends AbstractActionBarActivity {
 	@Inject RepositoryManager repositoryManager;
 	private Repository repository;
 	private FileManager fileManager;
+
+	private Tree filesTree; // gotten from github, used to restore state
 
 
 	@Override
@@ -67,21 +71,36 @@ public final class DirActivity extends AbstractActionBarActivity {
 		pathNodeAdapter = new PathNodeAdapter();
 		recyclerView.setAdapter(pathNodeAdapter);
 
-		compositeSubscription.add(fileManager.getTree()
-				.compose(new DefaultTransformer<Tree>())
-				.subscribe(new Action1<Tree>() {
-					@Override
-					public void call(Tree tree) {
-						pathNodeAdapter.setSelectedNode(parseGitHubTree(tree));
+		// get tree
+		if (savedInstanceState != null) {
+			filesTree = (Tree) savedInstanceState.getSerializable(STATE_TREE);
+			pathNodeAdapter.setSelectedNode(parseGitHubTree(filesTree));
+			pathNodeAdapter.onRestoreInstanceState(savedInstanceState);
 
-					}
-				}, new Action1<Throwable>() {
-					@Override
-					public void call(Throwable throwable) {
-						Toast.makeText(DirActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
-						Timber.e(throwable, "failed to get content");
-					}
-				}));
+		} else {
+			compositeSubscription.add(fileManager.getTree()
+					.compose(new DefaultTransformer<Tree>())
+					.subscribe(new Action1<Tree>() {
+						@Override
+						public void call(Tree tree) {
+							filesTree = tree;
+							pathNodeAdapter.setSelectedNode(parseGitHubTree(tree));
+						}
+					}, new Action1<Throwable>() {
+						@Override
+						public void call(Throwable throwable) {
+							Toast.makeText(DirActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
+							Timber.e(throwable, "failed to get content");
+						}
+					}));
+		}
+	}
+
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putSerializable(STATE_TREE, filesTree);
+		pathNodeAdapter.onSaveInstanceState(outState);
 	}
 
 
@@ -137,7 +156,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 
 	private DirNode parseGitHubTree(Tree gitTree) {
-		final DirNode rootNode = new DirNode(null, repository.getName());
+		final DirNode rootNode = new DirNode(null, "");
 		for (TreeEntry gitEntry : gitTree.getTree()) {
 			String[] paths = gitEntry.getPath().split("/");
 
@@ -147,13 +166,13 @@ public final class DirActivity extends AbstractActionBarActivity {
 				if (i == paths.length - 1) {
 					// commit leaf
 					if (gitEntry.getMode().equals(TreeEntry.MODE_DIRECTORY)) {
-						parentNode.entries.put(path, new DirNode(parentNode, path));
+						parentNode.getEntries().put(path, new DirNode(parentNode, path));
 					} else {
-						parentNode.entries.put(path, new FileNode(parentNode, path, gitEntry));
+						parentNode.getEntries().put(path, new FileNode(parentNode, path, gitEntry));
 					}
 
 				} else {
-					parentNode = (DirNode) parentNode.entries.get(path);
+					parentNode = (DirNode) parentNode.getEntries().get(path);
 				}
 			}
 		}
@@ -163,7 +182,9 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 	public class PathNodeAdapter extends RecyclerView.Adapter<PathNodeAdapter.PathNodeViewHolder> {
 
-		private final List<PathNode> nodeList = new ArrayList<>();
+		private static final String STATE_SELECTED_NODE = "STATE_SELECTED_NODE";
+
+		private final List<AbstractNode> nodeList = new ArrayList<>();
 		private DirNode selectedNode;
 
 
@@ -188,19 +209,46 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 		public boolean onBackPressed() {
 			// if no parent let activity handle back press
-			if (selectedNode.parent == null) return false;
+			if (selectedNode.getParent() == null) return false;
 			// otherwise navigate up
-			setSelectedNode((DirNode) selectedNode.parent);
+			setSelectedNode((DirNode) selectedNode.getParent());
 			return true;
 		}
 
 
 		public void setSelectedNode(DirNode newSelectedNode) {
-			setTitle(newSelectedNode.path);
+			setTitle(newSelectedNode.getPath());
 			selectedNode = newSelectedNode;
 			nodeList.clear();
-			nodeList.addAll(newSelectedNode.entries.values());
+			nodeList.addAll(newSelectedNode.getEntries().values());
 			notifyDataSetChanged();
+		}
+
+
+		public void onSaveInstanceState(Bundle outState) {
+			String selectedPath = "";
+
+			AbstractNode iter = selectedNode;
+			do {
+				selectedPath = "/" + iter.getPath() + selectedPath;
+				Timber.d(selectedPath);
+				iter = iter.getParent();
+			} while (iter.getParent() != null);
+
+			Timber.d("saving path " + selectedPath);
+			outState.putString(STATE_SELECTED_NODE, selectedPath);
+		}
+
+
+		public void onRestoreInstanceState(Bundle inState) {
+			String selectedPath = inState.getString(STATE_SELECTED_NODE);
+			String[] paths = selectedPath.split("/");
+			DirNode iter = selectedNode;
+			for (int i = 1; i < paths.length; ++i) {
+				Timber.d("found node " + iter.getPath());
+				iter = (DirNode) iter.getEntries().get(paths[i]);
+			}
+			setSelectedNode(iter);
 		}
 
 
@@ -215,8 +263,8 @@ public final class DirActivity extends AbstractActionBarActivity {
 				this.titleView = (TextView) view.findViewById(R.id.title);
 			}
 
-			public void setPathNode(final PathNode pathNode) {
-				titleView.setText(pathNode.path);
+			public void setPathNode(final AbstractNode pathNode) {
+				titleView.setText(pathNode.getPath());
 				view.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
@@ -226,7 +274,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 						} else {
 							// open file
 							FileNode fileNode = (FileNode) pathNode;
-							FileFragment newFragment = FileFragment.createInstance(repository, fileNode.treeEntry);
+							FileFragment newFragment = FileFragment.createInstance(repository, fileNode.getTreeEntry());
 							// uiUtils.replaceFragment(DirActivity.this, newFragment);
 							// TODO
 						}
@@ -236,39 +284,5 @@ public final class DirActivity extends AbstractActionBarActivity {
 		}
 	}
 
-
-	private static abstract class PathNode {
-
-		final PathNode parent;
-		final String path;
-
-		public PathNode(PathNode parent, String path) {
-			this.parent = parent;
-			this.path = path;
-		}
-
-	}
-
-
-	private static final class DirNode extends PathNode {
-
-		final Map<String, PathNode> entries = new HashMap<>();
-
-		public DirNode(PathNode parent, String path) {
-			super(parent, path);
-		}
-	}
-
-
-	private static final class FileNode extends PathNode {
-
-		final TreeEntry treeEntry;
-
-		public FileNode(PathNode parent, String path, TreeEntry treeEntry) {
-			super(parent, path);
-			this.treeEntry = treeEntry;
-		}
-
-	}
 
 }
