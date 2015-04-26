@@ -10,6 +10,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -67,9 +68,11 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 		// setup list
 		layoutManager = new LinearLayoutManager(this);
-		recyclerView.setLayoutManager(layoutManager);
 		pathNodeAdapter = new PathNodeAdapter();
+		recyclerView.setLayoutManager(layoutManager);
 		recyclerView.setAdapter(pathNodeAdapter);
+		recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+
 
 		// get tree
 		if (savedInstanceState != null) {
@@ -258,15 +261,23 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 			private final View view;
 			private final TextView titleView;
+			private final ImageView iconView;
 
 			public PathNodeViewHolder(View view) {
 				super(view);
 				this.view = view;
 				this.titleView = (TextView) view.findViewById(R.id.title);
+				this.iconView = (ImageView) view.findViewById(R.id.icon);
 			}
 
 			public void setPathNode(final AbstractNode pathNode) {
 				titleView.setText(pathNode.getPath());
+				if (pathNode instanceof DirNode) {
+					iconView.setImageResource(R.drawable.folder);
+				} else {
+					iconView.setImageResource(R.drawable.file);
+				}
+
 				view.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
