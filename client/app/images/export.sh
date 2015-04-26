@@ -14,16 +14,7 @@ outdir="../src/main/res/drawable"
 dpi=90
 
 
-
 export $dpi $outdir-mdpi/$2 $1
 export $(echo "scale=2; $dpi*1.5" | bc) $outdir-hdpi/$2 $1
 export $(echo "scale=2; $dpi*2" | bc) $outdir-xhdpi/$2 $1
 export $(echo "scale=2; $dpi*3" | bc) $outdir-xxhdpi/$2 $1
-
-echo
-
-export $dpi $outdir-xlarge-mdpi/$2 $1
-export $(echo "scale=2; $dpi*1.5*1.5" | bc) $outdir-xlarge-hdpi/$2 $1
-export $(echo "scale=2; $dpi*2*1.5" | bc) $outdir-xlarge-xhdpi/$2 $1
-export $(echo "scale=2; $dpi*3*1.5" | bc) $outdir-xlarge-xxhdpi/$2 $1
-
