@@ -7,7 +7,6 @@ class ConfigManager:
     __logger = logging.getLogger(__name__)
 
     def __init__(self, config_file):
-        #self.__config.read('config.ini')
         try:
             self.__config.read(config_file)
         except configparser.Error:
@@ -37,7 +36,7 @@ class ConfigManager:
 
     def get_hash_size(self):
         try:
-            return self.__config['repo']['id_length']
+            return int(self.__config['repo']['id_length'])
         except configparser.Error:
             self.__logger.error('Unable to parse config file.')
             raise

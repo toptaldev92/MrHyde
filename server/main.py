@@ -11,8 +11,11 @@ from configparser import Error as ConfigError
 from bottle import request, Bottle, run, abort, template, static_file
 import sys
 
-import RepositoryManager
 import RequirementsChecker
+import ConfigManager
+import FileManager
+import RepoUtils
+import RepositoryManager
 
 logging.basicConfig(filename='jekyll_server.log', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -24,7 +27,10 @@ else:
     config_file = sys.argv[1]
 
 try:
-    rm = RepositoryManager.RepositoryManager(config_file)
+    cm = ConfigManager.ConfigManager(config_file)
+    fm = FileManager.FileManager()
+    utils = RepoUtils.RepoUtils()
+    rm = RepositoryManager.RepositoryManager()
 except ConfigError:
     exit('Unable to parse config file.')
 except SQLError:
@@ -53,20 +59,22 @@ def create_repository():
             url = request.json.get('gitCheckoutUrl')
             diff = request.json.get('gitDiff')
             client_secret = request.json.get('clientSecret')
-            if client_secret != rm.get_config().get_client_secret():
+            if client_secret != cm.get_client_secret():
                 abort(400, 'Bad request')
             (repo_id, repo_url) = rm.init_repository(url, diff)
-            expires = rm.get_expiration_date(repo_id)
+            expires = utils.get_expiration_date(repo_id)
             return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': repo_id, 'jekyllErrors': 'Wir machen keine Fehler!'})
         else:
             url = request.POST.get('gitCheckoutUrl')
             diff = request.POST.get('gitDiff')
             client_secret = request.POST.get('clientSecret')
-            if client_secret != rm.get_config().get_client_secret():
+            if client_secret != cm.get_client_secret():
                 abort(400, 'Bad request')
             (repo_id, repo_url) = rm.init_repository(url, diff)
-            if repo_url is not None:
+            if repo_url is not None and isinstance(repo_url, str):
                 return template('list_view', rows=[repo_url, repo_id], header='Your new repository is available at:')
+            elif isinstance(repo_url, list):
+                return template('list_view', rows=repo_url, header='Build failed.')
             else:
                 abort(500, 'Internal error. Sorry for that!')
     except OSError as exception:
@@ -74,14 +82,14 @@ def create_repository():
             abort(403, 'Permission denied.')
     except KeyError:
         abort(500, 'Internal error. Sorry for that!')
-    except GitCommandError as exception:
+    except GitCommandError:
         abort(400, 'Bad request')
     except IOError:
         abort(500, 'Internal error. Sorry for that!')
 
 @jekyll_server.get('/jekyll/<id:path>/')
 def show_repository(id):
-    files = rm.list_single_directory(id)
+    files = fm.list_directory(id)
     if files is not None:
         if request.content_type.startswith('application/json'):
             return json.dumps(files)
@@ -96,9 +104,9 @@ def show_repository(id):
 @jekyll_server.get('/jekyll/<id:path>/<static_path>')
 def download_file(id, static_path):
     try:
-        file = rm.file_download(id, static_path)
+        file = fm.file_download(id, static_path)
         if file is True:
-            return static_file('/'.join([id, static_path]), root=rm.get_config().get_base_dir(), download=True)
+            return static_file('/'.join([id, static_path]), root=cm.get_base_dir(), download=True)
     except OSError as exception:
         if exception.errno == errno.ENOENT:
             abort(404, 'File not found.')
@@ -123,15 +131,15 @@ def update_repository(id):
         if request.content_type.startswith('application/json'):
             diff = request.json.get('gitDiff')
             client_secret = request.json.get('clientSecret')
-            if client_secret != rm.get_config().get_client_secret():
+            if client_secret != cm.get_client_secret():
                 abort(400, 'Bad request')
             repo_url = rm.update_repository(id, diff)
-            expires = rm.get_expiration_date(id)
+            expires = utils.get_expiration_date(id)
             return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': id, 'jekyllErrors': 'Wir machen keine Fehler!'})
         else:
             diff = request.POST.get('gitDiff')
             client_secret = request.POST.get('clientSecret')
-            if client_secret != rm.get_config().get_client_secret():
+            if client_secret != cm.get_client_secret():
                 abort(400, 'Bad request')
             url = rm.update_repository(id, diff)
             return template('list_view', rows=[url], header='Repository updated.')
@@ -140,7 +148,7 @@ def update_repository(id):
             abort(404, 'Repository not found.')
         elif exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
-    except GitCommandError as exception:
+    except GitCommandError:
         abort(500, 'Failed to apply patch.')
     except SQLError:
         abort(500, 'Internal error. Sorry for that!')

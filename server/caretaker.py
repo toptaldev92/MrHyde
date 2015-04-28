@@ -41,10 +41,10 @@ class Caretaker:
                 self.database().deleteData('repo', "id='%s'" % repo['id'])
         except OSError as exception:
             if exception.errno == errno.ENOENT:
-                self.log.error('Repository ' + repo['id'] + ' not found.')
+                self.log().error('Repository not found.')
                 raise
             elif exception.errno == errno.EPERM:
-                self.log().error('Insufficient permissions to remove repository ' + repo['id'] + '.')
+                self.log().error('Insufficient permissions to remove repository.')
                 raise
         except SQLError:
             self.log().error('Database error.')
