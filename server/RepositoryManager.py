@@ -66,7 +66,7 @@ class RepositoryManager:
         t.daemon = True
         t.start()
 
-        return (id, ''.join(['https://', id, '.', cm.get_base_url()]))
+        return (id, ''.join(['https://', id, '.', cm.get_base_url(), 'poller.html']))
 
 
     def init_repository_async(self, id, deploy_path, repo_path, url, diff):
