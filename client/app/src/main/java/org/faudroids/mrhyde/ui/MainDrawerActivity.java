@@ -24,8 +24,10 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity {
 
     @Override
     public void init(Bundle savedInstanceState) {
+        //favorite repositories
         addSection(newSection("Repositories", new ReposFragment()));
 
+        //account information
         LoginManager.Account account = loginManager.getAccount();
         addAccount(new MaterialAccount(
                 getResources(),
@@ -34,6 +36,9 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity {
                 account.getAvatar(),
                 null));
         setBackPattern(MaterialNavigationDrawer.BACKPATTERN_BACK_TO_FIRST);
+
+        //settings and feedback
+        this.addBottomSection(newSection("Settings", R.drawable.ic_action_settings, new SettingsFragment()));
     }
 
 

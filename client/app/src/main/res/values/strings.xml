@@ -28,4 +28,50 @@
     <string name="dir_new_message">NewDir</string>
 
     <string name="dir_empty">Empty</string>
+
+    <string name="version">Version</string>
+    <string name="about">About</string>
+    <string name="about_msg">
+        This app was developed as part of the Android Challenge: one app every month for one year
+        (think of it as a New Year\'s resolution). MrHyde is our project for April.&lt;br/&gt;
+        &lt;br/&gt;
+        If you want to know more be sure to check out our &lt;a href=&quot;http://faudroids.org&quot;&gt;website&lt;/a&gt;.
+        This app is &lt;b&gt;open source&lt;/b&gt; and you can find everything on &lt;a href=&quot;https://github.com/FauDroids/MrHyde&quot;&gt;GitHub&lt;/a&gt;.&lt;br/&gt;
+        &lt;br/&gt;
+        We would love to hear from you! Send us an &lt;a href=&quot;mailto:ideas@faudroids.org&quot;&gt;email&lt;/a&gt; and let us know what you think!&lt;br/&gt;
+        &lt;br/&gt;
+        The developers are&lt;br/&gt;
+        &lt;br/&gt;
+        Philipp Eichhorn&lt;br/&gt;
+        Simon Hofmann&lt;br/&gt;
+        Julia Schottenhamml&lt;br/&gt;
+        Richard Baumann&lt;br/&gt;
+        &lt;br/&gt;
+        Happy coding!
+    </string>
+    <string name="credits">Credits</string>
+    <string name="credits_msg">
+        This app is being powered by a number of small and large &lt;b&gt;open source projects&lt;/b&gt;
+        which all together have made this project happen. We couldn\'t have done this without them.
+        To those fellow developers out there spending their part time creating those libraries:
+        you guys are awesome, keep on rocking!&lt;br&gt;
+        &lt;br&gt;
+        The libraries in use are:&lt;br&gt;
+        &lt;br&gt;
+        &lt;a href=&quot;https://github.com/JakeWharton/timber&quot;&gt;Timber&lt;/a&gt; by Jake Wharton&lt;br&gt;
+        &lt;a href=&quot;https://github.com/roboguice/roboguice&quot;&gt;RoboGuice&lt;/a&gt;&lt;br&gt;
+        &lt;a href=&quot;https://github.com/neokree/GoogleNavigationDrawer&quot;&gt;GoogleNavigationDrawer&lt;/a&gt; by Neokree&lt;br&gt;
+        &lt;a href=&quot;http://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit/3.7.0.201502260915-r&quot;&gt;JGit Core&lt;/a&gt; by Eclipse&lt;br&gt;
+        &lt;a href=&quot;http://mvnrepository.com/artifact/org.eclipse.mylyn.github/org.eclipse.egit.github.core/2.1.5&quot;&gt;Eclipse EGit GitHub API Core&lt;/a&gt; by Eclipse&lt;br&gt;
+        &lt;a href=&quot;https://github.com/square/retrofit&quot;&gt;Retrofit&lt;/a&gt; by Square&lt;br&gt;
+        &lt;a href=&quot;https://github.com/square/picasso&quot;&gt;Picasso&lt;/a&gt; by Square&lt;br&gt;
+        &lt;a href=&quot;http://mvnrepository.com/artifact/io.reactivex/rxjava/1.0.9&quot;&gt;RxJava&lt;/a&gt; by Reactivex&lt;br&gt;
+        &lt;a href=&quot;http://mvnrepository.com/artifact/io.reactivex/rxandroid/0.24.0&quot;&gt;RxAndroid&lt;/a&gt; by Reactivex&lt;br&gt;
+        &lt;a href=&quot;https://github.com/futuresimple/android-floating-action-button&quot;&gt;Floating Action Button&lt;/a&gt; by futuresimple&lt;br&gt;
+        &lt;a href=&quot;https://source.android.com/&quot;&gt;Android Open Source Project&lt;/a&gt; by Google Inc. and the Open Handset Alliance&lt;br&gt;
+        &lt;br&gt;
+        &lt;br&gt;
+        Thanks everyone!
+    </string>
+    <string name="logout">Logout</string>
 </resources>
