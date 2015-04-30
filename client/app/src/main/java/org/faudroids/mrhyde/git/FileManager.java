@@ -55,9 +55,10 @@ public final class FileManager {
 	/**
 	 * Gets and stores a tree in memory (!).
 	 */
-	public Observable<Tree> getTree() {
+	public Observable<DirNode> getTree() {
 		if (cachedTree != null) return Observable.just(cachedTree)
 				.compose(new InitRepoTransformer<Tree>())
+				.flatMap(new GitHubParseFunc())
 				.flatMap(new LoadLocalFilesFunc());
 		else return apiWrapper.getCommits(repository)
 				.flatMap(new Func1<List<RepositoryCommit>, Observable<Tree>>() {
@@ -77,6 +78,7 @@ public final class FileManager {
 					}
 				})
 				.compose(new InitRepoTransformer<Tree>())
+				.flatMap(new GitHubParseFunc())
 				.flatMap(new LoadLocalFilesFunc());
 	}
 
@@ -84,7 +86,8 @@ public final class FileManager {
 	/**
 	 * Gets and stores a file on disk (!).
 	 */
-	public Observable<String> getFile(TreeEntry treeEntry) {
+	public Observable<String> getFile(FileNode fileNode) {
+		final TreeEntry treeEntry = fileNode.getTreeEntry();
 		final File file = new File(rootDir, treeEntry.getPath());
 
 		if (file.exists()) {
@@ -127,24 +130,55 @@ public final class FileManager {
 
 
 	/**
-	 * Creates a new tree entry which can be used later on to save content. It does NOT
-	 * touch the file system.
+	 * Creates a new file node and updates the file system.
 	 */
-	public TreeEntry createNewTreeEntry(TreeEntry parentEntry, String fileName) {
+	public FileNode createNewFile(DirNode parentNode, String fileName) {
+		// create node
 		String path = fileName;
-		if (parentEntry != null) path = parentEntry.getPath() + "/" + path;
-		return new DummyTreeEntry(path, TreeEntry.MODE_BLOB);
+		if (parentNode.getTreeEntry() != null) path = parentNode.getTreeEntry().getPath() + "/" + path;
+		FileNode fileNode = new FileNode(parentNode, fileName, new DummyTreeEntry(path, TreeEntry.MODE_BLOB));
+		parentNode.getEntries().put(fileName, fileNode);
+
+		// create file
+		Timber.d("creating new file " + path);
+		try {
+			File file = new File(rootDir, path);
+			if (!file.exists()) if (!file.createNewFile()) Timber.w("failed to create new file");
+		} catch (IOException ioe) {
+			Timber.e(ioe, "failed to create file");
+		}
+
+		return fileNode;
 	}
 
 
 	/**
 	 * Stores the content on disk.
 	 */
-	public void writeFile(TreeEntry treeEntry, String content) throws IOException {
-		Timber.d("writing file " + treeEntry.getPath());
-		File file = new File(rootDir, treeEntry.getPath());
-		if (!file.exists()) file.createNewFile();
+	public void writeFile(FileNode fileNode, String content) throws IOException {
+		Timber.d("writing file " + fileNode.getTreeEntry().getPath());
+		File file = new File(rootDir, fileNode.getTreeEntry().getPath());
+		if (!file.exists()) if (!file.createNewFile()) Timber.w("failed to create new file");
 		writeFile(file, content);
+	}
+
+
+	/**
+	 * Creates a new {@link DirNode} and updates the file system.
+	 */
+	public DirNode createNewDir(DirNode parentNode, String dirName) {
+		// create node
+		String path = dirName;
+		if (parentNode.getTreeEntry() != null) path = parentNode.getTreeEntry().getPath() + "/" + path;
+		DirNode dirNode = new DirNode(parentNode, dirName, new DummyTreeEntry(path, TreeEntry.MODE_DIRECTORY));
+		parentNode.getEntries().put(dirName, dirNode);
+
+		// create dir
+		Timber.d("creating new dir " + path);
+		File file = new File(rootDir, path);
+		if (!file.exists()) if (!file.mkdir()) Timber.w("did not create dir");
+
+		return dirNode;
 	}
 
 
@@ -163,15 +197,21 @@ public final class FileManager {
 					@Override
 					public Observable<SavedBlob> call(final String filePath) {
 						final Blob blob = new Blob();
-						blob.setContent(readFile(new File(rootDir, filePath)))
-								.setEncoding(Blob.ENCODING_UTF8);
-						return apiWrapper.createBlob(repository, blob)
-								.flatMap(new Func1<String, Observable<SavedBlob>>() {
-									@Override
-									public Observable<SavedBlob> call(String blobSha) {
-										return Observable.just(new SavedBlob(filePath, blobSha, blob));
-									}
-								});
+						File file = new File(rootDir, filePath);
+						if (file.isDirectory()) {
+							Timber.d("ignoring dir " + filePath + " for blob creation");
+							return Observable.empty();
+
+						} else {
+							blob.setContent(readFile(file)).setEncoding(Blob.ENCODING_UTF8);
+							return apiWrapper.createBlob(repository, blob)
+									.flatMap(new Func1<String, Observable<SavedBlob>>() {
+										@Override
+										public Observable<SavedBlob> call(String blobSha) {
+											return Observable.just(new SavedBlob(filePath, blobSha, blob));
+										}
+									});
+						}
 					}
 				})
 				// wait for all blobs
@@ -319,6 +359,9 @@ public final class FileManager {
 	}
 
 
+	/**
+	 * Ensures that the local git repository exists.
+	 */
 	private final class InitRepoTransformer<T> implements Observable.Transformer<T, T> {
 		@Override
 		public Observable<T> call(final Observable<T> observable) {
@@ -340,28 +383,75 @@ public final class FileManager {
 	}
 
 
-	private final class LoadLocalFilesFunc implements Func1<Tree, Observable<Tree>> {
+	/**
+	 * Parse a tree returned by GitHub into a tree like structure.
+	 */
+	private final class GitHubParseFunc implements Func1<Tree, Observable<DirNode>> {
+
 		@Override
-		public Observable<Tree> call(final Tree tree) {
-			return gitManager.getNewFiles().flatMap(new Func1<Set<String>, Observable<Tree>>() {
-				@Override
-				public Observable<Tree> call(Set<String> files) {
-					Timber.d("loading local files");
-					List<TreeEntry> entries = tree.getTree();
-					for (String file : files) {
-						entries.add(new DummyTreeEntry(file, TreeEntry.MODE_BLOB));
+		public Observable<DirNode> call(Tree gitTree) {
+			Timber.d("parsing GitHub tree");
+			final DirNode rootNode = new DirNode(null, "", null);
+			for (TreeEntry gitEntry : gitTree.getTree()) {
+				String[] paths = gitEntry.getPath().split("/");
+
+				DirNode parentNode = rootNode;
+				for (int i = 0; i < paths.length; ++i) {
+					String path = paths[i];
+					if (i == paths.length - 1) {
+						// commit leaf
+						if (gitEntry.getMode().equals(TreeEntry.MODE_DIRECTORY)) {
+							parentNode.getEntries().put(path, new DirNode(parentNode, path, gitEntry));
+						} else {
+							parentNode.getEntries().put(path, new FileNode(parentNode, path, gitEntry));
+						}
+
+					} else {
+						parentNode = (DirNode) parentNode.getEntries().get(path);
 					}
-					Tree newTree = new Tree();
-					newTree.setTree(entries);
-					newTree.setUrl(tree.getUrl());
-					newTree.setSha(tree.getSha());
-					return Observable.just(newTree);
 				}
-			});
+			}
+			return Observable.just(rootNode);
 		}
+
 	}
 
 
+	/**
+	 * Loads changes which have not yet been pushed to GitHub and adds those to the local tree
+	 * representation.
+	 */
+	private final class LoadLocalFilesFunc implements Func1<DirNode, Observable<DirNode>> {
+		@Override
+		public Observable<DirNode> call(final DirNode rootNode) {
+			addNodes(rootDir, rootNode);
+			return Observable.just(rootNode);
+		}
+
+		private void addNodes(File dir, DirNode rootNode) {
+			for (File file : dir.listFiles()) {
+				String fileName = file.getName();
+
+				if (file.isDirectory()) {
+					Timber.d("loading dir " + fileName);
+					DirNode newRootNode = new DirNode(rootNode, fileName, new DummyTreeEntry(fileName, TreeEntry.MODE_DIRECTORY));
+					rootNode.getEntries().put(fileName, newRootNode);
+					addNodes(file, newRootNode);
+
+				} else {
+					Timber.d("loading file " + fileName);
+					rootNode.getEntries().put(fileName, new FileNode(rootNode, fileName, new DummyTreeEntry(fileName, TreeEntry.MODE_BLOB)));
+				}
+			}
+
+		}
+
+	}
+
+
+	/**
+	 * Represents a local tree entry which has not yet been pushed to GitHub.
+	 */
 	private static final class DummyTreeEntry extends TreeEntry {
 
 		public DummyTreeEntry(String path, String mode) {
@@ -384,6 +474,9 @@ public final class FileManager {
 	}
 
 
+	/**
+	 * Helper structure for passing information down a RxJava chain.
+	 */
 	private static final class SavedBlob {
 
 		private final String path;
@@ -397,6 +490,5 @@ public final class FileManager {
 		}
 
 	}
-
 
 }

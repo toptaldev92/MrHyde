@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde.ui.tree;
+package org.faudroids.mrhyde.git;
 
 
 import org.eclipse.egit.github.core.TreeEntry;
@@ -9,7 +9,7 @@ public abstract class AbstractNode implements Comparable<AbstractNode> {
 	private final String path;
 	private final TreeEntry treeEntry;
 
-	public AbstractNode(AbstractNode parent, String path, TreeEntry treeEntry) {
+	AbstractNode(AbstractNode parent, String path, TreeEntry treeEntry) {
 		this.parent = parent;
 		this.path = path;
 		this.treeEntry = treeEntry;
@@ -26,7 +26,7 @@ public abstract class AbstractNode implements Comparable<AbstractNode> {
 	}
 
 
-	public TreeEntry getTreeEntry() {
+	TreeEntry getTreeEntry() {
 		return treeEntry;
 	}
 

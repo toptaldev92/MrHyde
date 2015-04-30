@@ -1,20 +1,15 @@
 package org.faudroids.mrhyde.ui;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.InputType;
-import android.text.method.DigitsKeyListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,14 +18,13 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
 import org.eclipse.egit.github.core.Repository;
-import org.eclipse.egit.github.core.Tree;
-import org.eclipse.egit.github.core.TreeEntry;
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.git.AbstractNode;
+import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileManager;
+import org.faudroids.mrhyde.git.FileNode;
+import org.faudroids.mrhyde.git.NodeUtils;
 import org.faudroids.mrhyde.git.RepositoryManager;
-import org.faudroids.mrhyde.ui.tree.AbstractNode;
-import org.faudroids.mrhyde.ui.tree.DirNode;
-import org.faudroids.mrhyde.ui.tree.FileNode;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
 import java.util.ArrayList;
@@ -62,10 +56,13 @@ public final class DirActivity extends AbstractActionBarActivity {
 	@InjectView(R.id.add) FloatingActionsMenu addButton;
 	@InjectView(R.id.add_file) FloatingActionButton addFileButton;
 	@InjectView(R.id.add_folder) FloatingActionButton addFolderButton;
+	@Inject UiUtils uiUtils;
 
 	@Inject RepositoryManager repositoryManager;
 	private Repository repository;
 	private FileManager fileManager;
+	@Inject NodeUtils nodeUtils;
+
 
 
 	@Override
@@ -104,6 +101,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 			@Override
 			public void onClick(View v) {
 				addButton.collapse();
+				addDirectory();
 			}
 		});
 		tintView.setOnClickListener(new View.OnClickListener() {
@@ -186,9 +184,9 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode != RESULT_OK) return;
 		switch (requestCode) {
 			case REQUEST_COMMIT:
+				if (resultCode != RESULT_OK) return;
 			case REQUEST_EDIT_FILE:
 				// refresh tree after successful commit or updated file (in case of new files)
 				Bundle tmpSavedState = new Bundle();
@@ -199,35 +197,42 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 
 	private void addAndOpenFile() {
-		final EditText inputView = new EditText(this);
-		// posix compatible files names :P
-		inputView.setKeyListener(DigitsKeyListener.getInstance("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ._-"));
-		inputView.setInputType(InputType.TYPE_CLASS_TEXT);
-
-		new AlertDialog.Builder(this)
-				.setTitle("New file")
-				.setMessage("Enter file name")
-				.setView(inputView)
-				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+		uiUtils.createInputDialog(
+				R.string.file_new_title,
+				R.string.file_new_message,
+				new UiUtils.OnInputListener() {
 					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						String value = inputView.getText().toString();
-						TreeEntry newEntry = fileManager.createNewTreeEntry(pathNodeAdapter.getSelectedNode().getTreeEntry(), value);
-						startFileActivity(newEntry, true);
+					public void onInput(String input) {
+						FileNode fileNode = fileManager.createNewFile(pathNodeAdapter.getSelectedNode(), input);
+						startFileActivity(fileNode, true);
 					}
 				})
-				.setNegativeButton(android.R.string.cancel, null)
+				.show();
+	}
+
+
+	private void addDirectory() {
+		uiUtils.createInputDialog(
+				R.string.dir_new_title,
+				R.string.dir_new_message,
+				new UiUtils.OnInputListener() {
+					@Override
+					public void onInput(String input) {
+						fileManager.createNewDir(pathNodeAdapter.getSelectedNode(), input);
+						updateTree(null);
+					}
+				})
 				.show();
 	}
 
 
 	private void updateTree(final Bundle savedInstanceState) {
 		compositeSubscription.add(fileManager.getTree()
-				.compose(new DefaultTransformer<Tree>())
-				.subscribe(new Action1<Tree>() {
+				.compose(new DefaultTransformer<DirNode>())
+				.subscribe(new Action1<DirNode>() {
 					@Override
-					public void call(Tree tree) {
-						pathNodeAdapter.setSelectedNode(parseGitHubTree(tree));
+					public void call(DirNode rootNode) {
+						pathNodeAdapter.setSelectedNode(rootNode);
 						if (savedInstanceState != null)
 							pathNodeAdapter.onRestoreInstanceState(savedInstanceState);
 					}
@@ -241,43 +246,19 @@ public final class DirActivity extends AbstractActionBarActivity {
 	}
 
 
-	private DirNode parseGitHubTree(Tree gitTree) {
-		final DirNode rootNode = new DirNode(null, "", null);
-		for (TreeEntry gitEntry : gitTree.getTree()) {
-			String[] paths = gitEntry.getPath().split("/");
+	private void startFileActivity(FileNode fileNode, boolean isNewFile) {
+		Bundle extras = new Bundle();
+		extras.putSerializable(FileActivity.EXTRA_REPOSITORY, repository);
+		extras.putBoolean(FileActivity.EXTRA_IS_NEW_FILE, isNewFile);
+		nodeUtils.saveInstanceState(extras, fileNode);
 
-			DirNode parentNode = rootNode;
-			for (int i = 0; i < paths.length; ++i) {
-				String path = paths[i];
-				if (i == paths.length - 1) {
-					// commit leaf
-					if (gitEntry.getMode().equals(TreeEntry.MODE_DIRECTORY)) {
-						parentNode.getEntries().put(path, new DirNode(parentNode, path, gitEntry));
-					} else {
-						parentNode.getEntries().put(path, new FileNode(parentNode, path, gitEntry));
-					}
-
-				} else {
-					parentNode = (DirNode) parentNode.getEntries().get(path);
-				}
-			}
-		}
-		return rootNode;
-	}
-
-
-	private void startFileActivity(TreeEntry entry, boolean isNewFile) {
 		Intent fileIntent = new Intent(DirActivity.this, FileActivity.class);
-		fileIntent.putExtra(FileActivity.EXTRA_REPOSITORY, repository);
-		fileIntent.putExtra(FileActivity.EXTRA_TREE_ENTRY, entry);
-		fileIntent.putExtra(FileActivity.EXTRA_IS_NEW_FILE, isNewFile);
+		fileIntent.putExtras(extras);
 		startActivityForResult(fileIntent, REQUEST_EDIT_FILE);
 	}
 
 
 	public class PathNodeAdapter extends RecyclerView.Adapter<PathNodeAdapter.PathNodeViewHolder> {
-
-		private static final String STATE_SELECTED_NODE = "STATE_SELECTED_NODE";
 
 		private final List<AbstractNode> nodeList = new ArrayList<>();
 		private DirNode selectedNode;
@@ -327,28 +308,12 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 
 		public void onSaveInstanceState(Bundle outState) {
-			AbstractNode iter = selectedNode;
-			String selectedPath = iter.getPath();
-			iter = iter.getParent();
-
-			while (iter != null) {
-				selectedPath = iter.getPath() + "/" + selectedPath;
-				Timber.d(selectedPath);
-				iter = iter.getParent();
-			}
-
-			outState.putString(STATE_SELECTED_NODE, selectedPath);
+			nodeUtils.saveInstanceState(outState, selectedNode);
 		}
 
 
 		public void onRestoreInstanceState(Bundle inState) {
-			String selectedPath = inState.getString(STATE_SELECTED_NODE);
-			String[] paths = selectedPath.split("/");
-			DirNode iter = selectedNode;
-			for (int i = 1; i < paths.length; ++i) {
-				iter = (DirNode) iter.getEntries().get(paths[i]);
-			}
-			setSelectedNode(iter);
+			setSelectedNode((DirNode) nodeUtils.restoreInstanceState(inState, selectedNode));
 		}
 
 
@@ -395,13 +360,12 @@ public final class DirActivity extends AbstractActionBarActivity {
 							setSelectedNode((DirNode) pathNode);
 						} else {
 							// open file
-							startFileActivity(pathNode.getTreeEntry(), false);
+							startFileActivity((FileNode) pathNode, false);
 						}
 					}
 				});
 			}
 		}
 	}
-
 
 }

@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde.ui.tree;
+package org.faudroids.mrhyde.git;
 
 import org.eclipse.egit.github.core.TreeEntry;
 
@@ -9,7 +9,7 @@ public final class DirNode extends AbstractNode {
 
 	private final Map<String, AbstractNode> entries = new HashMap<>();
 
-	public DirNode(AbstractNode parent, String path, TreeEntry treeEntry) {
+	DirNode(AbstractNode parent, String path, TreeEntry treeEntry) {
 		super(parent, path, treeEntry);
 	}
 
