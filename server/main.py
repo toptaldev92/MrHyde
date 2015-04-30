@@ -63,7 +63,7 @@ def create_repository():
                 abort(400, 'Bad request')
             (repo_id, repo_url) = rm.init_repository(url, diff)
             expires = utils.get_expiration_date(repo_id)
-            return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': repo_id, 'jekyllErrors': 'Wir machen keine Fehler!'})
+            return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': repo_id})
         else:
             url = request.POST.get('gitCheckoutUrl')
             diff = request.POST.get('gitDiff')
@@ -135,7 +135,7 @@ def update_repository(id):
                 abort(400, 'Bad request')
             repo_url = rm.update_repository(id, diff)
             expires = utils.get_expiration_date(id)
-            return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': id, 'jekyllErrors': 'Wir machen keine Fehler!'})
+            return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': id})
         else:
             diff = request.POST.get('gitDiff')
             client_secret = request.POST.get('clientSecret')
