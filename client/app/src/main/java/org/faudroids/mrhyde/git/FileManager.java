@@ -431,6 +431,8 @@ public final class FileManager {
 		private void addNodes(File dir, DirNode rootNode) {
 			for (File file : dir.listFiles()) {
 				String fileName = file.getName();
+				// ignore .git folder
+				if (fileName.equals(".git")) continue;
 
 				if (file.isDirectory()) {
 					Timber.d("loading dir " + fileName);
