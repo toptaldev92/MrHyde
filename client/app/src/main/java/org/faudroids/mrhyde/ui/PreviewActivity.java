@@ -10,11 +10,9 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import org.faudroids.mrhyde.R;
-import org.faudroids.mrhyde.jekyll.JekyllApi;
-import org.faudroids.mrhyde.jekyll.JekyllModule;
-import org.faudroids.mrhyde.jekyll.PreviewResult;
-import org.faudroids.mrhyde.jekyll.RepoDetails;
-import org.faudroids.mrhyde.utils.DefaultTransformer;
+import org.faudroids.mrhyde.jekyll.PreviewManager;
+
+import javax.inject.Inject;
 
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
@@ -29,8 +27,7 @@ public class PreviewActivity extends AbstractActionBarActivity {
             EXTRA_DIFF = "EXTRA_DIFF";
 
     @InjectView(R.id.web_view) WebView webView;
-    private String repoUrl;
-    private String diff;
+    @Inject PreviewManager previewManager;
 
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -52,19 +49,16 @@ public class PreviewActivity extends AbstractActionBarActivity {
                 });
 
         // load arguments
-        repoUrl = getIntent().getStringExtra(EXTRA_REPO_CHECKOUT_URL);
-        diff = getIntent().getStringExtra(EXTRA_DIFF);
+        String repoUrl = getIntent().getStringExtra(EXTRA_REPO_CHECKOUT_URL);
+        String diff = getIntent().getStringExtra(EXTRA_DIFF);
 
         // load preview
-        JekyllApi jekyllApi = new JekyllModule().provideJekyllApi();
-        RepoDetails repoDetails = new RepoDetails(repoUrl, diff, getString(R.string.jekyllServerClientSecret));
-        jekyllApi.createPreview(repoDetails)
-                .compose(new DefaultTransformer<PreviewResult>())
-                .subscribe(new Action1<PreviewResult>() {
+        previewManager.loadPreview(repoUrl, diff)
+                .subscribe(new Action1<String>() {
                     @Override
-                    public void call(PreviewResult previewResult) {
-                        Timber.d("getting url " + previewResult.getPreviewUrl());
-                        webView.loadUrl(previewResult.getPreviewUrl());
+                    public void call(String previewUrl) {
+                        Timber.d("getting url " + previewUrl);
+                        webView.loadUrl(previewUrl);
                     }
                 }, new Action1<Throwable>() {
                     @Override
