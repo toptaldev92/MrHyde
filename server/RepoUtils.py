@@ -1,4 +1,4 @@
-from datetime import time
+import time
 from os.path import join
 import random
 import string
@@ -18,7 +18,7 @@ class RepoUtils:
         return self.__db
 
     def update_timestamp(self, id):
-        self.db().updateData('repo', "id = '%s'" % id, 'last_used=%s' % int(time()))
+        self.db().updateData('repo', "id = '%s'" % id, 'last_used=%s' % int(time.time()))
 
     def get_expiration_date(self, id):
         last_used = self.db().list('repo', 'last_used', "id='%s'" % id)[0]
