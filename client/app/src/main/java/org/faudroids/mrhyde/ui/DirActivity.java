@@ -219,7 +219,9 @@ public final class DirActivity extends AbstractActionBarActivity {
 					@Override
 					public void onInput(String input) {
 						fileManager.createNewDir(pathNodeAdapter.getSelectedNode(), input);
-						updateTree(null);
+						Bundle state = new Bundle();
+						pathNodeAdapter.onSaveInstanceState(state);
+						updateTree(state);
 					}
 				})
 				.show();

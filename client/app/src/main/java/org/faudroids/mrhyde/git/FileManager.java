@@ -424,25 +424,32 @@ public final class FileManager {
 	private final class LoadLocalFilesFunc implements Func1<DirNode, Observable<DirNode>> {
 		@Override
 		public Observable<DirNode> call(final DirNode rootNode) {
-			addNodes(rootDir, rootNode);
+			addNodes("", rootDir, rootNode);
 			return Observable.just(rootNode);
 		}
 
-		private void addNodes(File dir, DirNode rootNode) {
+		private void addNodes(String rootPath, File dir, DirNode rootNode) {
 			for (File file : dir.listFiles()) {
 				String fileName = file.getName();
+				String path = rootPath + fileName;
+
 				// ignore .git folder
 				if (fileName.equals(".git")) continue;
 
+				// load local files
 				if (file.isDirectory()) {
-					Timber.d("loading dir " + fileName);
-					DirNode newRootNode = new DirNode(rootNode, fileName, new DummyTreeEntry(fileName, TreeEntry.MODE_DIRECTORY));
-					rootNode.getEntries().put(fileName, newRootNode);
-					addNodes(file, newRootNode);
+					DirNode newRootNode = (DirNode) rootNode.getEntries().get(fileName);
+					if (newRootNode == null) {
+						Timber.d("loading dir " + fileName);
+						newRootNode = new DirNode(rootNode, fileName, new DummyTreeEntry(path, TreeEntry.MODE_DIRECTORY));
+						rootNode.getEntries().put(fileName, newRootNode);
+					}
+					addNodes(path + "/", file, newRootNode);
 
 				} else {
+					if (rootNode.getEntries().containsKey(fileName)) continue;
 					Timber.d("loading file " + fileName);
-					rootNode.getEntries().put(fileName, new FileNode(rootNode, fileName, new DummyTreeEntry(fileName, TreeEntry.MODE_BLOB)));
+					rootNode.getEntries().put(fileName, new FileNode(rootNode, fileName, new DummyTreeEntry(path, TreeEntry.MODE_BLOB)));
 				}
 			}
 
