@@ -60,6 +60,7 @@ class RepositoryManager:
         repo_path = join(self.__base_dir, id)
         deploy_path = ''.join([cm.get_deploy_base_path(), id, cm.get_deploy_append_path()])
 
+        self.db().insertData('repo', id, repo_path, deploy_path, url, int(time()))
         shutil.copytree('redirector/', deploy_path)
 
         t = threading.Thread(target=self.init_repository_async, args=(id, deploy_path, repo_path, url, diff))
@@ -76,7 +77,6 @@ class RepositoryManager:
             try:
                 # TODO error handling
                 self.__git.clone(url, repo_path)
-                self.db().insertData('repo', id, repo_path, deploy_path, url, int(time()))
                 if diff is not None and diff is not '':
                     self.apply_diff(id, diff)
                 self.log().info('Repository cloned to ' + repo_path + '.')
