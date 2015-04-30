@@ -27,6 +27,7 @@ class RepoUtils:
             return last_used + (24 * 3600)
         except Exception as e:
             print(e)
+            return time.time() + (24*3600)
 
     def generateId(self, length=16, chars=string.ascii_lowercase+string.digits):
             return ''.join(random.SystemRandom().choice(chars) for _ in range(length))
