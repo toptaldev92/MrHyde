@@ -6,6 +6,9 @@ from shutil import rmtree
 from os.path import isdir, join
 from os import makedirs, chdir, getcwd
 from configparser import ParsingError as ConfigError
+import threading
+
+import shutil
 
 import git
 
@@ -56,6 +59,17 @@ class RepositoryManager:
         id = self.utils().generateId(cm.get_hash_size())
         repo_path = join(self.__base_dir, id)
         deploy_path = ''.join([cm.get_deploy_base_path(), id, cm.get_deploy_append_path()])
+
+        shutil.copytree('redirector/', deploy_path)
+
+        t = threading.Thread(target=self.init_repository_async, args=(id, deploy_path, repo_path, url, diff))
+        t.daemon = True
+        t.start()
+
+        return (id, ''.join(['https://', id, '.', cm.get_base_url()]))
+
+
+    def init_repository_async(self, id, deploy_path, repo_path, url, diff):
         if not isdir(self.__base_dir):
             makedirs(self.__base_dir, 0o755, True)
         if not self.utils().repository_exists(id):
@@ -67,11 +81,7 @@ class RepositoryManager:
                     self.apply_diff(id, diff)
                 self.log().info('Repository cloned to ' + repo_path + '.')
                 deploy_path = self.fm().setup_deployment(id)
-                build_successful = self.jm().build(repo_path, deploy_path)
-                if build_successful:
-                    return (id, ''.join(['https://', id, '.', cm.get_base_url()]))
-                else:
-                    return (id, jm.get_errors())
+                self.jm().build(repo_path, deploy_path)
             except OSError as exception:
                 if exception.errno == errno.EPERM:
                     self.log().error("Permission to " + repo_path + " denied.")

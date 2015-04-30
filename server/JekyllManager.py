@@ -18,13 +18,11 @@ class JekyllManager:
     def build(self, build_path, deploy_path):
         # TODO perhaps we should do this async (big pages?)
         cmd = ['jekyll', 'build', '--source', build_path, '--destination', deploy_path]
-        try:
-            process = subprocess.check_output(cmd)
-            return True
-        except subprocess.CalledProcessError as exception:
-            process = exception.output
-            self.__error_list = self.__regex.findall(process)
-            return False
+        status_code = 9
+        with open(deploy_path+'input.txt') as outfile:
+            status_code = subprocess.call(cmd, stdout=outfile)
+        with open(deploy_path+'statuscode.txt') as outfile:
+            outfile.write(str(status_code))
 
     def get_errors(self):
         return self.__error_list
