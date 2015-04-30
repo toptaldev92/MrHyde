@@ -9,6 +9,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.PreviewManager;
 
@@ -23,7 +24,7 @@ import timber.log.Timber;
 public class PreviewActivity extends AbstractActionBarActivity {
 
     static final String
-            EXTRA_REPO_CHECKOUT_URL = "EXTRA_REPO_CHECKOUT_URL",
+            EXTRA_REPO = "EXTRA_REPO",
             EXTRA_DIFF = "EXTRA_DIFF";
 
     @InjectView(R.id.web_view) WebView webView;
@@ -49,11 +50,11 @@ public class PreviewActivity extends AbstractActionBarActivity {
                 });
 
         // load arguments
-        String repoUrl = getIntent().getStringExtra(EXTRA_REPO_CHECKOUT_URL);
+        Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPO);
         String diff = getIntent().getStringExtra(EXTRA_DIFF);
 
         // load preview
-        previewManager.loadPreview(repoUrl, diff)
+        previewManager.loadPreview(repository.getOwner().getName() + "/" + repository.getName(), repository.getCloneUrl(), diff)
                 .subscribe(new Action1<String>() {
                     @Override
                     public void call(String previewUrl) {

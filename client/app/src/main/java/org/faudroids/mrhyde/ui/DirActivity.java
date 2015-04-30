@@ -161,7 +161,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 					@Override
 					public void call(String diff) {
 						Intent previewIntent = new Intent(DirActivity.this, PreviewActivity.class);
-						previewIntent.putExtra(PreviewActivity.EXTRA_REPO_CHECKOUT_URL, repository.getCloneUrl());
+						previewIntent.putExtra(PreviewActivity.EXTRA_REPO, repository);
 						previewIntent.putExtra(PreviewActivity.EXTRA_DIFF, diff);
 						startActivity(previewIntent);
 					}
