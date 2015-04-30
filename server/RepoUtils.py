@@ -21,8 +21,12 @@ class RepoUtils:
         self.db().updateData('repo', "id = '%s'" % id, 'last_used=%s' % int(time.time()))
 
     def get_expiration_date(self, id):
-        last_used = self.db().list('repo', 'last_used', "id='%s'" % id)[0]
-        return last_used + (24 * 3600)
+        # TODO bad hack!
+        try:
+            last_used = self.db().list('repo', 'last_used', "id='%s'" % id)[0]
+            return last_used + (24 * 3600)
+        except Exception as e:
+            print(e)
 
     def generateId(self, length=16, chars=string.ascii_lowercase+string.digits):
             return ''.join(random.SystemRandom().choice(chars) for _ in range(length))
