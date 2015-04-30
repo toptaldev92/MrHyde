@@ -1,5 +1,7 @@
 package org.faudroids.mrhyde.ui;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,6 +41,15 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity {
 
         //settings and feedback
         this.addBottomSection(newSection("Settings", R.drawable.ic_action_settings, new SettingsFragment()));
+
+        String address = getString(R.string.feedback_mail_address);
+        String subject = getString(
+                R.string.feedback_mail_subject,
+                getString(R.string.app_name));
+        Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", address, null));
+        intent.putExtra(Intent.EXTRA_SUBJECT, subject);
+        Intent mailer = Intent.createChooser(intent, getString(R.string.feedback_mail_chooser));
+        this.addBottomSection(newSection("Feedback", R.drawable.ic_action_email, mailer));
     }
 
 

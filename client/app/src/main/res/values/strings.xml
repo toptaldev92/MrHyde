@@ -74,4 +74,8 @@
         Thanks everyone!
     </string>
     <string name="logout">Logout</string>
+
+    <string name="feedback_mail_chooser">Thanks for the feedback!</string>
+    <string name="feedback_mail_address"> ideas@faudroids.org</string>
+    <string name="feedback_mail_subject">Feedback MrHyde</string>
 </resources>
