@@ -4,7 +4,7 @@
     android:id="@+id/spinner"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_light"
+    android:background="@color/gray_light_2"
     android:visibility="gone"
     >
 
