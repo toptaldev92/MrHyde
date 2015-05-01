@@ -111,11 +111,11 @@ public final class ApiWrapper {
 	}
 
 
-	public Observable<Tree> createTree(final IRepositoryIdProvider repository, final Collection<TreeEntry> entries, final String baseTreeSha) {
+	public Observable<Tree> createTree(final IRepositoryIdProvider repository, final Collection<TreeEntry> entries) {
 		return new Wrapper<Tree>() {
 			@Override
 			protected Tree doWrapMethod() throws Exception {
-				return dataService.createTree(repository, entries, baseTreeSha);
+				return dataService.createTree(repository, entries);
 			}
 		}.wrapMethod();
 	}

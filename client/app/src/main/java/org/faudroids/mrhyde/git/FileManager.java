@@ -25,7 +25,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import rx.Observable;
@@ -220,17 +222,32 @@ public final class FileManager {
 				.flatMap(new Func1<List<SavedBlob>, Observable<Tree>>() {
 					@Override
 					public Observable<Tree> call(List<SavedBlob> savedBlobs) {
-						Collection<TreeEntry> treeEntries = new ArrayList<>();
-						for (SavedBlob savedBlob : savedBlobs) {
-							TreeEntry treeEntry = new TreeEntry();
-							treeEntry.setPath(savedBlob.path);
-							treeEntry.setMode(TreeEntry.MODE_BLOB);
-							treeEntry.setType(TreeEntry.TYPE_BLOB);
-							treeEntry.setSha(savedBlob.sha);
-							treeEntry.setSize(savedBlob.blob.getContent().length());
-							treeEntries.add(treeEntry);
+						// send the full tree, everything not included will be marked as deleted
+						Map<String, SavedBlob> blobsMap = new HashMap<>();
+						for (SavedBlob blob : savedBlobs) {
+							blobsMap.put(blob.path, blob);
 						}
-						return apiWrapper.createTree(repository, treeEntries, cachedTree.getSha());
+
+						// update existing files
+						Collection<TreeEntry> treeEntries = new ArrayList<>();
+						for (TreeEntry entry : cachedTree.getTree()) {
+							SavedBlob blob = blobsMap.get(entry.getPath());
+							TreeEntry newEntry;
+							if (blob != null) {
+								blobsMap.remove(entry.getPath());
+								newEntry = createTreeEntryFromBlob(blob);
+							} else {
+								newEntry = entry;
+							}
+							treeEntries.add(newEntry);
+						}
+
+						// add new files
+						for (SavedBlob blob : blobsMap.values()) {
+							treeEntries.add(createTreeEntryFromBlob(blob));
+						}
+
+						return apiWrapper.createTree(repository, treeEntries);
 					}
 				})
 				// create new commit on GitHub
@@ -356,6 +373,17 @@ public final class FileManager {
 			}
 		}
 		file.delete();
+	}
+
+
+	private TreeEntry createTreeEntryFromBlob(SavedBlob blob) {
+		TreeEntry entry = new TreeEntry();
+		entry.setPath(blob.path);
+		entry.setMode(TreeEntry.MODE_BLOB);
+		entry.setType(TreeEntry.TYPE_BLOB);
+		entry.setSha(blob.sha);
+		entry.setSize(blob.blob.getContent().length());
+		return entry;
 	}
 
 
