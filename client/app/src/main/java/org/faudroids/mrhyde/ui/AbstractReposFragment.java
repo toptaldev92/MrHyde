@@ -128,7 +128,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 				Picasso.with(getActivity())
 						.load(repo.getOwner().getAvatarUrl())
 						.resizeDimen(R.dimen.card_icon_size, R.dimen.card_icon_size)
-						.placeholder(R.drawable.octocat)
+						.placeholder(R.drawable.octocat_black)
 						.transform(new CircleTransformation())
 						.into(iconView);
 				titleView.setText(repo.getOwner().getLogin() + "/" + repo.getName());
