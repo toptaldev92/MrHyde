@@ -13,15 +13,16 @@
         android:layout_marginTop="96dp" />
 
     <TextView
+        android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="30dp"
         android:textSize="40dp"
         android:gravity="center"
         android:text="@string/welcome_text"
-        android:id="@+id/textView"
         android:layout_below="@+id/imageView"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        />
 
     <Button
         android:id="@+id/login_button"
@@ -32,8 +33,7 @@
         android:layout_alignParentBottom="true"
         />
 
-
-
+    <include layout="@layout/spinner"/>
 
 </RelativeLayout>
 

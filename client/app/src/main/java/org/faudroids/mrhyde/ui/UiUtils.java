@@ -1,10 +1,16 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.drawable.AnimationDrawable;
 import android.text.InputType;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
+
+import org.faudroids.mrhyde.R;
 
 import javax.inject.Inject;
 
@@ -15,6 +21,28 @@ public class UiUtils {
 	@Inject
 	UiUtils(Context context) {
 		this.context = context;
+	}
+
+
+	public void showSpinner(Activity activity) {
+		View containerView = activity.findViewById(R.id.spinner);
+		containerView.setVisibility(View.VISIBLE);
+
+		ImageView spinnerView = (ImageView) activity.findViewById(R.id.spinner_image);
+		spinnerView.setBackgroundResource(R.drawable.spinner);
+		AnimationDrawable animationDrawable = (AnimationDrawable) spinnerView.getBackground();
+		animationDrawable.start();
+	}
+
+
+	public void hideSpinner(Activity activity) {
+		ImageView spinnerView = (ImageView) activity.findViewById(R.id.spinner_image);
+		spinnerView.setBackgroundResource(R.drawable.spinner);
+		AnimationDrawable animationDrawable = (AnimationDrawable) spinnerView.getBackground();
+		animationDrawable.stop();
+
+		View containerView = activity.findViewById(R.id.spinner);
+		containerView.setVisibility(View.GONE);
 	}
 
 

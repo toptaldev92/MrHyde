@@ -5,6 +5,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import javax.inject.Inject;
+
 import roboguice.fragment.provided.RoboFragment;
 import rx.subscriptions.CompositeSubscription;
 
@@ -13,6 +15,7 @@ abstract class AbstractFragment extends RoboFragment {
 
 	private final int layoutResource;
 	protected CompositeSubscription compositeSubscription = new CompositeSubscription();
+	@Inject UiUtils uiUtils;
 
 	AbstractFragment(int layoutResource) {
 		this.layoutResource = layoutResource;

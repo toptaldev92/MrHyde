@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,7 +34,6 @@ public final class ReposFragment extends AbstractFragment {
 
 	@Inject RepositoryManager repositoryManager;
 
-	@InjectView(R.id.progressbar) ProgressBar progressBar;
 	@InjectView(R.id.list) RecyclerView recyclerView;
 	private RepositoryAdapter repoAdapter;
 	private RecyclerView.LayoutManager layoutManager;
@@ -56,20 +54,20 @@ public final class ReposFragment extends AbstractFragment {
 		repoAdapter = new RepositoryAdapter();
 		recyclerView.setAdapter(repoAdapter);
 
-		progressBar.setVisibility(View.VISIBLE);
+		uiUtils.showSpinner(getActivity());
 		compositeSubscription.add(repositoryManager.getRepositories()
 				.compose(new DefaultTransformer<List<Repository>>())
 				.subscribe(new Action1<List<Repository>>() {
 					@Override
 					public void call(List<Repository> repositories) {
 						repoAdapter.setItems(repositories);
-						progressBar.setVisibility(View.GONE);
+						uiUtils.hideSpinner(getActivity());
 					}
 				}, new Action1<Throwable>() {
 					@Override
 					public void call(Throwable throwable) {
 						Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
-						progressBar.setVisibility(View.GONE);
+						uiUtils.hideSpinner(getActivity());
 						Timber.e(throwable, "failed to get repos");
 					}
 				}));

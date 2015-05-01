@@ -41,8 +41,7 @@ public final class LoginActivity extends AbstractActionBarActivity {
 
 	@InjectView(R.id.login_button) Button loginButton;
 	@Inject AuthApi authApi;
-	@Inject
-	LoginManager loginManager;
+	@Inject LoginManager loginManager;
 
 
 	@Override
