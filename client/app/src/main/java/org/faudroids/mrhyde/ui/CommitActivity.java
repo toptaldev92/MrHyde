@@ -1,35 +1,17 @@
 package org.faudroids.mrhyde.ui;
 
-import android.os.Bundle;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
-import org.faudroids.mrhyde.git.FileManager;
-import org.faudroids.mrhyde.git.RepositoryManager;
-import org.faudroids.mrhyde.utils.DefaultTransformer;
-
-import java.util.Set;
-
-import javax.inject.Inject;
 
 import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func2;
-import timber.log.Timber;
 
 @ContentView(R.layout.activity_commit)
 public final class CommitActivity extends AbstractActionBarActivity {
 
 	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
+	/*
 	@Inject RepositoryManager repositoryManager;
-	@InjectView(R.id.changes) TextView changesView;
+	@InjectView(R.id.changed_files) TextView changesView;
 	@InjectView(R.id.commit) Button commitButton;
 
 	private FileManager fileManager;
@@ -110,5 +92,6 @@ public final class CommitActivity extends AbstractActionBarActivity {
 		}
 
 	}
+	*/
 
 }

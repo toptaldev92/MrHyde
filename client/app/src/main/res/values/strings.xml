@@ -28,8 +28,11 @@
     <string name="file_new_message">NewFile</string>
     <string name="dir_new_title">Dir Name</string>
     <string name="dir_new_message">NewDir</string>
-
     <string name="dir_empty">Empty</string>
+
+    <string name="commit_changed_files">Changed files</string>
+    <string name="commit_git_diff">Git diff</string>
+    <string name="commit_action">Commit</string>
 
     <string name="version">Version</string>
     <string name="about">About</string>
