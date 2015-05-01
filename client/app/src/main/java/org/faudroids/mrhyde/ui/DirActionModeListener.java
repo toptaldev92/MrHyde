@@ -45,7 +45,7 @@ class DirActionModeListener implements ActionMode.Callback {
 	@Override
 	public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 		MenuInflater inflater = mode.getMenuInflater();
-		inflater.inflate(R.menu.files, menu);
+		inflater.inflate(R.menu.files_action_mode, menu);
 		return true;
 	}
 

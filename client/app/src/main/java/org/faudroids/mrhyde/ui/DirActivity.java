@@ -131,7 +131,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.editor, menu);
+		inflater.inflate(R.menu.files, menu);
 		return true;
 	}
 

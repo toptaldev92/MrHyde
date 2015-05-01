@@ -3,14 +3,18 @@
       xmlns:app="http://schemas.android.com/apk/res-auto"
       >
 
-    <item android:id="@+id/action_edit"
-          android:title="@string/action_edit"
-          android:icon="@drawable/ic_mode_edit"
-          app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_commit"
+        android:icon="@drawable/ic_commit"
+        android:title="@string/action_commit"
+        app:showAsAction="ifRoom"
+        />
 
-    <item android:id="@+id/action_delete"
-          android:title="@string/action_delete"
-          android:icon="@drawable/ic_delete"
-          app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/action_preview"
+        android:icon="@drawable/ic_preview"
+        android:title="@string/action_preview"
+        app:showAsAction="ifRoom"
+        />
 
 </menu>
