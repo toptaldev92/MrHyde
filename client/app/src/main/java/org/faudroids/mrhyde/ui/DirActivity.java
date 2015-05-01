@@ -1,5 +1,7 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -170,6 +172,21 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 								Timber.e(throwable, "failed to load changes");
 							}
 				}));
+				return true;
+
+			case R.id.action_discard_changes:
+				new AlertDialog.Builder(this)
+						.setTitle(R.string.discard_changes_title)
+						.setMessage(R.string.discard_changes_message)
+						.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								fileManager.resetRepository();
+								updateTree(null);
+							}
+						})
+						.setNegativeButton(android.R.string.cancel, null)
+						.show();
 				return true;
 		}
 		return super.onOptionsItemSelected(item);

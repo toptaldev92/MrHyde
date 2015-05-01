@@ -17,4 +17,10 @@
         app:showAsAction="ifRoom"
         />
 
+    <item
+        android:id="@+id/action_discard_changes"
+        android:title="@string/action_discard_changes"
+        app:showAsAction="never"
+        />
+
 </menu>

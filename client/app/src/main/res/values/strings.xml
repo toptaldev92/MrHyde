@@ -25,6 +25,7 @@
     <string name="action_delete">Delete</string>
     <string name="action_commit">Commit</string>
     <string name="action_preview">Preview</string>
+    <string name="action_discard_changes">Discard changes</string>
 
     <string name="repos_last_update">Last updated on %1$s</string>
 
@@ -33,6 +34,9 @@
     <string name="dir_new_title">Dir Name</string>
     <string name="dir_new_message">NewDir</string>
     <string name="dir_empty">Empty</string>
+
+    <string name="discard_changes_title">Discard changes</string>
+    <string name="discard_changes_message">Undo all local changes to this repository? Cannot be undone!</string>
 
     <string name="commit_changed_files">%1$s changed files</string>
     <string name="commit_deleted">%1$s (deleted)</string>

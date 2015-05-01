@@ -345,13 +345,7 @@ public final class FileManager {
 				.flatMap(new Func1<Reference, Observable<Void>>() {
 					@Override
 					public Observable<Void> call(Reference reference) {
-						cachedTree = null;
-						cachedBaseCommitSha = null;
-						try {
-							delete(rootDir);
-						} catch (IOException ioe) {
-							throw new RuntimeException(ioe);
-						}
+						resetRepository();
 						return Observable.just(null);
 					}
 				});
@@ -372,6 +366,16 @@ public final class FileManager {
 		return gitManager.getDeletedFiles();
 	}
 
+
+	public void resetRepository() {
+		this.cachedTree = null;
+		this.cachedBaseCommitSha = null;
+		try {
+			delete(rootDir);
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
+	}
 
 	private String readFile(File file) {
 		BufferedReader reader = null;
