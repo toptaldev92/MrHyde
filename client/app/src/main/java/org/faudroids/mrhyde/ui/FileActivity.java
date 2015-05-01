@@ -22,7 +22,9 @@ import javax.inject.Inject;
 
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
+import rx.Observable;
 import rx.functions.Action1;
+import rx.functions.Func1;
 import timber.log.Timber;
 
 @ContentView(R.layout.activity_file)
@@ -68,32 +70,54 @@ public final class FileActivity extends AbstractActionBarActivity {
 		});
 
 		// load selected file
-		fileManager.getTree()
-				.compose(new DefaultTransformer<DirNode>())
-				.subscribe(new Action1<DirNode>() {
+		compositeSubscription.add(fileManager.getTree()
+				.flatMap(new Func1<DirNode, Observable<LoadedFile>>() {
 					@Override
-					public void call(DirNode rootNode) {
-						fileNode = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
-						setTitle(fileNode.getPath());
+					public Observable<LoadedFile> call(DirNode rootNode) {
+						FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
+
+						final LoadedFile loadedFile = new LoadedFile();
+						loadedFile.node = node;
 
 						if (!isNewFile) {
-							compositeSubscription.add(fileManager.getFile(fileNode)
-									.compose(new DefaultTransformer<String>())
-									.subscribe(new Action1<String>() {
+							return fileManager.getFile(node)
+									.flatMap(new Func1<String, Observable<LoadedFile>>() {
 										@Override
-										public void call(String content) {
-											editText.setText(content);
+										public Observable<LoadedFile> call(String content) {
+											loadedFile.content = content;
+											return Observable.just(loadedFile);
 										}
-									}, new Action1<Throwable>() {
-										@Override
-										public void call(Throwable throwable) {
-											Toast.makeText(FileActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
-											Timber.e(throwable, "failed to get content");
-										}
-									}));
+									});
+						} else {
+							loadedFile.content = "";
+							return Observable.just(loadedFile);
 						}
 					}
-				});
+				})
+				.compose(new DefaultTransformer<LoadedFile>())
+				.subscribe(new Action1<LoadedFile>() {
+					@Override
+					public void call(LoadedFile loadedFile) {
+						setTitle(loadedFile.node.getPath());
+						editText.setText(loadedFile.content);
+						FileActivity.this.fileNode = loadedFile.node;
+					}
+				}, new Action1<Throwable>() {
+					@Override
+					public void call(Throwable throwable) {
+						Toast.makeText(FileActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
+						Timber.e(throwable, "failed to get content");
+					}
+				}));
+
+	}
+
+
+	private static final class LoadedFile {
+
+		private FileNode node;
+		private String content;
+
 	}
 
 }
