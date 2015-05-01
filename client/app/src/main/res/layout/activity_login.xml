@@ -33,7 +33,7 @@
         android:drawablePadding="@dimen/activity_horizontal_margin"
         android:text="@string/login_button"
         android:textColor="@android:color/white"
-        android:background="@color/login_gray"
+        android:background="@drawable/button_login"
         android:layout_alignParentBottom="true"
         />
 
