@@ -106,6 +106,7 @@ public final class GitManager {
 
 	/**
 	 * Returns all files that have been changed (including empty dirs), regardless if they are new or not.
+	 * This does not include deleted files.
 	 */
 	public Observable<Set<String>> getChangedFiles() {
 		return getStatus().flatMap(new Func1<Status, Observable<Set<String>>>() {
@@ -114,6 +115,7 @@ public final class GitManager {
 				Set<String> allFiles = status.getUncommittedChanges();
 				allFiles.addAll(status.getUntracked());
 				allFiles.addAll(status.getUntrackedFolders());
+				allFiles.removeAll(status.getMissing());
 				return Observable.just(allFiles);
 			}
 		});
@@ -123,24 +125,11 @@ public final class GitManager {
 	/**
 	 * Returns only new files.
 	 */
-	public Observable<Set<String>> getNewFiles() {
+	public Observable<Set<String>> getDeletedFiles() {
 		return getStatus().flatMap(new Func1<Status, Observable<Set<String>>>() {
 			@Override
 			public Observable<Set<String>> call(Status status) {
-				return Observable.just(status.getUntracked());
-			}
-		});
-	}
-
-
-	/**
-	 * Returns only new directories
-	 */
-	public Observable<Set<String>> getNewDirs() {
-		return getStatus().flatMap(new Func1<Status, Observable<Set<String>>>() {
-			@Override
-			public Observable<Set<String>> call(Status status) {
-				return Observable.just(status.getUntrackedFolders());
+				return Observable.just(status.getMissing());
 			}
 		});
 	}

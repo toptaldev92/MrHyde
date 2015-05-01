@@ -33,6 +33,7 @@ import java.util.Set;
 import rx.Observable;
 import rx.functions.Func0;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import timber.log.Timber;
 
 public final class FileManager {
@@ -184,6 +185,34 @@ public final class FileManager {
 	}
 
 
+	/**
+	 * Deletes a node from the file system. Do NOT pass in the root node!
+	 */
+	public Observable<Void> deleteFile(final FileNode node) {
+		// first download file to ensure proper diff
+		return getFile(node)
+				.flatMap(new Func1<String, Observable<Void>>() {
+					@Override
+					public Observable<Void> call(String fileContent) {
+						// remove from tree
+						DirNode parentNode = (DirNode) node.getParent();
+						parentNode.getEntries().remove(node.getPath());
+
+						// delete files
+						Timber.d("deleting file " + node.getTreeEntry().getPath());
+						try {
+							File file = new File(rootDir, node.getTreeEntry().getPath());
+							delete(file);
+						} catch (IOException ioe) {
+							Timber.e(ioe, "failed to create file");
+						}
+
+						return Observable.just(null);
+					}
+				});
+	}
+
+
 	public Observable<Void> commit() {
 		return getChangedFiles()
 				// get changed files
@@ -218,10 +247,10 @@ public final class FileManager {
 				})
 				// wait for all blobs
 				.toList()
-				// create new git tree on GitHub
-				.flatMap(new Func1<List<SavedBlob>, Observable<Tree>>() {
+				// construct the final tree
+				.zipWith(gitManager.getDeletedFiles(), new Func2<List<SavedBlob>, Set<String>, Collection<TreeEntry>>() {
 					@Override
-					public Observable<Tree> call(List<SavedBlob> savedBlobs) {
+					public Collection<TreeEntry> call(List<SavedBlob> savedBlobs, Set<String> deletedFiles) {
 						// send the full tree, everything not included will be marked as deleted
 						Map<String, SavedBlob> blobsMap = new HashMap<>();
 						for (SavedBlob blob : savedBlobs) {
@@ -231,7 +260,20 @@ public final class FileManager {
 						// update existing files
 						Collection<TreeEntry> treeEntries = new ArrayList<>();
 						for (TreeEntry entry : cachedTree.getTree()) {
-							SavedBlob blob = blobsMap.get(entry.getPath());
+							SavedBlob blob = blobsMap.remove(entry.getPath());
+
+							// do not add deleted files
+							if (deletedFiles.contains(entry.getPath())) {
+								Timber.d("ignoring " + entry.getPath() + " during commit");
+								continue;
+							}
+
+							// ignore existing trees (creates new ones on GitHub)
+							if (entry.getMode().equals(TreeEntry.MODE_DIRECTORY)) {
+								Timber.d("ignoring " + entry.getPath() + " during commit");
+								continue;
+							}
+
 							TreeEntry newEntry;
 							if (blob != null) {
 								blobsMap.remove(entry.getPath());
@@ -239,14 +281,23 @@ public final class FileManager {
 							} else {
 								newEntry = entry;
 							}
+							Timber.d("adding " + newEntry.getPath() + " to commit");
 							treeEntries.add(newEntry);
 						}
 
 						// add new files
 						for (SavedBlob blob : blobsMap.values()) {
+							Timber.d("adding " + blob.path + " to commit");
 							treeEntries.add(createTreeEntryFromBlob(blob));
 						}
 
+						return treeEntries;
+					}
+				})
+				// create tree on GitHub
+				.flatMap(new Func1<Collection<TreeEntry>, Observable<Tree>>() {
+					@Override
+					public Observable<Tree> call(Collection<TreeEntry> treeEntries) {
 						return apiWrapper.createTree(repository, treeEntries);
 					}
 				})
@@ -314,6 +365,11 @@ public final class FileManager {
 
 	public Observable<Set<String>> getChangedFiles() {
 		return gitManager.getChangedFiles();
+	}
+
+
+	public Observable<Set<String>> getDeletedFiles() {
+		return gitManager.getDeletedFiles();
 	}
 
 
@@ -452,11 +508,11 @@ public final class FileManager {
 	private final class LoadLocalFilesFunc implements Func1<DirNode, Observable<DirNode>> {
 		@Override
 		public Observable<DirNode> call(final DirNode rootNode) {
-			addNodes("", rootDir, rootNode);
-			return Observable.just(rootNode);
+			addLocalNodes("", rootDir, rootNode);
+			return removeDeletedNodes(rootNode);
 		}
 
-		private void addNodes(String rootPath, File dir, DirNode rootNode) {
+		private void addLocalNodes(String rootPath, File dir, DirNode rootNode) {
 			for (File file : dir.listFiles()) {
 				String fileName = file.getName();
 				String path = rootPath + fileName;
@@ -472,7 +528,7 @@ public final class FileManager {
 						newRootNode = new DirNode(rootNode, fileName, new DummyTreeEntry(path, TreeEntry.MODE_DIRECTORY));
 						rootNode.getEntries().put(fileName, newRootNode);
 					}
-					addNodes(path + "/", file, newRootNode);
+					addLocalNodes(path + "/", file, newRootNode);
 
 				} else {
 					if (rootNode.getEntries().containsKey(fileName)) continue;
@@ -482,6 +538,26 @@ public final class FileManager {
 			}
 
 		}
+
+		private Observable<DirNode> removeDeletedNodes(final DirNode rootNode) {
+			return gitManager.getDeletedFiles()
+					.flatMap(new Func1<Set<String>, Observable<DirNode>>() {
+						@Override
+						public Observable<DirNode> call(Set<String> deletedFiles) {
+							for (String file : deletedFiles) {
+								Timber.d("deleting file " + file + " from tree");
+								DirNode iter = rootNode;
+								String[] paths = file.split("/");
+								for (int i = 0; i < paths.length - 1; ++i) {
+									iter = (DirNode) iter.getEntries().get(paths[i]);
+								}
+								iter.getEntries().remove(paths[paths.length - 1]);
+							}
+							return Observable.just(rootNode);
+						}
+					});
+		}
+
 
 	}
 

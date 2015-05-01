@@ -16,6 +16,9 @@ import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -24,7 +27,7 @@ import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 import rx.Observable;
 import rx.functions.Action1;
-import rx.functions.Func2;
+import rx.functions.Func3;
 import timber.log.Timber;
 
 @ContentView(R.layout.activity_commit)
@@ -59,11 +62,12 @@ public final class CommitActivity extends AbstractActionBarActivity {
 		// load file content
 		compositeSubscription.add(Observable.zip(
 				fileManager.getChangedFiles(),
+				fileManager.getDeletedFiles(),
 				fileManager.getDiff(),
-				new Func2<Set<String>, String, Change>() {
+				new Func3<Set<String>, Set<String>, String, Change>() {
 					@Override
-					public Change call(Set<String> files, String diff) {
-						return new Change(files, diff);
+					public Change call(Set<String> changedFiles, Set<String> deletedFiles, String diff) {
+						return new Change(changedFiles, deletedFiles, diff);
 					}
 				})
 				.compose(new DefaultTransformer<Change>())
@@ -71,12 +75,17 @@ public final class CommitActivity extends AbstractActionBarActivity {
 					@Override
 					public void call(Change change) {
 						// updated changed files list
+						List<String> filesList = new ArrayList<>();
+						filesList.addAll(change.changedFiles);
+						for (String deletedFile : change.deletedFiles) filesList.add(getString(R.string.commit_deleted, deletedFile));
+						Collections.sort(filesList);
+
 						StringBuilder builder = new StringBuilder();
-						for (String file : change.files) {
+						for (String file : filesList) {
 							builder.append(file).append('\n');
 						}
 						changedFilesView.setText(builder.toString());
-						changedFilesTitleView.setText(getString(R.string.commit_changed_files, String.valueOf(change.files.size())));
+						changedFilesTitleView.setText(getString(R.string.commit_changed_files, String.valueOf(filesList.size())));
 
 						// update diff
 						diffView.setText(change.diff);
@@ -221,11 +230,12 @@ public final class CommitActivity extends AbstractActionBarActivity {
 
 	private static class Change {
 
-		private final Set<String> files;
+		private final Set<String> changedFiles, deletedFiles;
 		private final String diff;
 
-		public Change(Set<String> files, String diff) {
-			this.files = files;
+		public Change(Set<String> changedFiles, Set<String> deletedFiles, String diff) {
+			this.changedFiles = changedFiles;
+			this.deletedFiles = deletedFiles;
 			this.diff = diff;
 		}
 

@@ -40,7 +40,7 @@ import rx.functions.Action1;
 import timber.log.Timber;
 
 @ContentView(R.layout.activity_dir)
-public final class DirActivity extends AbstractActionBarActivity {
+public final class DirActivity extends AbstractActionBarActivity implements DirActionModeListener.ActionSelectionListener {
 
 	private static final int
 			REQUEST_COMMIT = 42,
@@ -62,6 +62,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 	private FileManager fileManager;
 	@Inject NodeUtils nodeUtils;
 
+	private DirActionModeListener actionModeListener = null;
 
 
 	@Override
@@ -115,6 +116,9 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 		// get tree
 		updateTree(savedInstanceState);
+
+		// prepare action mode
+		actionModeListener = new DirActionModeListener(this, this);
 	}
 
 
@@ -183,6 +187,33 @@ public final class DirActivity extends AbstractActionBarActivity {
 				pathNodeAdapter.onSaveInstanceState(tmpSavedState);
 				updateTree(tmpSavedState);
 		}
+	}
+
+
+	@Override
+	public void onDelete(FileNode fileNode) {
+		uiUtils.showSpinner(this);
+		fileManager.deleteFile(fileNode)
+				.compose(new DefaultTransformer<Void>())
+				.subscribe(new Action1<Void>() {
+					@Override
+					public void call(Void aVoid) {
+						uiUtils.hideSpinner(DirActivity.this);
+						updateTree(null);
+					}
+				}, new Action1<Throwable>() {
+					@Override
+					public void call(Throwable throwable) {
+						Timber.e(throwable, "failed to delete file");
+						uiUtils.hideSpinner(DirActivity.this);
+					}
+				});
+	}
+
+
+	@Override
+	public void onEdit(FileNode fileNode) {
+		startFileActivity(fileNode, false);
 	}
 
 
@@ -362,6 +393,16 @@ public final class DirActivity extends AbstractActionBarActivity {
 						}
 					}
 				});
+
+				if (pathNode instanceof FileNode) {
+					view.setOnLongClickListener(new View.OnLongClickListener() {
+						@Override
+						public boolean onLongClick(View v) {
+							actionModeListener.startActionMode(view, (FileNode) pathNode);
+							return true;
+						}
+					});
+				}
 			}
 		}
 	}
