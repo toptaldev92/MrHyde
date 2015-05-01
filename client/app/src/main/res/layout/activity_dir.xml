@@ -60,5 +60,7 @@
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
+    <include layout="@layout/spinner"/>
+
 </RelativeLayout>
 

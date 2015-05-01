@@ -56,7 +56,6 @@ public final class DirActivity extends AbstractActionBarActivity {
 	@InjectView(R.id.add) FloatingActionsMenu addButton;
 	@InjectView(R.id.add_file) FloatingActionButton addFileButton;
 	@InjectView(R.id.add_folder) FloatingActionButton addFolderButton;
-	@Inject UiUtils uiUtils;
 
 	@Inject RepositoryManager repositoryManager;
 	private Repository repository;
@@ -229,11 +228,13 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 
 	private void updateTree(final Bundle savedInstanceState) {
+		uiUtils.showSpinner(DirActivity.this);
 		compositeSubscription.add(fileManager.getTree()
 				.compose(new DefaultTransformer<DirNode>())
 				.subscribe(new Action1<DirNode>() {
 					@Override
 					public void call(DirNode rootNode) {
+						uiUtils.hideSpinner(DirActivity.this);
 						pathNodeAdapter.setSelectedNode(rootNode);
 						if (savedInstanceState != null)
 							pathNodeAdapter.onRestoreInstanceState(savedInstanceState);
@@ -241,6 +242,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 				}, new Action1<Throwable>() {
 					@Override
 					public void call(Throwable throwable) {
+						uiUtils.hideSpinner(DirActivity.this);
 						Toast.makeText(DirActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
 						Timber.e(throwable, "failed to get content");
 					}

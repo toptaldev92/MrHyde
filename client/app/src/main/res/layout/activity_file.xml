@@ -21,5 +21,7 @@
         android:layout_margin="10dp"
         />
 
+    <include layout="@layout/spinner"/>
+
 </RelativeLayout>
 
