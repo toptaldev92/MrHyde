@@ -3,7 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="1dp"
-    android:background="#ffd8d8d8"
-    android:layout_marginRight="25dp">
+    android:background="@color/gray_light_2"
+    android:layout_marginRight="20dp"
+    android:layout_marginLeft="20dp">
     </View>
 
