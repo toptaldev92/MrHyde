@@ -7670,10 +7670,9 @@ var $$ = Object.create(null);
   outputRequestComplete_closure: {
     "^": "Closure:10;httpRequest_0",
     call$1: function(e) {
-      var t1 = this.httpRequest_0;
-      if (J.contains$1$asx(t1.responseText, "0")) {
+      if (J.contains$1$asx(this.httpRequest_0.responseText, "0")) {
         $.t.cancel$0();
-        document.querySelector("#status").textContent = C.JSString_methods.$add("Finished!", t1.responseText);
+        document.querySelector("#status").textContent = "Finished!";
         window.location.assign($.redirecturl);
       }
       return;
