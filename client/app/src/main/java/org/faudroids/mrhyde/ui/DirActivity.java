@@ -73,10 +73,6 @@ public final class DirActivity extends AbstractActionBarActivity {
 		fileManager = repositoryManager.getFileManager(repository);
 		setTitle(repository.getName());
 
-		// show action bar back button
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-		getSupportActionBar().setHomeButtonEnabled(true);
-
 		// setup add buttons
 		addButton.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
 			@Override
@@ -171,11 +167,6 @@ public final class DirActivity extends AbstractActionBarActivity {
 							}
 				}));
 				return true;
-
-			case android.R.id.home:
-				onBackPressed();
-				return true;
-
 		}
 		return super.onOptionsItemSelected(item);
 	}
