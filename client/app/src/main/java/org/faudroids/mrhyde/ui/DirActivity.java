@@ -327,8 +327,8 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 
 		public boolean onBackPressed() {
-			// if no parent let activity handle back press
-			if (selectedNode.getParent() == null) return false;
+			// if no parent (or not loaded) let activity handle back press
+			if (selectedNode == null || selectedNode.getParent() == null) return false;
 			// otherwise navigate up
 			setSelectedNode((DirNode) selectedNode.getParent());
 			return true;
