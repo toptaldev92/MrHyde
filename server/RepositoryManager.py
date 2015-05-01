@@ -84,7 +84,7 @@ class RepositoryManager:
             self.log().info('Repository cloned to ' + repo_path + '.')
             #deploy_path = self.fm().setup_deployment(id)
             #self.jm().build(repo_path, deploy_path)
-            cmd = ['jekyll', 'build', '--source', repo_path, '--destination', deploy_path]
+            cmd = ['jekyll', 'build', '--source', repo_path, '--destination', deploy_path, '--config '+repo_path+'/_config.yml,keep_files.yml']
             with open(deploy_path+'/input.txt', 'w') as outfile:
                 status_code = subprocess.call(cmd, stdout=outfile)
             with open(deploy_path+'/statuscode.txt', 'w') as outfile:
