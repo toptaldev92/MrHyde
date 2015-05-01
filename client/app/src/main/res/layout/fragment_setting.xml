@@ -77,4 +77,6 @@
         </LinearLayout>
     </ScrollView>
 
+    <include layout="@layout/spinner"/>
+
 </RelativeLayout>
