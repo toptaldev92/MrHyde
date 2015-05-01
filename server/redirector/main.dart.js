@@ -8188,7 +8188,7 @@ Isolate.$lazy($, "_toStringVisiting", "IterableBase__toStringVisiting", "get$Ite
 });
 Isolate.$lazy($, "path", "path", "get$path", function() {
   var t1 = P.Uri_base();
-  return J.toString$0(t1.get$host(t1));
+  return J.$add$ns(J.toString$0(t1.get$host(t1)), "/");
 });
 
 // Native classes

@@ -2,7 +2,7 @@ import 'dart:html';
 import 'dart:async';
 
 String s;
-var path = Uri.base.host.toString();
+var path = Uri.base.host.toString()+'/';
 var outputfile = 'input.txt';
 var statuscodefile = 'statuscode.txt';
 var redirecturl = 'index.html';
