@@ -43,7 +43,7 @@ public final class CommitActivity extends AbstractActionBarActivity {
 		repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		fileManager = repositoryManager.getFileManager(repository);
 
-		Observable.zip(
+		compositeSubscription.add(Observable.zip(
 				fileManager.getChangedFiles(),
 				fileManager.getDiff(),
 				new Func2<Set<String>, String, Change>() {
@@ -69,12 +69,12 @@ public final class CommitActivity extends AbstractActionBarActivity {
 					public void call(Throwable throwable) {
 						Timber.e(throwable, "failed to load changes");
 					}
-				});
+				}));
 
 		commitButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				fileManager.commit()
+				compositeSubscription.add(fileManager.commit()
 						.compose(new DefaultTransformer<Void>())
 						.subscribe(new Action1<Void>() {
 							@Override
@@ -90,7 +90,7 @@ public final class CommitActivity extends AbstractActionBarActivity {
 								Toast.makeText(CommitActivity.this, "Commit error", Toast.LENGTH_SHORT).show();
 
 							}
-						});
+						}));
 			}
 		});
 	}
