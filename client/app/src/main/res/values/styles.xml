@@ -5,6 +5,8 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:actionModeBackground">@color/colorPrimaryDark</item>
+        <item name="android:actionModeCloseDrawable">@drawable/ic_arrow_back</item>
     </style>
 
     <style name="NavigationDrawerTheme" parent="MaterialNavigationDrawerTheme">
