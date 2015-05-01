@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 
 import com.google.inject.Inject;
 
+import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.github.LoginManager;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 
 import rx.Observable;
@@ -22,22 +24,27 @@ public class PreviewManager {
 	private final Context context;
 	private final JekyllApi jekyllApi;
 	private final String clientSecret;
+	private final LoginManager loginManager;
 
 	@Inject
-	PreviewManager(Context context, JekyllApi jekyllApi) {
+	PreviewManager(Context context, JekyllApi jekyllApi, LoginManager loginManager) {
 		this.context = context;
 		this.jekyllApi = jekyllApi;
 		this.clientSecret = context.getString(R.string.jekyllServerClientSecret);
+		this.loginManager = loginManager;
 	}
 
 
-	public Observable<String> loadPreview(String repoName, String repoUrl, String diff) {
+	public Observable<String> loadPreview(Repository repository, String diff) {
+		// TODO this is not that great security wise. In the long run use https://help.github.com/articles/git-automation-with-oauth-tokens/
+		String repoName = repository.getOwner().getLogin() + "/" + repository.getName();
+		String cloneUrl = "https://" + loginManager.getAccount().getAccessToken() + "@" + repository.getCloneUrl().replaceFirst("https://", "");
 		long expirationDate = getPreviewExpiration(repoName);
 
 		// if (expirationDate <= (System.currentTimeMillis() / 1000)) {
 			// create new preview
 			Timber.d("starting new preview");
-			final RepoDetails repoDetails = new RepoDetails(repoUrl, diff, clientSecret);
+			final RepoDetails repoDetails = new RepoDetails(cloneUrl, diff, clientSecret);
 			return jekyllApi.createPreview(repoDetails)
 					.compose(new DefaultTransformer<PreviewResult>())
 					.flatMap(new StorePreviewFunction(repoName));

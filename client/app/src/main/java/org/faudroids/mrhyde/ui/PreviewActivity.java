@@ -66,7 +66,7 @@ public class PreviewActivity extends AbstractActionBarActivity {
             webView.loadUrl(previewUrl);
         } else {
             previewManager
-                    .loadPreview(repository.getOwner().getName() + "/" + repository.getName(), repository.getCloneUrl(), diff)
+                    .loadPreview(repository, diff)
                     .delay(1, TimeUnit.SECONDS)
                     .compose(new DefaultTransformer<String>())
                     .subscribe(new Action1<String>() {
