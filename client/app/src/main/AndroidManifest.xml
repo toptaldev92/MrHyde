@@ -37,6 +37,9 @@
         <activity
             android:name=".ui.PreviewActivity"
             />
+        <activity
+            android:name=".ui.SelectRepoActivity"
+            />
     </application>
 
 </manifest>

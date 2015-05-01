@@ -71,6 +71,16 @@ public final class ApiWrapper {
 	}
 
 
+	public Observable<Repository> getRepository(final String ownerLogin, final String repoName) {
+		return new Wrapper<Repository>() {
+			@Override
+			protected Repository doWrapMethod() throws Exception {
+				return repositoryService.getRepository(ownerLogin, repoName);
+			}
+		}.wrapMethod();
+	}
+
+
 	public Observable<List<User>> getOrganizations() {
 		return new Wrapper<List<User>>() {
 			@Override

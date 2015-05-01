@@ -18,6 +18,7 @@ import org.faudroids.mrhyde.git.RepositoryManager;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -31,12 +32,17 @@ abstract class AbstractReposFragment extends AbstractFragment {
 	@Inject RepositoryManager repositoryManager;
 
 	@InjectView(R.id.list) RecyclerView recyclerView;
-	private RepositoryAdapter repoAdapter;
+	protected RepositoryAdapter repoAdapter;
 	private RecyclerView.LayoutManager layoutManager;
 
 
 	public AbstractReposFragment() {
-		super(R.layout.fragment_repos);
+		this(R.layout.fragment_repos);
+	}
+
+
+	public AbstractReposFragment(int layoutResource) {
+		super(layoutResource);
 	}
 
 
@@ -49,12 +55,18 @@ abstract class AbstractReposFragment extends AbstractFragment {
 		recyclerView.setLayoutManager(layoutManager);
 		repoAdapter = new RepositoryAdapter();
 		recyclerView.setAdapter(repoAdapter);
-
-		loadRepositories(repoAdapter);
+		loadRepositories();
 	}
 
 
-	protected abstract void loadRepositories(RepositoryAdapter repoAdapter);
+	protected abstract void loadRepositories();
+
+
+	protected void onRepositorySelected(Repository repository) {
+		Intent intent = new Intent(AbstractReposFragment.this.getActivity(), DirActivity.class);
+		intent.putExtra(DirActivity.EXTRA_REPOSITORY, repository);
+		startActivity(intent);
+	}
 
 
 	protected final class RepositoryAdapter extends RecyclerView.Adapter<RepositoryAdapter.RepoViewHolder> {
@@ -81,7 +93,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 		}
 
 
-		public void setItems(List<Repository> repositoryList) {
+		public void setItems(Collection<Repository> repositoryList) {
 			this.repositoryList.clear();
 			this.repositoryList.addAll(repositoryList);
 			notifyDataSetChanged();
@@ -114,9 +126,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 				containerView.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
-						Intent intent = new Intent(AbstractReposFragment.this.getActivity(), DirActivity.class);
-						intent.putExtra(DirActivity.EXTRA_REPOSITORY, repo);
-						startActivity(intent);
+						onRepositorySelected(repo);
 					}
 				});
 			}

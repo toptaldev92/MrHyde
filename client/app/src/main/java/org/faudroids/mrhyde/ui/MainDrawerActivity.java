@@ -19,8 +19,9 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity {
 
     @Override
     public void init(Bundle savedInstanceState) {
-        //favorite repositories
-        addSection(newSection("Repositories", new ReposFragment()));
+        // repositories
+        addSection(newSection(getString(R.string.section_starred_repositories), new StarredReposFragment()));
+        addSection(newSection(getString(R.string.section_all_repositories), new AllReposFragment()));
 
         //account information
         LoginManager.Account account = loginManager.getAccount();
@@ -33,7 +34,7 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity {
         setBackPattern(MaterialNavigationDrawer.BACKPATTERN_BACK_TO_FIRST);
 
         //settings and feedback
-        this.addBottomSection(newSection("Settings", R.drawable.ic_settings, new SettingsFragment()));
+        this.addBottomSection(newSection(getString(R.string.section_settings), R.drawable.ic_settings, new SettingsFragment()));
 
         String address = getString(R.string.feedback_mail_address);
         String subject = getString(
@@ -42,7 +43,7 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity {
         Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", address, null));
         intent.putExtra(Intent.EXTRA_SUBJECT, subject);
         Intent mailer = Intent.createChooser(intent, getString(R.string.feedback_mail_chooser));
-        this.addBottomSection(newSection("Feedback", R.drawable.ic_email, mailer));
+        this.addBottomSection(newSection(getString(R.string.section_feedback), R.drawable.ic_email, mailer));
     }
 
 }
