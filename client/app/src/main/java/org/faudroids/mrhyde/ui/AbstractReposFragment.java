@@ -19,6 +19,8 @@ import org.faudroids.mrhyde.git.RepositoryManager;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -96,6 +98,12 @@ abstract class AbstractReposFragment extends AbstractFragment {
 		public void setItems(Collection<Repository> repositoryList) {
 			this.repositoryList.clear();
 			this.repositoryList.addAll(repositoryList);
+			Collections.sort(this.repositoryList, new Comparator<Repository>() {
+				@Override
+				public int compare(Repository lhs, Repository rhs) {
+					return (lhs.getOwner().getLogin() + "/" +  lhs.getName()).compareTo(rhs.getOwner().getLogin() + "/" + rhs.getName());
+				}
+			});
 			notifyDataSetChanged();
 		}
 
