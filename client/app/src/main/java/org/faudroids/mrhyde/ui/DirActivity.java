@@ -157,7 +157,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 			case R.id.action_preview:
 				fileManager = repositoryManager.getFileManager(repository);
-				fileManager.getDiff().subscribe(new Action1<String>() {
+				compositeSubscription.add(fileManager.getDiff().subscribe(new Action1<String>() {
 					@Override
 					public void call(String diff) {
 						Intent previewIntent = new Intent(DirActivity.this, PreviewActivity.class);
@@ -170,7 +170,7 @@ public final class DirActivity extends AbstractActionBarActivity {
 							public void call(Throwable throwable) {
 								Timber.e(throwable, "failed to load changes");
 							}
-				});
+				}));
 				return true;
 
 			case android.R.id.home:
@@ -315,7 +315,10 @@ public final class DirActivity extends AbstractActionBarActivity {
 
 
 		public void onRestoreInstanceState(Bundle inState) {
-			setSelectedNode((DirNode) nodeUtils.restoreInstanceState(inState, selectedNode));
+			AbstractNode restoredSelectedNode = nodeUtils.restoreInstanceState(inState, selectedNode);
+			if (restoredSelectedNode == null) return;
+
+			setSelectedNode((DirNode) restoredSelectedNode);
 		}
 
 

@@ -19,6 +19,8 @@ public class NodeUtils {
 	 * Stores a node in the supplied bundle to be retrieved later.
 	 */
 	public void saveInstanceState(Bundle outState, AbstractNode node) {
+		if (node == null) return;
+
 		AbstractNode iter = node;
 		String selectedPath = iter.getPath();
 		iter = iter.getParent();
@@ -38,6 +40,8 @@ public class NodeUtils {
 	 */
 	public AbstractNode restoreInstanceState(Bundle inState, DirNode rootNode) {
 		String selectedPath = inState.getString(STATE_NODE);
+		if (selectedPath == null) return null;
+
 		String[] paths = selectedPath.split("/");
 		AbstractNode iter = rootNode;
 		for (int i = 1; i < paths.length; ++i) {
