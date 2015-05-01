@@ -1,0 +1,7 @@
+name:  mrhydepoller
+description:  An application that polls MrHyde for Updates
+
+dependencies:
+  browser: any
+#  js: any
+#  unittest: any
