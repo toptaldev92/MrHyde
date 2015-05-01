@@ -1,5 +1,7 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -139,8 +141,28 @@ abstract class AbstractReposFragment extends AbstractFragment {
 						onRepositorySelected(repo);
 					}
 				});
-				if (repositoryManager.isRepositoryStarred(repo)) starView.setVisibility(View.VISIBLE);
-				else starView.setVisibility(View.GONE);
+				if (repositoryManager.isRepositoryStarred(repo)) {
+					starView.setVisibility(View.VISIBLE);
+					starView.setOnClickListener(new View.OnClickListener() {
+						@Override
+						public void onClick(View v) {
+							new AlertDialog.Builder(getActivity())
+									.setTitle(AbstractReposFragment.this.getActivity().getString(R.string.unstar_title))
+									.setMessage(AbstractReposFragment.this.getActivity().getString(R.string.unstar_message))
+									.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+										@Override
+										public void onClick(DialogInterface dialog, int which) {
+											repositoryManager.unstarRepsitory(repo);
+											loadRepositories();
+										}
+									})
+									.setNegativeButton(android.R.string.cancel, null)
+									.show();
+						}
+					});
+				} else {
+					starView.setVisibility(View.GONE);
+				}
 			}
 		}
 
