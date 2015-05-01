@@ -1,13 +1,10 @@
 <resources>
     <string name="app_name">MrHyde</string>
 
-    <string name="title_section1">Posts</string>
-    <string name="title_section2">Drafts</string>
-    <string name="title_section3">Search</string>
-
     <string name="title_repos">Repositories</string>
     <string name="title_preview">Preview</string>
     <string name="title_commit">Commit changes</string>
+    <string name="title_select_repository">Select repository</string>
 
     <string name="login_button">Login with GitHub</string>
     <string name="login_title">Login</string>
