@@ -34,7 +34,7 @@ public class PreviewManager {
 	public Observable<String> loadPreview(String repoName, String repoUrl, String diff) {
 		long expirationDate = getPreviewExpiration(repoName);
 
-		if (expirationDate <= (System.currentTimeMillis() / 1000)) {
+		// if (expirationDate <= (System.currentTimeMillis() / 1000)) {
 			// create new preview
 			Timber.d("starting new preview");
 			final RepoDetails repoDetails = new RepoDetails(repoUrl, diff, clientSecret);
@@ -42,6 +42,7 @@ public class PreviewManager {
 					.compose(new DefaultTransformer<PreviewResult>())
 					.flatMap(new StorePreviewFunction(repoName));
 
+		/*
 		} else {
 			// update old preview
 			Timber.d("updating preview");
@@ -52,6 +53,7 @@ public class PreviewManager {
 					.compose(new DefaultTransformer<PreviewResult>())
 					.flatMap(new StorePreviewFunction(repoName));
 		}
+		*/
 
 	}
 
