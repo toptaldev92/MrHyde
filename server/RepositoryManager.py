@@ -85,10 +85,9 @@ class RepositoryManager:
             #deploy_path = self.fm().setup_deployment(id)
             #self.jm().build(repo_path, deploy_path)
             cmd = ['jekyll', 'build', '--source', repo_path, '--destination', deploy_path]
-            status_code = 9
-            with open(deploy_path+'input.txt') as outfile:
+            with open(deploy_path+'input.txt', 'w') as outfile:
                 status_code = subprocess.call(cmd, stdout=outfile)
-            with open(deploy_path+'statuscode.txt') as outfile:
+            with open(deploy_path+'statuscode.txt', 'w') as outfile:
                 outfile.write(str(status_code))
         except OSError as exception:
             if exception.errno == errno.EPERM:
