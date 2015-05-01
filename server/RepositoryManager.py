@@ -7,7 +7,7 @@ from os.path import isdir, join
 from os import makedirs, chdir, getcwd
 from configparser import ParsingError as ConfigError
 import threading
-
+import subprocess
 import shutil
 
 import git
@@ -60,6 +60,9 @@ class RepositoryManager:
         repo_path = join(self.__base_dir, id)
         deploy_path = ''.join([cm.get_deploy_base_path(), id, cm.get_deploy_append_path()])
 
+        if self.utils().repository_exists(id):
+            return None
+
         self.db().insertData('repo', id, repo_path, deploy_path, url, int(time()))
         shutil.copytree('redirector/', deploy_path)
 
@@ -73,24 +76,27 @@ class RepositoryManager:
     def init_repository_async(self, id, deploy_path, repo_path, url, diff):
         if not isdir(self.__base_dir):
             makedirs(self.__base_dir, 0o755, True)
-        if not self.utils().repository_exists(id):
-            try:
-                # TODO error handling
-                self.__git.clone(url, repo_path)
-                if diff is not None and diff is not '':
-                    self.apply_diff(id, diff)
-                self.log().info('Repository cloned to ' + repo_path + '.')
-                deploy_path = self.fm().setup_deployment(id)
-                self.jm().build(repo_path, deploy_path)
-            except OSError as exception:
-                if exception.errno == errno.EPERM:
-                    self.log().error("Permission to " + repo_path + " denied.")
-                    raise
-            except git.GitCommandError as exception:
-                self.log().error(exception.__str__())
+        try:
+            # TODO error handling
+            self.__git.clone(url, repo_path)
+            if diff is not None and diff is not '':
+                self.apply_diff(id, diff)
+            self.log().info('Repository cloned to ' + repo_path + '.')
+            #deploy_path = self.fm().setup_deployment(id)
+            #self.jm().build(repo_path, deploy_path)
+            cmd = ['jekyll', 'build', '--source', repo_path, '--destination', deploy_path]
+            status_code = 9
+            with open(deploy_path+'input.txt') as outfile:
+                status_code = subprocess.call(cmd, stdout=outfile)
+            with open(deploy_path+'statuscode.txt') as outfile:
+                outfile.write(str(status_code))
+        except OSError as exception:
+            if exception.errno == errno.EPERM:
+                self.log().error("Permission to " + repo_path + " denied.")
                 raise
-        else:
-            return None
+        except git.GitCommandError as exception:
+            self.log().error(exception.__str__())
+            raise
 
     def list_repositories(self):
         dir_list = [[f['path'].split('/')[-1], f['url']] for f in self.db().list('repo') if isdir(f['path'])]
