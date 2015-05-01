@@ -113,6 +113,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 			private final View containerView;
 			private final ImageView iconView;
 			private final TextView titleView, subTitleView;
+			private final ImageView starView;
 
 			public RepoViewHolder(View view) {
 				super(view);
@@ -120,6 +121,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 				this.iconView = (ImageView) view.findViewById(R.id.icon);
 				this.titleView = (TextView) view.findViewById(R.id.title);
 				this.subTitleView = (TextView) view.findViewById(R.id.subtitle);
+				this.starView = (ImageView) view.findViewById(R.id.star);
 			}
 
 			public void setRepo(final Repository repo) {
@@ -137,6 +139,8 @@ abstract class AbstractReposFragment extends AbstractFragment {
 						onRepositorySelected(repo);
 					}
 				});
+				if (repositoryManager.isRepositoryStarred(repo)) starView.setVisibility(View.VISIBLE);
+				else starView.setVisibility(View.GONE);
 			}
 		}
 

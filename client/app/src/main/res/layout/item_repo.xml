@@ -55,6 +55,16 @@
 
         </LinearLayout>
 
+        <ImageView
+            android:id="@+id/star"
+            android:layout_width="@dimen/card_icon_size"
+            android:layout_height="@dimen/card_icon_size"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_star"
+            android:layout_alignParentRight="true"
+            android:visibility="gone"
+            />
+
     </RelativeLayout>
 
 </android.support.v7.widget.CardView>

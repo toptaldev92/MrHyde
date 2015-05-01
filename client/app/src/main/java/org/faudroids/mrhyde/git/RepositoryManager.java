@@ -162,6 +162,12 @@ public final class RepositoryManager {
 	}
 
 
+	public boolean isRepositoryStarred(Repository repository) {
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		return prefs.contains(getFullRepoName(repository));
+	}
+
+
 	public void unstarRepsitory(Repository repository) {
 		unstarRepsitory(getFullRepoName(repository));
 	}
