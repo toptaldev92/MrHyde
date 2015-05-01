@@ -14,20 +14,20 @@ public final class ReposFragment extends AbstractReposFragment {
 
 	@Override
 	protected void loadRepositories(final RepositoryAdapter repoAdapter) {
-		uiUtils.showSpinner(getActivity());
+		showSpinner();
 		compositeSubscription.add(repositoryManager.getRepositories()
 				.compose(new DefaultTransformer<List<Repository>>())
 				.subscribe(new Action1<List<Repository>>() {
 					@Override
 					public void call(List<Repository> repositories) {
+						hideSpinner();
 						repoAdapter.setItems(repositories);
-						uiUtils.hideSpinner(getActivity());
 					}
 				}, new Action1<Throwable>() {
 					@Override
 					public void call(Throwable throwable) {
+						hideSpinner();
 						Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
-						uiUtils.hideSpinner(getActivity());
 						Timber.e(throwable, "failed to get repos");
 					}
 				}));

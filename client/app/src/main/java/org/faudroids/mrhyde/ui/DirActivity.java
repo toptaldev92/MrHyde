@@ -209,20 +209,20 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 	@Override
 	public void onDelete(FileNode fileNode) {
-		uiUtils.showSpinner(this);
+		showSpinner();
 		fileManager.deleteFile(fileNode)
 				.compose(new DefaultTransformer<Void>())
 				.subscribe(new Action1<Void>() {
 					@Override
 					public void call(Void aVoid) {
-						uiUtils.hideSpinner(DirActivity.this);
+						hideSpinner();
 						updateTree(null);
 					}
 				}, new Action1<Throwable>() {
 					@Override
 					public void call(Throwable throwable) {
+						hideSpinner();
 						Timber.e(throwable, "failed to delete file");
-						uiUtils.hideSpinner(DirActivity.this);
 					}
 				});
 	}
@@ -267,13 +267,13 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 
 	private void updateTree(final Bundle savedInstanceState) {
-		uiUtils.showSpinner(DirActivity.this);
+		showSpinner();
 		compositeSubscription.add(fileManager.getTree()
 				.compose(new DefaultTransformer<DirNode>())
 				.subscribe(new Action1<DirNode>() {
 					@Override
 					public void call(DirNode rootNode) {
-						uiUtils.hideSpinner(DirActivity.this);
+						hideSpinner();
 						pathNodeAdapter.setSelectedNode(rootNode);
 						if (savedInstanceState != null)
 							pathNodeAdapter.onRestoreInstanceState(savedInstanceState);
@@ -281,7 +281,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 				}, new Action1<Throwable>() {
 					@Override
 					public void call(Throwable throwable) {
-						uiUtils.hideSpinner(DirActivity.this);
+						hideSpinner();
 						Toast.makeText(DirActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
 						Timber.e(throwable, "failed to get content");
 					}

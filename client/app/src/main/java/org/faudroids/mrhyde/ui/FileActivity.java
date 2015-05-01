@@ -108,7 +108,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 		});
 
 		// load selected file
-		uiUtils.showSpinner(this);
+		showSpinner();
 		compositeSubscription.add(fileManager.getTree()
 				.flatMap(new Func1<DirNode, Observable<LoadedFile>>() {
 					@Override
@@ -137,7 +137,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 				.subscribe(new Action1<LoadedFile>() {
 					@Override
 					public void call(LoadedFile loadedFile) {
-						uiUtils.hideSpinner(FileActivity.this);
+						hideSpinner();
 						setTitle(loadedFile.node.getPath());
 						editText.setText(loadedFile.content);
 						FileActivity.this.fileNode = loadedFile.node;
@@ -145,7 +145,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 				}, new Action1<Throwable>() {
 					@Override
 					public void call(Throwable throwable) {
-						uiUtils.hideSpinner(FileActivity.this);
+						hideSpinner();
 						Toast.makeText(FileActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
 						Timber.e(throwable, "failed to get content");
 					}

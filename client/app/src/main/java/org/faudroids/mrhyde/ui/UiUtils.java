@@ -1,6 +1,5 @@
 package org.faudroids.mrhyde.ui;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,25 +23,20 @@ public class UiUtils {
 	}
 
 
-	public void showSpinner(Activity activity) {
-		View containerView = activity.findViewById(R.id.spinner);
-		containerView.setVisibility(View.VISIBLE);
+	public void showSpinner(View spinnerContainerView, ImageView spinnerImageView) {
+		spinnerContainerView.setVisibility(View.VISIBLE);
 
-		ImageView spinnerView = (ImageView) activity.findViewById(R.id.spinner_image);
-		spinnerView.setBackgroundResource(R.drawable.spinner);
-		AnimationDrawable animationDrawable = (AnimationDrawable) spinnerView.getBackground();
+		spinnerImageView.setBackgroundResource(R.drawable.spinner);
+		AnimationDrawable animationDrawable = (AnimationDrawable) spinnerImageView.getBackground();
 		animationDrawable.start();
 	}
 
 
-	public void hideSpinner(Activity activity) {
-		ImageView spinnerView = (ImageView) activity.findViewById(R.id.spinner_image);
-		spinnerView.setBackgroundResource(R.drawable.spinner);
-		AnimationDrawable animationDrawable = (AnimationDrawable) spinnerView.getBackground();
+	public void hideSpinner(View spinnerContainerView, ImageView spinnerImageView) {
+		AnimationDrawable animationDrawable = (AnimationDrawable) spinnerImageView.getBackground();
 		animationDrawable.stop();
 
-		View containerView = activity.findViewById(R.id.spinner);
-		containerView.setVisibility(View.GONE);
+		spinnerContainerView.setVisibility(View.GONE);
 	}
 
 

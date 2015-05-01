@@ -3,10 +3,15 @@ package org.faudroids.mrhyde.ui;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+
+import org.faudroids.mrhyde.R;
 
 import javax.inject.Inject;
 
 import roboguice.activity.RoboActionBarActivity;
+import roboguice.inject.InjectView;
 import rx.subscriptions.CompositeSubscription;
 
 
@@ -14,6 +19,8 @@ abstract class AbstractActionBarActivity extends RoboActionBarActivity {
 
 	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
 	@Inject UiUtils uiUtils;
+	@InjectView(R.id.spinner) View spinnerContainerView;
+	@InjectView(R.id.spinner_image) ImageView spinnerImageView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -45,6 +52,16 @@ abstract class AbstractActionBarActivity extends RoboActionBarActivity {
 	public void onDestroy() {
 		super.onDestroy();
 		compositeSubscription.unsubscribe();
+	}
+
+
+	protected void showSpinner() {
+		uiUtils.showSpinner(spinnerContainerView, spinnerImageView);
+	}
+
+
+	protected void hideSpinner() {
+		uiUtils.hideSpinner(spinnerContainerView, spinnerImageView);
 	}
 
 }

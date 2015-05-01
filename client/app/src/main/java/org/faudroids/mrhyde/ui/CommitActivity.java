@@ -102,13 +102,14 @@ public final class CommitActivity extends AbstractActionBarActivity {
 		commitButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				uiUtils.showSpinner(CommitActivity.this);
+				showSpinner();
+				uiUtils.showSpinner(spinnerContainerView, spinnerImageView);
 				compositeSubscription.add(fileManager.commit()
 						.compose(new DefaultTransformer<Void>())
 						.subscribe(new Action1<Void>() {
 							@Override
 							public void call(Void nothing) {
-								uiUtils.hideSpinner(CommitActivity.this);
+								hideSpinner();
 								Timber.d("commit success");
 								setResult(RESULT_OK);
 								finish();
@@ -116,7 +117,7 @@ public final class CommitActivity extends AbstractActionBarActivity {
 						}, new Action1<Throwable>() {
 							@Override
 							public void call(Throwable throwable) {
-								uiUtils.hideSpinner(CommitActivity.this);
+								hideSpinner();
 								Timber.e(throwable, "commit failed");
 								Toast.makeText(CommitActivity.this, "Commit error", Toast.LENGTH_SHORT).show();
 
