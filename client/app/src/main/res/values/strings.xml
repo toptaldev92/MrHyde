@@ -30,7 +30,7 @@
     <string name="dir_new_message">NewDir</string>
     <string name="dir_empty">Empty</string>
 
-    <string name="commit_changed_files">Changed files</string>
+    <string name="commit_changed_files">%1$s changed files</string>
     <string name="commit_git_diff">Git diff</string>
     <string name="commit_action">Commit</string>
 

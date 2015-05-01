@@ -20,7 +20,7 @@
         android:textSize="40dp"
         android:gravity="center"
         android:text="@string/welcome_text"
-        android:textColor="@color/login_gray"
+        android:textColor="@color/gray_dark"
         android:layout_below="@+id/imageView"
         android:layout_centerHorizontal="true"
         />
@@ -33,7 +33,7 @@
         android:drawablePadding="@dimen/activity_horizontal_margin"
         android:text="@string/login_button"
         android:textColor="@android:color/white"
-        android:background="@color/login_gray"
+        android:background="@color/gray_dark"
         android:layout_alignParentBottom="true"
         />
 

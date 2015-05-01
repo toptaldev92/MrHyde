@@ -29,30 +29,43 @@
                 android:clickable="true"
                 >
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
                     android:padding="15dp"
                     >
 
                     <TextView
+                        android:id="@+id/changed_files_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
+                        android:layout_alignParentTop="true"
                         android:text="@string/commit_changed_files"
                         style="@style/DefaultTextTitle"
+                        />
+
+                    <ImageButton
+                        android:id="@+id/changed_files_expand"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:background="@drawable/ic_expand_more"
                         />
 
                     <TextView
                         android:id="@+id/changed_files"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Changed file1\nChanged file 2\n/foo/bar/foo/bar"
+                        android:layout_marginTop="10dp"
+                        android:layout_below="@id/changed_files_title"
+                        android:textColor="@color/gray_dark"
+                        android:visibility="gone"
                         style="@style/DefaultText"
                         />
 
-                </LinearLayout>
+
+                </RelativeLayout>
 
             </android.support.v7.widget.CardView>
 
@@ -65,31 +78,43 @@
                 android:clickable="true"
                 >
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
                     android:padding="15dp"
                     >
 
                     <TextView
+                        android:id="@+id/diff_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="10dp"
+                        android:layout_alignParentTop="true"
                         android:text="@string/commit_git_diff"
                         style="@style/DefaultTextTitle"
+                        />
+
+                    <ImageButton
+                        android:id="@+id/diff_expand"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:background="@drawable/ic_expand_more"
                         />
 
                     <TextView
                         android:id="@+id/diff"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_below="@id/diff_title"
+                        android:layout_marginTop="10dp"
+                        android:textColor="@color/gray_dark"
+                        android:visibility="gone"
                         style="@style/DefaultText"
-                        android:text="There is a very long diff in here, how aboutthat??\nfoo bar, foo bar foobar"
                         />
 
 
-                </LinearLayout>
+                </RelativeLayout>
 
             </android.support.v7.widget.CardView>
 

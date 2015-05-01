@@ -30,7 +30,7 @@
 
     <style name="DefaultText" parent="DefaultTextTitle">
         <item name="android:textColor">@android:color/black</item>
-        <item name="android:textSize">12sp</item>
+        <item name="android:textSize">14sp</item>
     </style>
 
     <style name="SettingsEntry">
