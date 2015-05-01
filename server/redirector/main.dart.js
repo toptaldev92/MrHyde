@@ -7618,11 +7618,15 @@ var $$ = Object.create(null);
     $.t = P.Timer_Timer$periodic(P.Duration$(0, 0, 0, 0, 0, 1), F.timerTrigger$closure());
   }, "call$0", "main$closure", 0, 0, 2],
   timerTrigger: [function(t) {
-    var httpRequest, t1;
+    var httpRequest, t1, t2;
     httpRequest = new XMLHttpRequest();
-    C.HttpRequest_methods.open$2(httpRequest, "GET", J.$add$ns($.get$path(), $.outputfile));
-    t1 = H.setRuntimeTypeInfo(new W._EventStream(httpRequest, "loadend", false), [null]);
-    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.timerTrigger_closure(httpRequest)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
+    t1 = $.get$path();
+    t2 = $.outputfile;
+    if (t1 == null)
+      return t1.$add();
+    C.HttpRequest_methods.open$2(httpRequest, "GET", t1 + t2);
+    t2 = H.setRuntimeTypeInfo(new W._EventStream(httpRequest, "loadend", false), [null]);
+    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new F.timerTrigger_closure(httpRequest)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
     httpRequest.send("");
   }, "call$1", "timerTrigger$closure", 2, 0, 7],
   outputRequestComplete: function(h) {
@@ -7648,9 +7652,13 @@ var $$ = Object.create(null);
       }
     }
     httpRequest = new XMLHttpRequest();
-    C.HttpRequest_methods.open$2(httpRequest, "GET", J.$add$ns($.get$path(), $.statuscodefile));
-    t1 = H.setRuntimeTypeInfo(new W._EventStream(httpRequest, "loadend", false), [null]);
-    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.outputRequestComplete_closure(httpRequest)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
+    t1 = $.get$path();
+    t2 = $.statuscodefile;
+    if (t1 == null)
+      return t1.$add();
+    C.HttpRequest_methods.open$2(httpRequest, "GET", t1 + t2);
+    t2 = H.setRuntimeTypeInfo(new W._EventStream(httpRequest, "loadend", false), [null]);
+    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new F.outputRequestComplete_closure(httpRequest)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
     httpRequest.send("");
   },
   timerTrigger_closure: {
@@ -7662,9 +7670,10 @@ var $$ = Object.create(null);
   outputRequestComplete_closure: {
     "^": "Closure:10;httpRequest_0",
     call$1: function(e) {
-      if (J.contains$1$asx(this.httpRequest_0.responseText, "0")) {
+      var t1 = this.httpRequest_0;
+      if (J.contains$1$asx(t1.responseText, "0")) {
         $.t.cancel$0();
-        document.querySelector("#status").textContent = "Finished!";
+        document.querySelector("#status").textContent = C.JSString_methods.$add("Finished!", t1.responseText);
         window.location.assign($.redirecturl);
       }
       return;
@@ -8188,7 +8197,7 @@ Isolate.$lazy($, "_toStringVisiting", "IterableBase__toStringVisiting", "get$Ite
 });
 Isolate.$lazy($, "path", "path", "get$path", function() {
   var t1 = P.Uri_base();
-  return J.$add$ns(J.toString$0(t1.get$host(t1)), "/");
+  return C.JSString_methods.$add("http://", J.toString$0(t1.get$host(t1))) + "/";
 });
 
 // Native classes

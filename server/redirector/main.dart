@@ -2,14 +2,14 @@ import 'dart:html';
 import 'dart:async';
 
 String s;
-var path = Uri.base.host.toString()+'/';
+var path = 'http://'+Uri.base.host.toString()+'/';
 var outputfile = 'input.txt';
 var statuscodefile = 'statuscode.txt';
 var redirecturl = 'index.html';
 Timer t;
 
 void  main() {
-  s = '';;
+  s = '';
   querySelector('#status').text = 'Getting Jekyll Output';
   t = new Timer.periodic(new Duration(seconds:1), timerTrigger);
 }
@@ -43,7 +43,7 @@ void outputRequestComplete(HttpRequest h){
 void statusCodeRequestComplete(HttpRequest h){
   if (h.responseText.contains('0')){
     t.cancel();
-    querySelector('#status').text = 'Finished!';
+    querySelector('#status').text = 'Finished!' + h.responseText;
     window.location.assign(redirecturl);
   }
 }
