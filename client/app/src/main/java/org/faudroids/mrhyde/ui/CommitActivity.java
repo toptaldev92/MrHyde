@@ -43,6 +43,7 @@ public final class CommitActivity extends AbstractActionBarActivity {
 
 	@InjectView(R.id.changed_files_title) TextView changedFilesTitleView;
 	@InjectView(R.id.changed_files) TextView changedFilesView;
+	@InjectView(R.id.diff_title) TextView diffTitleView;
 	@InjectView(R.id.diff) TextView diffView;
 	@InjectView(R.id.commit_button) Button commitButton;
 
@@ -125,14 +126,14 @@ public final class CommitActivity extends AbstractActionBarActivity {
 		});
 
 		// setup expand buttons
-		changedFilesExpandButton.setOnClickListener(new View.OnClickListener() {
+		changedFilesTitleView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				toggleExpand(changedFilesExpandButton, changedFilesView);
 			}
 		});
 
-		diffExpandButton.setOnClickListener(new View.OnClickListener() {
+		diffTitleView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				toggleExpand(diffExpandButton, diffView);

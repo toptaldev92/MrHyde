@@ -35,15 +35,6 @@
                     android:padding="15dp"
                     >
 
-                    <TextView
-                        android:id="@+id/changed_files_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:text="@string/commit_changed_files"
-                        style="@style/DefaultTextTitle"
-                        />
-
                     <ImageButton
                         android:id="@+id/changed_files_expand"
                         android:layout_width="wrap_content"
@@ -51,6 +42,15 @@
                         android:layout_alignParentRight="true"
                         android:layout_alignParentTop="true"
                         android:background="@drawable/ic_expand_more"
+                        />
+
+                    <TextView
+                        android:id="@+id/changed_files_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:text="@string/commit_changed_files"
+                        style="@style/DefaultTextTitle"
                         />
 
                     <TextView
@@ -63,7 +63,6 @@
                         android:visibility="gone"
                         style="@style/DefaultText"
                         />
-
 
                 </RelativeLayout>
 
@@ -84,15 +83,6 @@
                     android:padding="15dp"
                     >
 
-                    <TextView
-                        android:id="@+id/diff_title"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:text="@string/commit_git_diff"
-                        style="@style/DefaultTextTitle"
-                        />
-
                     <ImageButton
                         android:id="@+id/diff_expand"
                         android:layout_width="wrap_content"
@@ -100,6 +90,15 @@
                         android:layout_alignParentRight="true"
                         android:layout_alignParentTop="true"
                         android:background="@drawable/ic_expand_more"
+                        />
+
+                    <TextView
+                        android:id="@+id/diff_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:text="@string/commit_git_diff"
+                        style="@style/DefaultTextTitle"
                         />
 
                     <TextView
