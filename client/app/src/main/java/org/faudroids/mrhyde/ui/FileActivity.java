@@ -148,6 +148,8 @@ public final class FileActivity extends AbstractActionBarActivity {
 						setTitle(loadedFile.node.getPath());
 						editText.setText(loadedFile.content);
 						FileActivity.this.fileNode = loadedFile.node;
+						if (isNewFile) startEditMode();
+						else stopEditMode();
 					}
 				}, new Action1<Throwable>() {
 					@Override
