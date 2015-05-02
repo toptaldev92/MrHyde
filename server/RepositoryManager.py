@@ -82,7 +82,7 @@ class RepositoryManager:
             # TODO error handling
             self.__git.clone(url, repo_path)
             if diff is not None and diff is not '':
-                self.apply_diff(id, diff)
+                self.apply_diff(id, repo_path, diff)
             self.log().info('Repository cloned to ' + repo_path + '.')
             #deploy_path = self.fm().setup_deployment(id)
             self.jm().build(repo_path, deploy_path)
@@ -120,7 +120,7 @@ class RepositoryManager:
             repo_path = self.db().list('repo', 'path', "id='%s'" % id)[0]
             deploy_path = self.db().list('repo', 'deploy_path', "id='%s'" % id)[0]
             diff_file = self.fm().create_diff_file(id, diff)
-            self.apply_diff(id, diff_file)
+            self.apply_diff(id, repo_path, diff_file)
             build_successful = self.jm().build(repo_path, deploy_path)
             if build_successful:
                 return (id, ''.join(['https://', id, '.', self.__base_url]))
@@ -143,14 +143,14 @@ class RepositoryManager:
     def log(self):
         return self.__logger
 
-    def apply_diff(self, id, diff):
+    def apply_diff(self, id, repo_path, diff):
         try:
-            repo_path = self.db().list('repo', 'path', "id='%s'" % id)[0]
+            #repo_path = self.db().list('repo', 'path', "id='%s'" % id)[0]
             old_dir = getcwd()
             chdir(repo_path)
             diff_file = self.fm().create_diff_file(id, diff)
             self.__git.apply(diff_file)
-            self.utils().update_timestamp(id)
+            #self.utils().update_timestamp(id)
             chdir(old_dir)
         except SQLError:
             raise
