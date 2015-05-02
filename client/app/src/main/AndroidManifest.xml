@@ -23,7 +23,7 @@
         </activity>
         <activity
             android:name=".ui.MainDrawerActivity"
-            android:theme="@style/NavigationDrawerTheme"
+            android:theme="@style/DrawerTheme"
             />
         <activity
             android:name=".ui.DirActivity"
