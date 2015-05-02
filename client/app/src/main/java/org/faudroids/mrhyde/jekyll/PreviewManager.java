@@ -38,7 +38,7 @@ public class PreviewManager {
 	public Observable<String> loadPreview(Repository repository, String diff) {
 		// TODO this is not that great security wise. In the long run use https://help.github.com/articles/git-automation-with-oauth-tokens/
 		String repoName = repository.getOwner().getLogin() + "/" + repository.getName();
-		String cloneUrl = "https://" + loginManager.getAccount().getAccessToken() + "@" + repository.getCloneUrl().replaceFirst("https://", "");
+		String cloneUrl = "https://" + loginManager.getAccount().getAccessToken() + ":x-oauth-basic@" + repository.getCloneUrl().replaceFirst("https://", "");
 		long expirationDate = getPreviewExpiration(repoName);
 
 		// if (expirationDate <= (System.currentTimeMillis() / 1000)) {
