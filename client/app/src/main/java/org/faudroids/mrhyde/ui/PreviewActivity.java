@@ -44,6 +44,7 @@ public class PreviewActivity extends AbstractActionBarActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setTitle(getString(R.string.title_preview));
 
         // load arguments
         Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPO);
