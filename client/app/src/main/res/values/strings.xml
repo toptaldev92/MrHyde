@@ -51,6 +51,8 @@
     <string name="commit_changed_files">%1$s changed files</string>
     <string name="commit_deleted">%1$s (deleted)</string>
     <string name="commit_git_diff">Git diff</string>
+    <string name="commit_message">Commit Message</string>
+    <string name="commit_message_default">Mr Hyde was here …</string>
     <string name="commit_action">Commit</string>
 
     <string name="version">Version</string>

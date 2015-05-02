@@ -213,7 +213,7 @@ public final class FileManager {
 	}
 
 
-	public Observable<Void> commit() {
+	public Observable<Void> commit(final String commitMessage) {
 		return getChangedFiles()
 				// get changed files
 				.flatMap(new Func1<Set<String>, Observable<String>>() {
@@ -306,7 +306,7 @@ public final class FileManager {
 					@Override
 					public Observable<Commit> call(Tree newTree) {
 						Commit commit = new Commit();
-						commit.setMessage("MrHyde update");
+						commit.setMessage(commitMessage);
 						commit.setTree(newTree);
 
 						CommitUser author = new CommitUser();

@@ -6,6 +6,7 @@ import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,18 +38,24 @@ public final class CommitActivity extends AbstractActionBarActivity {
 
 	private static final String
 			STATE_FILES_EXPAND = "STATE_FILES_EXPAND",
-			STATE_DIFF_EXPAND = "STATE_DIFF_EXPAND";
+			STATE_DIFF_EXPAND = "STATE_DIFF_EXPAND",
+			STATE_MESSAGE_EXPAND = "STATE_MESSAGE_EXPAND";
 
 	@Inject RepositoryManager repositoryManager;
 
+	@InjectView(R.id.changed_files_expand) ImageButton changedFilesExpandButton;
 	@InjectView(R.id.changed_files_title) TextView changedFilesTitleView;
 	@InjectView(R.id.changed_files) TextView changedFilesView;
+
+	@InjectView(R.id.diff_expand) ImageButton diffExpandButton;
 	@InjectView(R.id.diff_title) TextView diffTitleView;
 	@InjectView(R.id.diff) TextView diffView;
-	@InjectView(R.id.commit_button) Button commitButton;
 
-	@InjectView(R.id.changed_files_expand) ImageButton changedFilesExpandButton;
-	@InjectView(R.id.diff_expand) ImageButton diffExpandButton;
+	@InjectView(R.id.message_expand) ImageButton messageExpandButton;
+	@InjectView(R.id.message_title) TextView messageTitleView;
+	@InjectView(R.id.message) EditText messageView;
+
+	@InjectView(R.id.commit_button) Button commitButton;
 
 
 	@Override
@@ -78,7 +85,8 @@ public final class CommitActivity extends AbstractActionBarActivity {
 						// updated changed files list
 						List<String> filesList = new ArrayList<>();
 						filesList.addAll(change.changedFiles);
-						for (String deletedFile : change.deletedFiles) filesList.add(getString(R.string.commit_deleted, deletedFile));
+						for (String deletedFile : change.deletedFiles)
+							filesList.add(getString(R.string.commit_deleted, deletedFile));
 						Collections.sort(filesList);
 
 						StringBuilder builder = new StringBuilder();
@@ -103,8 +111,12 @@ public final class CommitActivity extends AbstractActionBarActivity {
 			@Override
 			public void onClick(View v) {
 				showSpinner();
+				String commitMessage = messageView.getText().toString();
+				if ("".equals(commitMessage)) commitMessage = messageView.getHint().toString();
+
 				uiUtils.showSpinner(spinnerContainerView, spinnerImageView);
-				compositeSubscription.add(fileManager.commit()
+				compositeSubscription.add(fileManager.commit(commitMessage
+				)
 						.compose(new DefaultTransformer<Void>())
 						.subscribe(new Action1<Void>() {
 							@Override
@@ -133,11 +145,16 @@ public final class CommitActivity extends AbstractActionBarActivity {
 				toggleExpand(changedFilesExpandButton, changedFilesView);
 			}
 		});
-
 		diffTitleView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				toggleExpand(diffExpandButton, diffView);
+			}
+		});
+		messageTitleView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				toggleExpand(messageExpandButton, messageView);
 			}
 		});
 
@@ -151,6 +168,10 @@ public final class CommitActivity extends AbstractActionBarActivity {
 				diffView.setVisibility(View.VISIBLE);
 				diffExpandButton.setBackgroundResource(R.drawable.ic_expand_less);
 			}
+			if (savedInstanceState.getBoolean(STATE_MESSAGE_EXPAND)) {
+				messageView.setVisibility(View.VISIBLE);
+				messageExpandButton.setBackgroundResource(R.drawable.ic_expand_less);
+			}
 		}
 	}
 
@@ -160,6 +181,7 @@ public final class CommitActivity extends AbstractActionBarActivity {
 		super.onSaveInstanceState(outState);
 		outState.putBoolean(STATE_FILES_EXPAND, changedFilesView.getVisibility() != View.GONE);
 		outState.putBoolean(STATE_DIFF_EXPAND, diffView.getVisibility() != View.GONE);
+		outState.putBoolean(STATE_MESSAGE_EXPAND, messageView.getVisibility() != View.GONE);
 	}
 
 
