@@ -7673,7 +7673,7 @@ var $$ = Object.create(null);
       if (J.contains$1$asx(this.httpRequest_0.responseText, "0")) {
         $.t.cancel$0();
         document.querySelector("#status").textContent = "Finished!";
-        window.location.assign($.redirecturl);
+        window.location.replace($.redirecturl);
       }
       return;
     }

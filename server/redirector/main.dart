@@ -44,6 +44,6 @@ void statusCodeRequestComplete(HttpRequest h){
   if (h.responseText.contains('0')){
     t.cancel();
     querySelector('#status').text = 'Finished!';
-    window.location.assign(redirecturl);
+    window.location.replace(redirecturl);
   }
 }
