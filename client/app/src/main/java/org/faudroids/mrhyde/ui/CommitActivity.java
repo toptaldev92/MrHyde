@@ -123,6 +123,7 @@ public final class CommitActivity extends AbstractActionBarActivity {
 								hideSpinner();
 								Timber.d("commit success");
 								setResult(RESULT_OK);
+								Toast.makeText(CommitActivity.this, getString(R.string.commit_success), Toast.LENGTH_LONG).show();
 								finish();
 							}
 						}, new Action1<Throwable>() {

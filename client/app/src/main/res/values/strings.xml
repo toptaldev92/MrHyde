@@ -60,6 +60,7 @@
     <string name="commit_message">Commit Message</string>
     <string name="commit_message_default">Mr Hyde was here …</string>
     <string name="commit_action">Commit</string>
+    <string name="commit_success">Commit success</string>
 
     <string name="version">Version</string>
     <string name="about">About</string>
