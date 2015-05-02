@@ -20,7 +20,7 @@ class JekyllManager:
     def build(self, build_path, deploy_path):
         cmd = ['jekyll', 'build', '--source', build_path, '--destination', deploy_path, '--config', build_path+'/_config.yml,'+OWN_DIR+'/keep_files.yml']
         with open(deploy_path+'/input.txt', 'w') as outfile:
-            status_code = subprocess.call(cmd, stdout=outfile)
+            status_code = subprocess.call(cmd, stdout=outfile, stderr=outfile)
         with open(deploy_path+'/statuscode.txt', 'w') as outfile:
             outfile.write(str(status_code))
 
