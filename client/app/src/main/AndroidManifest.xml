@@ -40,6 +40,9 @@
         <activity
             android:name=".ui.SelectRepoActivity"
             />
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="d24b6175dc50a0705e30d49f9f580ca61cbddbed" />
     </application>
 
 </manifest>
