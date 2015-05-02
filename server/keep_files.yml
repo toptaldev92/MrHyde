@@ -1,1 +1,1 @@
-keep_files: ['packages/', 'input.txt', 'main.dart', 'main.dart.js', 'main.dart.js.map', 'poller.html', 'statuscode.txt']
+keep_files: [packages/*, input.txt, main.dart, main.dart.js, main.dart.js.map, poller.html, statuscode.txt]
