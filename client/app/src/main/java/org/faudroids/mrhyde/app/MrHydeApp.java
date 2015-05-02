@@ -26,7 +26,7 @@ public final class MrHydeApp extends Application {
 				new GitHubModule(),
 				new JekyllModule());
 
-		if (!BuildConfig.DEBUG) {
+		if (BuildConfig.DEBUG) {
 			Timber.plant(new Timber.DebugTree());
 		} else {
 			Fabric.with(this, new Crashlytics());
@@ -47,7 +47,6 @@ public final class MrHydeApp extends Application {
 			Crashlytics.log(msg);
 			Crashlytics.logException(e);
 		}
-
 
 		@Override
 		public void w(String msg, Object... args) {
