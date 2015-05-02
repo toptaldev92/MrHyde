@@ -3,7 +3,7 @@ from sqlite3 import Error as SQLError
 import logging
 from time import time
 from shutil import rmtree
-from os.path import isdir, join
+from os.path import isdir, join, dirname, realpath
 from os import makedirs, chdir, getcwd
 from configparser import ParsingError as ConfigError
 import threading
@@ -17,6 +17,8 @@ import JekyllManager
 import FileManager
 import RepoUtils
 
+
+OWN_PATH = dirname(realpath(__file__))
 
 class RepositoryManager:
     __db = None
@@ -64,13 +66,13 @@ class RepositoryManager:
             return None
 
         self.db().insertData('repo', id, repo_path, deploy_path, url, int(time()))
-        shutil.copytree('redirector/', deploy_path)
+        shutil.copytree(OWN_PATH+'/redirector/', deploy_path)
 
         t = threading.Thread(target=self.init_repository_async, args=(id, deploy_path, repo_path, url, diff))
         t.daemon = True
         t.start()
 
-        return (id, ''.join(['https://', id, '.', cm.get_base_url(), '/poller.html']))
+        return (id, ''.join(['http://', id, '.', cm.get_base_url(), '/poller.html']))
 
 
     def init_repository_async(self, id, deploy_path, repo_path, url, diff):

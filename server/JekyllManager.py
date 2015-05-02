@@ -1,7 +1,9 @@
 import logging
 import subprocess
 import re
+import os
 
+OWN_DIR = os.path.dirname(os.path.realpath(__file__))
 
 class JekyllManager:
     __regex = None
@@ -16,8 +18,7 @@ class JekyllManager:
         return self.__logger
 
     def build(self, build_path, deploy_path):
-        # TODO perhaps we should do this async (big pages?)
-        cmd = ['jekyll', 'build', '--source', build_path, '--destination', deploy_path, '--config '+build_path+'/_config.yml,keep_files.yml']
+        cmd = ['jekyll', 'build', '--source', build_path, '--destination', deploy_path, '--config', build_path+'/_config.yml,'+OWN_DIR+'/keep_files.yml']
         with open(deploy_path+'/input.txt', 'w') as outfile:
             status_code = subprocess.call(cmd, stdout=outfile)
         with open(deploy_path+'/statuscode.txt', 'w') as outfile:
