@@ -115,8 +115,7 @@ public final class CommitActivity extends AbstractActionBarActivity {
 				if ("".equals(commitMessage)) commitMessage = messageView.getHint().toString();
 
 				uiUtils.showSpinner(spinnerContainerView, spinnerImageView);
-				compositeSubscription.add(fileManager.commit(commitMessage
-				)
+				compositeSubscription.add(fileManager.commit(commitMessage)
 						.compose(new DefaultTransformer<Void>())
 						.subscribe(new Action1<Void>() {
 							@Override

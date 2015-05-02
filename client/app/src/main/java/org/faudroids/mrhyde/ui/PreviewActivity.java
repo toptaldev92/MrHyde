@@ -3,6 +3,9 @@ package org.faudroids.mrhyde.ui;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.webkit.ConsoleMessage;
 import android.webkit.WebBackForwardList;
 import android.webkit.WebChromeClient;
@@ -88,6 +91,25 @@ public class PreviewActivity extends AbstractActionBarActivity {
                         }
                     }));
         }
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.preview, menu);
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_close:
+                finish();
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
 
