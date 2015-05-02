@@ -65,13 +65,15 @@ public class PreviewActivity extends AbstractActionBarActivity {
             Timber.d("restoring url " + previewUrl);
             webView.loadUrl(previewUrl);
         } else {
-            previewManager
+            showSpinner();
+            compositeSubscription.add(previewManager
                     .loadPreview(repository, diff)
                     .delay(1, TimeUnit.SECONDS)
                     .compose(new DefaultTransformer<String>())
                     .subscribe(new Action1<String>() {
                         @Override
                         public void call(String previewUrl) {
+                            hideSpinner();
                             Timber.d("getting url " + previewUrl);
                             webView.loadUrl(previewUrl);
                             PreviewActivity.this.previewUrl = previewUrl;
@@ -79,9 +81,10 @@ public class PreviewActivity extends AbstractActionBarActivity {
                     }, new Action1<Throwable>() {
                         @Override
                         public void call(Throwable throwable) {
+                            hideSpinner();
                             Timber.e(throwable, "failed to get results from server");
                         }
-                    });
+                    }));
         }
     }
 
