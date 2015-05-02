@@ -94,14 +94,18 @@
         &lt;a href=&quot;https://github.com/JakeWharton/timber&quot;&gt;Timber&lt;/a&gt; by Jake Wharton&lt;br&gt;
         &lt;a href=&quot;https://github.com/roboguice/roboguice&quot;&gt;RoboGuice&lt;/a&gt;&lt;br&gt;
         &lt;a href=&quot;https://github.com/neokree/GoogleNavigationDrawer&quot;&gt;GoogleNavigationDrawer&lt;/a&gt; by Neokree&lt;br&gt;
-        &lt;a href=&quot;http://mvnrepository.com/artifact/org.eclipse.jgit/org.eclipse.jgit/3.7.0.201502260915-r&quot;&gt;JGit Core&lt;/a&gt; by Eclipse&lt;br&gt;
-        &lt;a href=&quot;http://mvnrepository.com/artifact/org.eclipse.mylyn.github/org.eclipse.egit.github.core/2.1.5&quot;&gt;Eclipse EGit GitHub API Core&lt;/a&gt; by Eclipse&lt;br&gt;
+        &lt;a href=&quot;https://github.com/eclipse/jgit&quot;&gt;JGit Core&lt;/a&gt; by Eclipse&lt;br&gt;
+        &lt;a href=&quot;https://github.com/eclipse/egit-github&quot;&gt;Eclipse EGit GitHub API Core&lt;/a&gt; by Eclipse&lt;br&gt;
         &lt;a href=&quot;https://github.com/square/retrofit&quot;&gt;Retrofit&lt;/a&gt; by Square&lt;br&gt;
         &lt;a href=&quot;https://github.com/square/picasso&quot;&gt;Picasso&lt;/a&gt; by Square&lt;br&gt;
-        &lt;a href=&quot;http://mvnrepository.com/artifact/io.reactivex/rxjava/1.0.9&quot;&gt;RxJava&lt;/a&gt; by Reactivex&lt;br&gt;
-        &lt;a href=&quot;http://mvnrepository.com/artifact/io.reactivex/rxandroid/0.24.0&quot;&gt;RxAndroid&lt;/a&gt; by Reactivex&lt;br&gt;
+        &lt;a href=&quot;https://github.com/ReactiveX/RxJava&quot;&gt;RxJava&lt;/a&gt; by Reactivex&lt;br&gt;
+        &lt;a href=&quot;https://github.com/ReactiveX/RxAndroid&quot;&gt;RxAndroid&lt;/a&gt; by Reactivex&lt;br&gt;
         &lt;a href=&quot;https://github.com/futuresimple/android-floating-action-button&quot;&gt;Floating Action Button&lt;/a&gt; by futuresimple&lt;br&gt;
+        &lt;a href=&quot;https://github.com/google/material-design-icons&quot;&gt;Material Design Icons&lt;/a&gt; by Google Inc.&lt;br&gt;
         &lt;a href=&quot;https://source.android.com/&quot;&gt;Android Open Source Project&lt;/a&gt; by Google Inc. and the Open Handset Alliance&lt;br&gt;
+        &lt;br&gt;
+        And of course are using the awesome &lt;a href=&quot;https://developer.github.com/v3/&quot;&gt;GitHub API&lt;/a&gt;, which gives us access
+        to probably the best platform for hosting and collaborating on open source projects out there.
         &lt;br&gt;
         &lt;br&gt;
         Thanks everyone!
