@@ -2,6 +2,7 @@ package org.faudroids.mrhyde.ui;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -104,7 +105,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 						numLinesTextView.append("\n");
 					}
 				}
-
+				numLinesTextView.setTypeface(Typeface.MONOSPACE);
 			}
 		});
 
@@ -149,6 +150,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 						hideSpinner();
 						setTitle(loadedFile.node.getPath());
 						editText.setText(loadedFile.content);
+						editText.setTypeface(Typeface.MONOSPACE);
 						FileActivity.this.fileNode = loadedFile.node;
 						if (isNewFile) startEditMode();
 						else stopEditMode();
