@@ -18,7 +18,9 @@ import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.github.AuthApi;
 import org.faudroids.mrhyde.github.LoginManager;
 import org.faudroids.mrhyde.github.TokenDetails;
+import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
+import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -130,12 +132,9 @@ public final class LoginActivity extends AbstractActionBarActivity {
 						loginManager.setAccount(account);
 						onLoginSuccess();
 					}
-				}, new Action1<Throwable>() {
-					@Override
-					public void call(Throwable throwable) {
-						Timber.d(throwable, "failed to get token");
-					}
-				}));
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(this, "failed to get token"))
+						.build()));
 	}
 
 

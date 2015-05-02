@@ -111,4 +111,9 @@
     <string name="feedback_mail_chooser">Thanks for the feedback!</string>
     <string name="feedback_mail_address"> ideas@faudroids.org</string>
     <string name="feedback_mail_subject">Feedback MrHyde</string>
+
+    <string name="error_internal_title">That didn\'t work</string>
+    <string name="error_internal_message">Unfortunately there was an internal error, we are sorry! Please retry or send us an email to resolve the issue.</string>
+    <string name="error_network_title">No internet connection</string>
+    <string name="error_network_message">Failed to perform request due to a problem with the internet connection</string>
 </resources>

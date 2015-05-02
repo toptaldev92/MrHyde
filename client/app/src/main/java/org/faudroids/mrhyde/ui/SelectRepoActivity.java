@@ -2,11 +2,13 @@ package org.faudroids.mrhyde.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
+import org.faudroids.mrhyde.utils.ErrorActionBuilder;
+import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,7 +17,6 @@ import roboguice.inject.ContentView;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func2;
-import timber.log.Timber;
 
 @ContentView(R.layout.activity_select_repo)
 public class SelectRepoActivity extends AbstractActionBarActivity {
@@ -71,15 +72,10 @@ public class SelectRepoActivity extends AbstractActionBarActivity {
                                                hideSpinner();
                                                repoAdapter.setItems(repositories);
                                            }
-                                       }, new Action1<Throwable>() {
-                                           @Override
-                                           public void call(Throwable throwable) {
-                                               hideSpinner();
-                                               Toast.makeText(getActivity(), "That didn't work, check log", Toast.LENGTH_LONG).show();
-                                               Timber.e(throwable, "failed to get repos");
-                                           }
-                                       }
-                            ));
+                                       }, new ErrorActionBuilder()
+                                            .add(new DefaultErrorAction(this.getActivity(), "failed to get repos"))
+                                            .add(new HideSpinnerAction(this))
+                                            .build()));
         }
 
         @Override

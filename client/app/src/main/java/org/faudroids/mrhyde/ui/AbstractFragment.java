@@ -15,7 +15,7 @@ import roboguice.inject.InjectView;
 import rx.subscriptions.CompositeSubscription;
 
 
-abstract class AbstractFragment extends RoboFragment {
+public abstract class AbstractFragment extends RoboFragment {
 
 	private final int layoutResource;
 	protected CompositeSubscription compositeSubscription = new CompositeSubscription();
@@ -42,12 +42,12 @@ abstract class AbstractFragment extends RoboFragment {
 	}
 
 
-	protected void showSpinner() {
+	public void showSpinner() {
 		uiUtils.showSpinner(spinnerContainerView, spinnerImageView);
 	}
 
 
-	protected void hideSpinner() {
+	public void hideSpinner() {
 		uiUtils.hideSpinner(spinnerContainerView, spinnerImageView);
 	}
 

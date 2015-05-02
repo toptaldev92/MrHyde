@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
@@ -21,7 +20,10 @@ import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.NodeUtils;
 import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
+import org.faudroids.mrhyde.utils.ErrorActionBuilder;
+import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.io.IOException;
 
@@ -151,15 +153,10 @@ public final class FileActivity extends AbstractActionBarActivity {
 						if (isNewFile) startEditMode();
 						else stopEditMode();
 					}
-				}, new Action1<Throwable>() {
-					@Override
-					public void call(Throwable throwable) {
-						hideSpinner();
-						Toast.makeText(FileActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
-						Timber.e(throwable, "failed to get content");
-					}
-				}));
-
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(this, "failed to get file content"))
+						.add(new HideSpinnerAction(this))
+						.build()));
 	}
 
 

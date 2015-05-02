@@ -15,7 +15,10 @@ import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
+import org.faudroids.mrhyde.utils.ErrorActionBuilder;
+import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -99,12 +102,9 @@ public final class CommitActivity extends AbstractActionBarActivity {
 						// update diff
 						diffView.setText(change.diff);
 					}
-				}, new Action1<Throwable>() {
-					@Override
-					public void call(Throwable throwable) {
-						Timber.e(throwable, "failed to load changes");
-					}
-				}));
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(this, "failed to load git changes"))
+						.build()));
 
 		// setup commit button
 		commitButton.setOnClickListener(new View.OnClickListener() {
@@ -126,15 +126,10 @@ public final class CommitActivity extends AbstractActionBarActivity {
 								Toast.makeText(CommitActivity.this, getString(R.string.commit_success), Toast.LENGTH_LONG).show();
 								finish();
 							}
-						}, new Action1<Throwable>() {
-							@Override
-							public void call(Throwable throwable) {
-								hideSpinner();
-								Timber.e(throwable, "commit failed");
-								Toast.makeText(CommitActivity.this, "Commit error", Toast.LENGTH_SHORT).show();
-
-							}
-						}));
+						}, new ErrorActionBuilder()
+								.add(new DefaultErrorAction(CommitActivity.this, "failed to commit"))
+								.add(new HideSpinnerAction(CommitActivity.this))
+								.build()));
 			}
 		});
 

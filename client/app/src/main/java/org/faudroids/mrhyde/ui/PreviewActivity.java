@@ -15,9 +15,10 @@ import android.webkit.WebViewClient;
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.PreviewManager;
+import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
-
-import java.util.concurrent.TimeUnit;
+import org.faudroids.mrhyde.utils.ErrorActionBuilder;
+import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import javax.inject.Inject;
 
@@ -74,23 +75,19 @@ public class PreviewActivity extends AbstractActionBarActivity {
             showSpinner();
             compositeSubscription.add(previewManager
                     .loadPreview(repository, diff)
-                    .delay(0, TimeUnit.SECONDS)
                     .compose(new DefaultTransformer<String>())
                     .subscribe(new Action1<String>() {
-                        @Override
-                        public void call(String previewUrl) {
-                            hideSpinner();
-                            Timber.d("getting url " + previewUrl);
-                            webView.loadUrl(previewUrl);
-                            // startBrowser(previewUrl);
-                        }
-                    }, new Action1<Throwable>() {
-                        @Override
-                        public void call(Throwable throwable) {
-                            hideSpinner();
-                            Timber.e(throwable, "failed to get results from server");
-                        }
-                    }));
+                                   @Override
+                                   public void call(String previewUrl) {
+                                       Timber.d("getting url " + previewUrl);
+                                       webView.loadUrl(previewUrl);
+                                       hideSpinner();
+                                   }
+                               },
+                            new ErrorActionBuilder()
+                                    .add(new DefaultErrorAction(this, "failed to get preview from server"))
+                                    .add(new HideSpinnerAction(this))
+                                    .build()));
         }
     }
 

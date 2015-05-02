@@ -27,7 +27,10 @@ import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.NodeUtils;
 import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
+import org.faudroids.mrhyde.utils.ErrorActionBuilder;
+import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -39,7 +42,6 @@ import javax.inject.Inject;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 import rx.functions.Action1;
-import timber.log.Timber;
 
 @ContentView(R.layout.activity_dir)
 public final class DirActivity extends AbstractActionBarActivity implements DirActionModeListener.ActionSelectionListener {
@@ -141,7 +143,8 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
 		MenuItem item = menu.findItem(R.id.action_star_repository);
-		if (repositoryManager.isRepositoryStarred(repository)) item.setTitle(getString(R.string.action_unstar_repository));
+		if (repositoryManager.isRepositoryStarred(repository))
+			item.setTitle(getString(R.string.action_unstar_repository));
 		else item.setTitle(getString(R.string.action_star_repository));
 		return super.onPrepareOptionsMenu(menu);
 	}
@@ -158,7 +161,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()) {
+		switch (item.getItemId()) {
 			case R.id.action_commit:
 				Intent commitIntent = new Intent(this, CommitActivity.class);
 				commitIntent.putExtra(CommitActivity.EXTRA_REPOSITORY, repository);
@@ -175,12 +178,9 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 						previewIntent.putExtra(PreviewActivity.EXTRA_DIFF, diff);
 						startActivity(previewIntent);
 					}
-				}, new Action1<Throwable>() {
-					@Override
-					public void call(Throwable throwable) {
-						Timber.e(throwable, "failed to load changes");
-					}
-				}));
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(this, "failed to load changes"))
+						.build()));
 				return true;
 
 			case R.id.action_star_repository:
@@ -229,7 +229,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	@Override
 	public void onDelete(FileNode fileNode) {
 		showSpinner();
-		fileManager.deleteFile(fileNode)
+		compositeSubscription.add(fileManager.deleteFile(fileNode)
 				.compose(new DefaultTransformer<Void>())
 				.subscribe(new Action1<Void>() {
 					@Override
@@ -237,13 +237,10 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 						hideSpinner();
 						updateTree(null);
 					}
-				}, new Action1<Throwable>() {
-					@Override
-					public void call(Throwable throwable) {
-						hideSpinner();
-						Timber.e(throwable, "failed to delete file");
-					}
-				});
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(this, "failed to delete file"))
+						.add(new HideSpinnerAction(this))
+						.build()));
 	}
 
 
@@ -297,14 +294,10 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 						if (savedInstanceState != null)
 							pathNodeAdapter.onRestoreInstanceState(savedInstanceState);
 					}
-				}, new Action1<Throwable>() {
-					@Override
-					public void call(Throwable throwable) {
-						hideSpinner();
-						Toast.makeText(DirActivity.this, "That didn't work, check log", Toast.LENGTH_LONG).show();
-						Timber.e(throwable, "failed to get content");
-					}
-				}));
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(this, "failed to get tree"))
+						.add(new HideSpinnerAction(this))
+						.build()));
 	}
 
 

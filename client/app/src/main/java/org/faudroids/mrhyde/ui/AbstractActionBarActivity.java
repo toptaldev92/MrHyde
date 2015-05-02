@@ -15,7 +15,7 @@ import roboguice.inject.InjectView;
 import rx.subscriptions.CompositeSubscription;
 
 
-abstract class AbstractActionBarActivity extends RoboActionBarActivity {
+public abstract class AbstractActionBarActivity extends RoboActionBarActivity {
 
 	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
 	@Inject UiUtils uiUtils;
@@ -55,12 +55,12 @@ abstract class AbstractActionBarActivity extends RoboActionBarActivity {
 	}
 
 
-	protected void showSpinner() {
+	public void showSpinner() {
 		uiUtils.showSpinner(spinnerContainerView, spinnerImageView);
 	}
 
 
-	protected void hideSpinner() {
+	public void hideSpinner() {
 		uiUtils.hideSpinner(spinnerContainerView, spinnerImageView);
 	}
 
