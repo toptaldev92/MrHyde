@@ -3,30 +3,45 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
+    android:background="@color/gray_light_2"
     >
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent"
+        >
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:layout_marginLeft="@dimen/list_horizontal_margin"
+            android:layout_marginRight="@dimen/list_horizontal_margin"
+            android:paddingLeft="@dimen/activity_vertical_margin"
+            android:paddingRight="@dimen/activity_vertical_margin"
+            android:paddingTop="@dimen/activity_vertical_margin"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:background="@android:color/white"
+            >
 
             <TextView
+                android:id="@+id/line_numbers"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textSize="14dp"
-                android:id="@+id/numLines"/>
+                android:textSize="14sp"
+                android:textColor="@color/gray_light_2"
+                android:text="1\n2\n3\n4\n"
+                />
 
             <EditText
-                android:id="@+id/title"
-                android:textSize="14dp"
+                android:id="@+id/content"
+                android:textSize="14sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
+                android:background="@android:color/transparent"
+                android:text="Hello world hello world\nThis is some serious content"
                 />
 
         </LinearLayout>

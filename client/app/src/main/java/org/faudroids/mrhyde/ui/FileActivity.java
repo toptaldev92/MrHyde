@@ -38,9 +38,9 @@ public final class FileActivity extends AbstractActionBarActivity {
 
 
 	@Inject RepositoryManager repositoryManager;
-	@InjectView(R.id.title) EditText editText;
+	@InjectView(R.id.content) EditText editText;
 	@InjectView(R.id.submit) Button submitButton;
-	@InjectView(R.id.numLines) TextView numLinesTextView;
+	@InjectView(R.id.line_numbers) TextView numLinesTextView;
 
 	@Inject NodeUtils nodeUtils;
 	private FileManager fileManager;
