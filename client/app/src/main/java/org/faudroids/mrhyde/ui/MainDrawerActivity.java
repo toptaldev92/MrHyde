@@ -30,7 +30,7 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity {
                 account.getLogin(),
                 account.getEmail(),
                 account.getAvatar(),
-                null));
+                R.drawable.drawer_background));
         setBackPattern(MaterialNavigationDrawer.BACKPATTERN_BACK_TO_FIRST);
 
         //settings and feedback
