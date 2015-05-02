@@ -139,6 +139,15 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 
 	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem item = menu.findItem(R.id.action_star_repository);
+		if (repositoryManager.isRepositoryStarred(repository)) item.setTitle(getString(R.string.action_unstar_repository));
+		else item.setTitle(getString(R.string.action_star_repository));
+		return super.onPrepareOptionsMenu(menu);
+	}
+
+
+	@Override
 	public void onBackPressed() {
 		// only go back when at the top dir
 		if (!pathNodeAdapter.onBackPressed()) {
@@ -167,11 +176,21 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 						startActivity(previewIntent);
 					}
 				}, new Action1<Throwable>() {
-							@Override
-							public void call(Throwable throwable) {
-								Timber.e(throwable, "failed to load changes");
-							}
+					@Override
+					public void call(Throwable throwable) {
+						Timber.e(throwable, "failed to load changes");
+					}
 				}));
+				return true;
+
+			case R.id.action_star_repository:
+				if (repositoryManager.isRepositoryStarred(repository)) {
+					repositoryManager.unstarRepsitory(repository);
+					Toast.makeText(this, getString(R.string.unstared_toast), Toast.LENGTH_SHORT).show();
+				} else {
+					repositoryManager.starRepository(repository);
+					Toast.makeText(this, getString(R.string.stared_toast), Toast.LENGTH_SHORT).show();
+				}
 				return true;
 
 			case R.id.action_discard_changes:

@@ -18,9 +18,16 @@
         />
 
     <item
+        android:id="@+id/action_star_repository"
+        android:title="@string/action_star_repository"
+        app:showAsAction="never"
+        />
+
+    <item
         android:id="@+id/action_discard_changes"
         android:title="@string/action_discard_changes"
         app:showAsAction="never"
         />
+
 
 </menu>

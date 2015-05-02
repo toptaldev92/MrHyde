@@ -27,6 +27,8 @@
     <string name="action_delete">Delete</string>
     <string name="action_commit">Commit</string>
     <string name="action_preview">Preview</string>
+    <string name="action_star_repository">Star repository</string>
+    <string name="action_unstar_repository">Unstar repository</string>
     <string name="action_discard_changes">Discard changes</string>
 
     <string name="repos_last_update">Last updated on %1$s</string>
@@ -42,6 +44,9 @@
 
     <string name="unstar_title">Unstar repository</string>
     <string name="unstar_message">Remove repository from favourites list?</string>
+
+    <string name="stared_toast">Repository starred</string>
+    <string name="unstared_toast">Repository unstarred</string>
 
     <string name="commit_changed_files">%1$s changed files</string>
     <string name="commit_deleted">%1$s (deleted)</string>

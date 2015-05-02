@@ -47,14 +47,17 @@ public final class StarredReposFragment extends AbstractReposFragment {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode != Activity.RESULT_OK) return;
+		if (resultCode != Activity.RESULT_OK) {
+			super.onActivityResult(requestCode, resultCode, data);
+		}
 		switch (requestCode) {
 			case REQUEST_SELECT_REPOSITORY:
 				Repository repository = (Repository) data.getSerializableExtra(SelectRepoActivity.RESULT_REPOSITORY);
 				repositoryManager.starRepository(repository);
 				loadRepositories();
-				break;
+				return;
 		}
+		super.onActivityResult(requestCode, resultCode, data);
 	}
 
 
