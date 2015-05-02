@@ -13,6 +13,7 @@ import org.eclipse.egit.github.core.Tree;
 import org.eclipse.egit.github.core.TreeEntry;
 import org.eclipse.egit.github.core.TypedResource;
 import org.faudroids.mrhyde.github.ApiWrapper;
+import org.faudroids.mrhyde.github.LoginManager;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -38,6 +39,7 @@ import timber.log.Timber;
 
 public final class FileManager {
 
+	private final LoginManager loginManager;
 	private final GitManager gitManager;
 	private final ApiWrapper apiWrapper;
 	private final Repository repository;
@@ -47,7 +49,8 @@ public final class FileManager {
 	private String cachedBaseCommitSha = null;
 
 
-	FileManager(Context context, ApiWrapper apiWrapper, Repository repository) {
+	FileManager(Context context, LoginManager loginManager, ApiWrapper apiWrapper, Repository repository) {
+		this.loginManager = loginManager;
 		this.apiWrapper = apiWrapper;
 		this.repository = repository;
 		this.rootDir = new File(context.getFilesDir(), repository.getOwner().getLogin() + "/" + repository.getName());
@@ -310,8 +313,8 @@ public final class FileManager {
 						commit.setTree(newTree);
 
 						CommitUser author = new CommitUser();
-						author.setName("MrHyde");
-						author.setEmail("faudroids@gmail.com");
+						author.setName(loginManager.getAccount().getLogin());
+						author.setEmail(loginManager.getAccount().getEmail());
 						author.setDate(Calendar.getInstance().getTime());
 						commit.setAuthor(author);
 						commit.setCommitter(author);

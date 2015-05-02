@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.User;
 import org.faudroids.mrhyde.github.ApiWrapper;
+import org.faudroids.mrhyde.github.LoginManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,14 +31,16 @@ public final class RepositoryManager {
 	private static final String PREFS_NAME = RepositoryManager.class.getName();
 
 	private final Context context;
+	private final LoginManager loginManager;
 	private final ApiWrapper apiWrapper;
 	private final Map<String, FileManager> fileManagerMap = new HashMap<>();
 	private Map<String, Repository> allRepositoryMap, starredRepositoryMap;
 
 
 	@Inject
-	RepositoryManager(Context context, ApiWrapper apiWrapper) {
+	RepositoryManager(Context context, LoginManager loginManager, ApiWrapper apiWrapper) {
 		this.context = context;
+		this.loginManager = loginManager;
 		this.apiWrapper = apiWrapper;
 	}
 
@@ -45,7 +48,7 @@ public final class RepositoryManager {
 	public FileManager getFileManager(Repository repository) {
 		FileManager fileManager = fileManagerMap.get(getFullRepoName(repository));
 		if (fileManager == null) {
-			fileManager = new FileManager(context, apiWrapper, repository);
+			fileManager = new FileManager(context, loginManager, apiWrapper, repository);
 			fileManagerMap.put(getFullRepoName(repository), fileManager);
 		}
 		return fileManager;
