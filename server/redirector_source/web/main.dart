@@ -11,10 +11,11 @@ Timer t;
 void  main() {
   s = '';
   querySelector('#status').text = 'Getting Jekyll Output';
-  t = new Timer.periodic(new Duration(seconds:1), timerTrigger);
+  t = new Timer.periodic(new Duration(seconds:3), timerTrigger);
 }
 
 void timerTrigger(Timer t){
+  print('Timer');
   var httpRequest = new HttpRequest();
   httpRequest
     ..open('GET', path+outputfile)
@@ -23,6 +24,7 @@ void timerTrigger(Timer t){
 }
 
 void outputRequestComplete(HttpRequest h){
+  print('Log fetched');
   var response = h.responseText.replaceFirst(s, '');
   s = s + response;
   List<String> list = response.split('\n');
@@ -41,7 +43,9 @@ void outputRequestComplete(HttpRequest h){
 }
 
 void statusCodeRequestComplete(HttpRequest h){
+  print('Statuscode fetched'+h.responseText);
   if (h.responseText.contains('0')){
+    print('Redirect');
     t.cancel();
     querySelector('#status').text = 'Finished!';
     window.location.replace(redirecturl);

@@ -7615,10 +7615,11 @@ var $$ = Object.create(null);
   main: [function() {
     $.s = "";
     document.querySelector("#status").textContent = "Getting Jekyll Output";
-    $.t = P.Timer_Timer$periodic(P.Duration$(0, 0, 0, 0, 0, 1), F.timerTrigger$closure());
+    $.t = P.Timer_Timer$periodic(P.Duration$(0, 0, 0, 0, 0, 3), F.timerTrigger$closure());
   }, "call$0", "main$closure", 0, 0, 2],
   timerTrigger: [function(t) {
     var httpRequest, t1, t2;
+    P.print("Timer");
     httpRequest = new XMLHttpRequest();
     t1 = $.get$path();
     t2 = $.outputfile;
@@ -7631,6 +7632,7 @@ var $$ = Object.create(null);
   }, "call$1", "timerTrigger$closure", 2, 0, 7],
   outputRequestComplete: function(h) {
     var t1, t2, response, list, line, element, httpRequest;
+    P.print("Log fetched");
     t1 = h.responseText;
     t2 = $.s;
     t1.toString;
@@ -7670,7 +7672,10 @@ var $$ = Object.create(null);
   outputRequestComplete_closure: {
     "^": "Closure:10;httpRequest_0",
     call$1: function(e) {
-      if (J.contains$1$asx(this.httpRequest_0.responseText, "0")) {
+      var t1 = this.httpRequest_0;
+      P.print(C.JSString_methods.$add("Statuscode fetched", t1.responseText));
+      if (J.contains$1$asx(t1.responseText, "0")) {
+        P.print("Redirect");
         $.t.cancel$0();
         document.querySelector("#status").textContent = "Finished!";
         window.location.replace($.redirecturl);
