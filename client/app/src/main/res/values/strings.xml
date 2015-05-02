@@ -49,6 +49,11 @@
     <string name="stared_toast">Repository starred</string>
     <string name="unstared_toast">Repository unstarred</string>
 
+    <string name="save_title">Unsaved changes</string>
+    <string name="save_message">Save changes made to this file?</string>
+    <string name="save_ok">Save</string>
+    <string name="save_cancel">Discard</string>
+
     <string name="commit_changed_files">%1$s changed files</string>
     <string name="commit_deleted">%1$s (deleted)</string>
     <string name="commit_git_diff">Git diff</string>

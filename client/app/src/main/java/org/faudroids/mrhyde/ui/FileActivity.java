@@ -1,13 +1,18 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
@@ -38,8 +43,10 @@ public final class FileActivity extends AbstractActionBarActivity {
 
 
 	@Inject RepositoryManager repositoryManager;
+	@Inject InputMethodManager inputMethodManager;
+
 	@InjectView(R.id.content) EditText editText;
-	@InjectView(R.id.submit) Button submitButton;
+	@InjectView(R.id.edit) FloatingActionButton editButton;
 	@InjectView(R.id.line_numbers) TextView numLinesTextView;
 
 	@Inject NodeUtils nodeUtils;
@@ -56,54 +63,54 @@ public final class FileActivity extends AbstractActionBarActivity {
 		final Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		fileManager = repositoryManager.getFileManager(repository);
 
-		// setup ui
+		// start editing on long click
+		editText.setOnLongClickListener(new View.OnLongClickListener() {
+			@Override
+			public boolean onLongClick(View v) {
+				if (isEditMode()) return false;
+				startEditMode();
+				return true;
+			}
+		});
+
+		// setup line numbers
 		editText.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
 			}
 
 			@Override
 			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
 			}
 
 			@Override
-			public void afterTextChanged(Editable s)
-			{
+			public void afterTextChanged(Editable s) {
 				numLinesTextView.setText("");
 				int numLines = editText.getLineCount();
 				int numCount = 1;
-				for(int i = 0; i < numLines; ++i)
-				{
+				for (int i = 0; i < numLines; ++i) {
 					int start = editText.getLayout().getLineStart(i);
-					if(start == 0)
-					{
+					if (start == 0) {
 						numLinesTextView.append(numCount + "\n");
 						numCount++;
-					}
-					else if(editText.getText().charAt(start-1) == '\n') {
+
+					} else if (editText.getText().charAt(start - 1) == '\n') {
 						numLinesTextView.append(numCount + "\n");
 						numCount++;
-					}
-					else {
+
+					} else {
 						numLinesTextView.append("\n");
 					}
 				}
 
 			}
 		});
-		submitButton.setOnClickListener(new View.OnClickListener() {
+
+		// setup edit button
+		editButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				try {
-					fileManager.writeFile(fileNode, editText.getText().toString());
-				} catch (IOException ioe) {
-					Timber.e(ioe, "failed to write file");
-					// TODO
-				}
-				setResult(RESULT_OK);
-				finish();
+				startEditMode();
 			}
 		});
 
@@ -151,6 +158,89 @@ public final class FileActivity extends AbstractActionBarActivity {
 					}
 				}));
 
+	}
+
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch(item.getItemId()) {
+			case android.R.id.home:
+				Timber.d("back pressed");
+				if (isEditMode()) stopEditMode();
+				else onBackPressed();
+				return true;
+
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+
+	@Override
+	public void onBackPressed() {
+		if (isEditMode()) {
+			new AlertDialog.Builder(this)
+					.setTitle(R.string.save_title)
+					.setMessage(R.string.save_message)
+					.setCancelable(false)
+					.setPositiveButton(getString(R.string.save_ok), new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							saveFile();
+							returnResult();
+						}
+					})
+					.setNegativeButton(getString(R.string.save_cancel), new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							returnResult();
+						}
+					})
+					.show();
+
+		} else {
+			returnResult();
+		}
+	}
+
+
+	private void saveFile() {
+		try {
+			fileManager.writeFile(fileNode, editText.getText().toString());
+		} catch (IOException ioe) {
+			Timber.e(ioe, "failed to write file");
+			// TODO
+		}
+	}
+
+
+	private void returnResult() {
+		setResult(RESULT_OK);
+		finish();
+	}
+
+
+	private void startEditMode() {
+		editText.setFocusable(true);
+		editText.setFocusableInTouchMode(true);
+		editText.requestFocus();
+		editButton.setVisibility(View.GONE);
+		getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_done);
+		inputMethodManager.showSoftInput(editText, 0);
+	}
+
+
+	private void stopEditMode() {
+		inputMethodManager.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+		getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_arrow_back);
+		editText.setFocusable(false);
+		editText.setFocusableInTouchMode(false);
+		editButton.setVisibility(View.VISIBLE);
+		saveFile();
+	}
+
+
+	private boolean isEditMode() {
+		return editText.isFocusable();
 	}
 
 

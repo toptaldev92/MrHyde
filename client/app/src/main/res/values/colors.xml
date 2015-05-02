@@ -13,4 +13,7 @@
 
     <color name="red">#ffdd0000</color>
     <color name="red_dark">#ffad0000</color>
+
+    <color name="blue">#ff0b98dd</color>
+    <color name="blue_dark">#ff096b9b</color>
 </resources>
