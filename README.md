@@ -1,6 +1,26 @@
 # MrHyde
 Avoid turning yourself into a raging monster by using our Android app to ease blogging using Jekyll and GitHub pages.
 
+The repository is devided into two parts:
+- **client**: the android application which has been published on the [Google Playstore](https://play.google.com/store/apps/details?id=org.faudroids.mrhyde)
+- **server**: the server which handles creating and temporarily hosting Jekyll previews
+
+
+## Client
+Setting up the android client is fairly straight forward. The only things that's missing are a number of API keys which should be added to the `app/src/main/res/values` folder. They are:
+
+```xml
+<resources>
+    <string name="gitHubClientSecret">YOUR_GITHUB_CLIENT_SECRET</string>
+    <string name="gitHubClientId">YOU_GITHUB_ID</string>
+    <string name="jekyllServerClientSecret">CLIENT_SECRET_FOR_MRHYDE_SERVER</string>
+</resources>
+```
+
+For getting a proper GitHub client id and secret you will have to [register your application](https://github.com/settings/applications/new) with GitHub.
+
+The `jekyllServerClientSecret` should match the one configured on the MrHyde server. See the server configuration section below for details.
+
 
 ## Server
 The MrHyde Server gets requests from the clients, builds the page and returns a link to the built page to the clients, so they can preview it.
