@@ -7615,7 +7615,7 @@ var $$ = Object.create(null);
   main: [function() {
     $.s = "";
     document.querySelector("#status").textContent = "Getting Jekyll Output";
-    $.t = P.Timer_Timer$periodic(P.Duration$(0, 0, 0, 0, 0, 3), F.timerTrigger$closure());
+    $.t = P.Timer_Timer$periodic(P.Duration$(0, 0, 0, 0, 0, 5), F.timerTrigger$closure());
   }, "call$0", "main$closure", 0, 0, 2],
   timerTrigger: [function(t) {
     var httpRequest, t1, t2;

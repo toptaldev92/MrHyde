@@ -11,7 +11,7 @@ Timer t;
 void  main() {
   s = '';
   querySelector('#status').text = 'Getting Jekyll Output';
-  t = new Timer.periodic(new Duration(seconds:3), timerTrigger);
+  t = new Timer.periodic(new Duration(seconds:5), timerTrigger);
 }
 
 void timerTrigger(Timer t){
