@@ -61,3 +61,10 @@ class ConfigManager:
         except configparser.Error:
             self.__logger.error('Unable to parse config file.')
             raise
+
+    def get_cleanup_time(self):
+        try:
+            return self.__config['caretaker']['time_limit']
+        except configparser.Error:
+            self.__logger.error('Unable to parse config file.')
+            raise

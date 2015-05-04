@@ -10,6 +10,8 @@ import DbHandler
 import logging
 from time import time
 
+logging.basicConfig(filename='caretaker.log', level=logging.DEBUG)
+
 
 class Caretaker:
     def __init__(self, config_file):
@@ -32,10 +34,11 @@ class Caretaker:
         return self.__logger
 
     def cleanup(self):
-        timestamp = int(time()-(24*3600))
+        timestamp = int(time()-self.get_config().get_cleanup_time())
         try:
             old_repos = self.database().list('repo', '', 'last_used < %s' % timestamp)
             for repo in old_repos:
+                self.log().info('Deleting repo %s' % repo['path'])
                 rmtree(repo['path'])
                 rmtree(repo['deploy_path'])
                 self.database().deleteData('repo', "id='%s'" % repo['id'])
