@@ -50,6 +50,7 @@ public final class StarredReposFragment extends AbstractReposFragment {
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode != Activity.RESULT_OK) {
 			super.onActivityResult(requestCode, resultCode, data);
+			return;
 		}
 		switch (requestCode) {
 			case REQUEST_SELECT_REPOSITORY:
