@@ -34,7 +34,7 @@ public final class RepositoryManager {
 	private final LoginManager loginManager;
 	private final ApiWrapper apiWrapper;
 	private final Map<String, FileManager> fileManagerMap = new HashMap<>();
-	private Map<String, Repository> allRepositoryMap, starredRepositoryMap;
+	private Map<String, Repository> allRepositoryMap, favouriteRepositoriesMap;
 
 
 	@Inject
@@ -97,29 +97,29 @@ public final class RepositoryManager {
 	}
 
 
-	public Observable<Collection<Repository>> getStarredRepositories() {
+	public Observable<Collection<Repository>> getFavouriteRepositories() {
 		// get cached values
-		if (starredRepositoryMap != null) return Observable.just(starredRepositoryMap.values());
+		if (favouriteRepositoriesMap != null) return Observable.just(favouriteRepositoriesMap.values());
 
-		// get starred repos from all cached
+		// get favourite repos from all cached
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		Set<String> repoNames = prefs.getAll().keySet();
 
 		if (allRepositoryMap != null) {
-			starredRepositoryMap = new HashMap<>();
+			favouriteRepositoriesMap = new HashMap<>();
 			for (String repoName : repoNames) {
 				Repository repo = allRepositoryMap.get(repoName);
 				if (repo == null) {
-					Timber.w("failed to find starred repo " + repoName);
-					unstarRepsitory(repoName);
+					Timber.w("failed to find favourite repo " + repoName);
+					unmarkRepositoryAsFavourite(repoName);
 					continue;
 				}
-				starredRepositoryMap.put(repoName, allRepositoryMap.get(repoName));
+				favouriteRepositoriesMap.put(repoName, allRepositoryMap.get(repoName));
 			}
-			return Observable.just(starredRepositoryMap.values());
+			return Observable.just(favouriteRepositoriesMap.values());
 		}
 
-		// download starred repos
+		// download favourite repos
 		return Observable.from(repoNames)
 				.flatMap(new Func1<String, Observable<Repository>>() {
 					@Override
@@ -145,45 +145,45 @@ public final class RepositoryManager {
 				.flatMap(new Func1<List<Repository>, Observable<Collection<Repository>>>() {
 					@Override
 					public Observable<Collection<Repository>> call(List<Repository> repositories) {
-						starredRepositoryMap = new HashMap<>();
-						for (Repository repo : repositories) starredRepositoryMap.put(getFullRepoName(repo), repo);
+						favouriteRepositoriesMap = new HashMap<>();
+						for (Repository repo : repositories) favouriteRepositoriesMap.put(getFullRepoName(repo), repo);
 						return Observable.<Collection<Repository>>just(repositories);
 					}
 				});
 	}
 
 
-	public void starRepository(Repository repository) {
-		Timber.d("staring repo " + getFullRepoName(repository));
+	public void markRepositoryAsFavourite(Repository repository) {
+		Timber.d("marking repo " + getFullRepoName(repository) + " as favourite");
 		SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
 		editor.putString(getFullRepoName(repository), "");
 		editor.commit();
 
-		if (starredRepositoryMap != null) {
-			starredRepositoryMap.put(getFullRepoName(repository), repository);
+		if (favouriteRepositoriesMap != null) {
+			favouriteRepositoriesMap.put(getFullRepoName(repository), repository);
 		}
 	}
 
 
-	public boolean isRepositoryStarred(Repository repository) {
+	public boolean isRepositoryFavourite(Repository repository) {
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
 		return prefs.contains(getFullRepoName(repository));
 	}
 
 
-	public void unstarRepsitory(Repository repository) {
-		unstarRepsitory(getFullRepoName(repository));
+	public void unmarkRepositoryAsFavourite(Repository repository) {
+		unmarkRepositoryAsFavourite(getFullRepoName(repository));
 	}
 
 
-	private void unstarRepsitory(String repoName) {
-		Timber.d("unstaring repo " + repoName);
+	private void unmarkRepositoryAsFavourite(String repoName) {
+		Timber.d("unmarking repo " + repoName + " as favourite");
 		SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
 		editor.remove(repoName);
 		editor.commit();
 
-		if (starredRepositoryMap != null) {
-			starredRepositoryMap.remove(repoName);
+		if (favouriteRepositoriesMap != null) {
+			favouriteRepositoriesMap.remove(repoName);
 		}
 	}
 

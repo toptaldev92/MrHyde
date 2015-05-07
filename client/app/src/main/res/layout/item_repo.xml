@@ -27,7 +27,7 @@
             />
 
         <ImageView
-            android:id="@+id/star"
+            android:id="@+id/heart"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
@@ -40,7 +40,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/icon"
-            android:layout_toLeftOf="@id/star"
+            android:layout_toLeftOf="@id/heart"
             android:layout_centerVertical="true"
             android:layout_marginLeft="20dp"
             android:orientation="vertical"

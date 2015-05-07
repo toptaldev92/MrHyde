@@ -20,7 +20,7 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity {
     @Override
     public void init(Bundle savedInstanceState) {
         // repositories
-        addSection(newSection(getString(R.string.section_starred_repositories), new StarredReposFragment()));
+        addSection(newSection(getString(R.string.section_favourite_repositories), new FavouriteReposFragment()));
         addSection(newSection(getString(R.string.section_all_repositories), new AllReposFragment()));
 
         //account information

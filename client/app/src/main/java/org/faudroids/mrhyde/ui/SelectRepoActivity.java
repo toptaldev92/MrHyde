@@ -46,16 +46,16 @@ public class SelectRepoActivity extends AbstractActionBarActivity {
             compositeSubscription.add(
                     Observable.zip(
                             repositoryManager.getAllRepositories(),
-                            repositoryManager.getStarredRepositories(),
+                            repositoryManager.getFavouriteRepositories(),
                             new Func2<Collection<Repository>, Collection<Repository>, Collection<Repository>>() {
                                 @Override
-                                public Collection<Repository> call(Collection<Repository> allRepos, Collection<Repository> starredRepos) {
-                                    // show only not starred repositories
+                                public Collection<Repository> call(Collection<Repository> allRepos, Collection<Repository> favouriteRepos) {
+                                    // show only not favourite repositories
                                     Collection<Repository> filteredRepos = new ArrayList<>();
                                     for (Repository repo : allRepos) {
                                         boolean found = false;
-                                        for (Repository starredRepo : starredRepos) {
-                                            if (repo.getId() == starredRepo.getId()) {
+                                        for (Repository favouriteRepo : favouriteRepos) {
+                                            if (repo.getId() == favouriteRepo.getId()) {
                                                 found = true;
                                                 break;
                                             }

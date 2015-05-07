@@ -142,10 +142,10 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		MenuItem item = menu.findItem(R.id.action_star_repository);
-		if (repositoryManager.isRepositoryStarred(repository))
-			item.setTitle(getString(R.string.action_unstar_repository));
-		else item.setTitle(getString(R.string.action_star_repository));
+		MenuItem item = menu.findItem(R.id.action_mark_repository);
+		if (repositoryManager.isRepositoryFavourite(repository))
+			item.setTitle(getString(R.string.action_unmark_repository));
+		else item.setTitle(getString(R.string.action_mark_repository));
 		return super.onPrepareOptionsMenu(menu);
 	}
 
@@ -183,13 +183,13 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 						.build()));
 				return true;
 
-			case R.id.action_star_repository:
-				if (repositoryManager.isRepositoryStarred(repository)) {
-					repositoryManager.unstarRepsitory(repository);
-					Toast.makeText(this, getString(R.string.unstared_toast), Toast.LENGTH_SHORT).show();
+			case R.id.action_mark_repository:
+				if (repositoryManager.isRepositoryFavourite(repository)) {
+					repositoryManager.unmarkRepositoryAsFavourite(repository);
+					Toast.makeText(this, getString(R.string.unmarked_toast), Toast.LENGTH_SHORT).show();
 				} else {
-					repositoryManager.starRepository(repository);
-					Toast.makeText(this, getString(R.string.stared_toast), Toast.LENGTH_SHORT).show();
+					repositoryManager.markRepositoryAsFavourite(repository);
+					Toast.makeText(this, getString(R.string.marked_toast), Toast.LENGTH_SHORT).show();
 				}
 				return true;
 

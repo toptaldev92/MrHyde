@@ -126,7 +126,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 			private final View containerView;
 			private final ImageView iconView;
 			private final TextView titleView, subTitleView;
-			private final ImageView starView;
+			private final ImageView heartView;
 
 			public RepoViewHolder(View view) {
 				super(view);
@@ -134,7 +134,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 				this.iconView = (ImageView) view.findViewById(R.id.icon);
 				this.titleView = (TextView) view.findViewById(R.id.title);
 				this.subTitleView = (TextView) view.findViewById(R.id.subtitle);
-				this.starView = (ImageView) view.findViewById(R.id.star);
+				this.heartView = (ImageView) view.findViewById(R.id.heart);
 			}
 
 			public void setRepo(final Repository repo) {
@@ -152,18 +152,18 @@ abstract class AbstractReposFragment extends AbstractFragment {
 						onRepositorySelected(repo);
 					}
 				});
-				if (repositoryManager.isRepositoryStarred(repo)) {
-					starView.setVisibility(View.VISIBLE);
-					starView.setOnClickListener(new View.OnClickListener() {
+				if (repositoryManager.isRepositoryFavourite(repo)) {
+					heartView.setVisibility(View.VISIBLE);
+					heartView.setOnClickListener(new View.OnClickListener() {
 						@Override
 						public void onClick(View v) {
 							new AlertDialog.Builder(getActivity())
-									.setTitle(AbstractReposFragment.this.getActivity().getString(R.string.unstar_title))
-									.setMessage(AbstractReposFragment.this.getActivity().getString(R.string.unstar_message))
+									.setTitle(AbstractReposFragment.this.getActivity().getString(R.string.unmark_title))
+									.setMessage(AbstractReposFragment.this.getActivity().getString(R.string.unmark_message))
 									.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 										@Override
 										public void onClick(DialogInterface dialog, int which) {
-											repositoryManager.unstarRepsitory(repo);
+											repositoryManager.unmarkRepositoryAsFavourite(repo);
 											loadRepositories();
 										}
 									})
@@ -172,7 +172,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 						}
 					});
 				} else {
-					starView.setVisibility(View.GONE);
+					heartView.setVisibility(View.GONE);
 				}
 			}
 		}

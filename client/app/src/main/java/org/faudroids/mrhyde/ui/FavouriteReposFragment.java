@@ -20,7 +20,7 @@ import java.util.Collection;
 import roboguice.inject.InjectView;
 import rx.functions.Action1;
 
-public final class StarredReposFragment extends AbstractReposFragment {
+public final class FavouriteReposFragment extends AbstractReposFragment {
 
 	private static final int REQUEST_SELECT_REPOSITORY = 42;
 
@@ -28,8 +28,8 @@ public final class StarredReposFragment extends AbstractReposFragment {
 	@InjectView(R.id.add) AddFloatingActionButton addButton;
 
 
-	public StarredReposFragment() {
-		super(R.layout.fragment_repos_starred);
+	public FavouriteReposFragment() {
+		super(R.layout.fragment_repos_favourite);
 	}
 
 
@@ -55,7 +55,7 @@ public final class StarredReposFragment extends AbstractReposFragment {
 		switch (requestCode) {
 			case REQUEST_SELECT_REPOSITORY:
 				Repository repository = (Repository) data.getSerializableExtra(SelectRepoActivity.RESULT_REPOSITORY);
-				repositoryManager.starRepository(repository);
+				repositoryManager.markRepositoryAsFavourite(repository);
 				loadRepositories();
 				return;
 		}
@@ -66,7 +66,7 @@ public final class StarredReposFragment extends AbstractReposFragment {
 	@Override
 	protected void loadRepositories() {
 		showSpinner();
-		compositeSubscription.add(repositoryManager.getStarredRepositories()
+		compositeSubscription.add(repositoryManager.getFavouriteRepositories()
 				.compose(new DefaultTransformer<Collection<Repository>>())
 				.subscribe(new Action1<Collection<Repository>>() {
 					@Override
@@ -79,7 +79,7 @@ public final class StarredReposFragment extends AbstractReposFragment {
 						}
 					}
 				}, new ErrorActionBuilder()
-						.add(new DefaultErrorAction(this.getActivity(), "failed to get starred repos"))
+						.add(new DefaultErrorAction(this.getActivity(), "failed to get favourite repos"))
 						.add(new HideSpinnerAction(this))
 						.build()));
 	}

@@ -18,8 +18,8 @@
         />
 
     <item
-        android:id="@+id/action_star_repository"
-        android:title="@string/action_star_repository"
+        android:id="@+id/action_mark_repository"
+        android:title="@string/action_mark_repository"
         app:showAsAction="never"
         />
 

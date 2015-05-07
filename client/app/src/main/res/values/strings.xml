@@ -16,7 +16,7 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
-    <string name="section_starred_repositories">Starred Repositories</string>
+    <string name="section_favourite_repositories">Favourite Repositories</string>
     <string name="section_all_repositories">All Repositories</string>
     <string name="section_settings">Settings</string>
     <string name="section_feedback">Feedback</string>
@@ -27,8 +27,8 @@
     <string name="action_delete">Delete</string>
     <string name="action_commit">Commit</string>
     <string name="action_preview">Preview</string>
-    <string name="action_star_repository">Star repository</string>
-    <string name="action_unstar_repository">Unstar repository</string>
+    <string name="action_mark_repository">Mark repo as favourite</string>
+    <string name="action_unmark_repository">Unmark repo as favourite</string>
     <string name="action_discard_changes">Discard changes</string>
     <string name="action_close">Close</string>
 
@@ -43,11 +43,12 @@
     <string name="discard_changes_title">Discard changes</string>
     <string name="discard_changes_message">Undo all local changes to this repository? Cannot be undone!</string>
 
-    <string name="unstar_title">Unstar repository</string>
-    <string name="unstar_message">Remove repository from favourites list?</string>
+    <string name="unmark_title">Unmark repository</string>
+    <string name="unmark_message">Remove repository from favourites list?</string>
+    <string name="favourites_empty">No favourite repositories yet</string>
 
-    <string name="stared_toast">Repository starred</string>
-    <string name="unstared_toast">Repository unstarred</string>
+    <string name="marked_toast">Repo added to favourites list</string>
+    <string name="unmarked_toast">Repo removed from favourites list</string>
 
     <string name="save_title">Unsaved changes</string>
     <string name="save_message">Save changes made to this file?</string>
