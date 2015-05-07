@@ -26,10 +26,21 @@
             android:src="@drawable/octocat"
             />
 
+        <ImageView
+            android:id="@+id/star"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_heart"
+            android:layout_alignParentRight="true"
+            android:visibility="visible"
+            />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/icon"
+            android:layout_toLeftOf="@id/star"
             android:layout_centerVertical="true"
             android:layout_marginLeft="20dp"
             android:orientation="vertical"
@@ -42,7 +53,7 @@
                 android:layout_marginBottom="5dp"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
-                android:text="Title"
+                android:text="Foo bar foo bar foo bar foo bar"
                 />
 
             <TextView
@@ -54,16 +65,6 @@
                 />
 
         </LinearLayout>
-
-        <ImageView
-            android:id="@+id/star"
-            android:layout_width="@dimen/card_icon_size"
-            android:layout_height="@dimen/card_icon_size"
-            android:layout_centerVertical="true"
-            android:src="@drawable/ic_star"
-            android:layout_alignParentRight="true"
-            android:visibility="gone"
-            />
 
     </RelativeLayout>
 
