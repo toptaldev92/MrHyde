@@ -21,6 +21,7 @@ import org.faudroids.mrhyde.github.TokenDetails;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 import org.faudroids.mrhyde.utils.ErrorActionBuilder;
+import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -100,6 +101,7 @@ public final class LoginActivity extends AbstractActionBarActivity {
 	private void getAccessToken(String code) {
 		String clientId = getString(R.string.gitHubClientId);
 		String clientSecret = getString(R.string.gitHubClientSecret);
+		showSpinner();
 		compositeSubscription.add(authApi.getAccessToken(clientId, clientSecret, code)
 				.flatMap(new Func1<TokenDetails, Observable<LoginManager.Account>>() {
 					@Override
@@ -128,12 +130,14 @@ public final class LoginActivity extends AbstractActionBarActivity {
 				.subscribe(new Action1<LoginManager.Account>() {
 					@Override
 					public void call(LoginManager.Account account) {
+						hideSpinner();
 						Timber.d("gotten token " + account.getAccessToken());
 						loginManager.setAccount(account);
 						onLoginSuccess();
 					}
 				}, new ErrorActionBuilder()
 						.add(new DefaultErrorAction(this, "failed to get token"))
+						.add(new HideSpinnerAction(this))
 						.build()));
 	}
 

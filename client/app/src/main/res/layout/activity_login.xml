@@ -1,41 +1,48 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    style="@style/DefaultLayout"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
     >
 
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_background"
-        android:id="@+id/imageView"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="96dp" />
+    <RelativeLayout
+        style="@style/DefaultLayout"
+        >
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="30dp"
-        android:textSize="40dp"
-        android:gravity="center"
-        android:text="@string/welcome_text"
-        android:textColor="@color/gray_dark"
-        android:layout_below="@+id/imageView"
-        android:layout_centerHorizontal="true"
-        />
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_background"
+            android:id="@+id/imageView"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="96dp" />
 
-    <Button
-        android:id="@+id/login_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:drawableLeft="@drawable/octocat"
-        android:drawablePadding="@dimen/activity_horizontal_margin"
-        android:text="@string/login_button"
-        android:textColor="@android:color/white"
-        android:background="@drawable/button_login"
-        android:layout_alignParentBottom="true"
-        />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="30dp"
+            android:textSize="40dp"
+            android:gravity="center"
+            android:text="@string/welcome_text"
+            android:textColor="@color/gray_dark"
+            android:layout_below="@+id/imageView"
+            android:layout_centerHorizontal="true"
+            />
+
+        <Button
+            android:id="@+id/login_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/octocat"
+            android:drawablePadding="@dimen/activity_horizontal_margin"
+            android:text="@string/login_button"
+            android:textColor="@android:color/white"
+            android:background="@drawable/button_login"
+            android:layout_alignParentBottom="true"
+            />
+
+    </RelativeLayout>
 
     <include layout="@layout/spinner"/>
 
