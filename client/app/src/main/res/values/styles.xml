@@ -15,7 +15,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="singleAccount">true</item>
         <item name="learningPattern">false</item>
-        <item name="drawerColor">@color/colorPrimaryDark</item>
+        <item name="drawerColor">@color/gray_dark</item>
     </style>
 
     <style name="DefaultLayout">
