@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
+import android.webkit.CookieManager;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -60,12 +61,18 @@ public final class LoginManager {
 	}
 
 
+	@SuppressWarnings("deprecation")
 	public void clearAccount() {
+		// clear local credentials
 		SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
 		editor.remove(KEY_ACCESS_TOKEN);
 		editor.remove(KEY_LOGIN);
 		editor.remove(KEY_EMAIL);
 		editor.commit();
+
+		// clear credentials stored in cookies
+		CookieManager cookieManager = CookieManager.getInstance();
+		cookieManager.removeAllCookie();
 	}
 
 
