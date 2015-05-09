@@ -42,59 +42,91 @@ import timber.log.Timber;
 @ContentView(R.layout.activity_login)
 public final class LoginActivity extends AbstractActionBarActivity {
 
+	private static final String STATE_LOGIN_RUNNING = "STATE_LOGIN_RUNNING";
+
 	@InjectView(R.id.login_button) Button loginButton;
 	@Inject AuthApi authApi;
 	@Inject LoginManager loginManager;
 
+	private Dialog loginDialog = null;
+	private boolean loginRunning = false;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		// check if logged in
 		if (loginManager.getAccount() != null) {
 			onLoginSuccess();
 			return;
 		}
 
+		// setup UI
 		loginButton.setOnClickListener(new View.OnClickListener() {
-			private Dialog loginDialog;
-
 			@Override
 			public void onClick(View arg0) {
-				final String state = UUID.randomUUID().toString();
-				loginDialog = new Dialog(LoginActivity.this);
-				loginDialog.setContentView(R.layout.dialog_login);
-				WebView webView = (WebView) loginDialog.findViewById(R.id.webview);
-				webView.loadUrl("https://github.com/login/oauth/authorize?"
-						+ "&client_id=" + getString(R.string.gitHubClientId)
-						+ "&scope=user%2Crepo"
-						+ "&state=" + state);
-				webView.setWebViewClient(new WebViewClient() {
-					@Override
-					public void onPageFinished(WebView view, String url) {
-						super.onPageFinished(view, url);
-						if (url.contains("code=")) {
-							Uri uri = Uri.parse(url);
-							String code = uri.getQueryParameter("code");
-							if (!state.equals(uri.getQueryParameter("state"))) {
-								Timber.w("state did not match");
-								return;
-							}
-
-							getAccessToken(code);
-							loginDialog.dismiss();
-
-						} else if (url.contains("error=access_denied")) {
-							loginDialog.dismiss();
-							onAccessDenied();
-						}
-					}
-				});
-				loginDialog.show();
-				loginDialog.setTitle(getString(R.string.login_title));
-				loginDialog.setCancelable(true);
+				loginRunning = true;
+				startLogin();
 			}
 		});
+
+		// check for interrupted login attempt
+		if (savedInstanceState != null) {
+			loginRunning = savedInstanceState.getBoolean(STATE_LOGIN_RUNNING);
+			if (loginRunning) {
+				startLogin();
+			}
+		}
+	}
+
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		if (loginDialog != null) {
+			loginDialog.dismiss();
+			loginDialog = null;
+		}
+		outState.putBoolean(STATE_LOGIN_RUNNING, loginRunning);
+		super.onSaveInstanceState(outState);
+	}
+
+
+	private void startLogin() {
+		final String state = UUID.randomUUID().toString();
+		loginDialog = new Dialog(LoginActivity.this);
+		loginDialog.setContentView(R.layout.dialog_login);
+		WebView webView = (WebView) loginDialog.findViewById(R.id.webview);
+		webView.loadUrl("https://github.com/login/oauth/authorize?"
+				+ "&client_id=" + getString(R.string.gitHubClientId)
+				+ "&scope=user%2Crepo"
+				+ "&state=" + state);
+		webView.setWebViewClient(new WebViewClient() {
+			@Override
+			public void onPageFinished(WebView view, String url) {
+				super.onPageFinished(view, url);
+				if (url.contains("code=")) {
+					Uri uri = Uri.parse(url);
+					String code = uri.getQueryParameter("code");
+					if (!state.equals(uri.getQueryParameter("state"))) {
+						Timber.w("GitHub login states did not match");
+						onAccessDenied();
+						return;
+					}
+
+					loginDialog.dismiss();
+					loginDialog = null;
+					getAccessToken(code);
+
+				} else if (url.contains("error=access_denied")) {
+					loginDialog.dismiss();
+					loginDialog = null;
+					onAccessDenied();
+				}
+			}
+		});
+		loginDialog.show();
+		loginDialog.setTitle(getString(R.string.login_title));
+		loginDialog.setCancelable(true);
 	}
 
 
