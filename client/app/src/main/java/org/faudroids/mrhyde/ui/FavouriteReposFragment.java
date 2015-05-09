@@ -72,9 +72,12 @@ public final class FavouriteReposFragment extends AbstractReposFragment {
 					@Override
 					public void call(Collection<Repository> repositories) {
 						hideSpinner();
-						if (repositories.size() == 0) emptyView.setVisibility(View.VISIBLE);
-						else {
+						if (repositories.size() == 0) {
+							emptyView.setVisibility(View.VISIBLE);
+							recyclerView.setVisibility(View.GONE);
+						} else {
 							emptyView.setVisibility(View.GONE);
+							recyclerView.setVisibility(View.VISIBLE);
 							repoAdapter.setItems(repositories);
 						}
 					}
