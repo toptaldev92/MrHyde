@@ -20,8 +20,8 @@ public class MainDrawerActivity extends AbstractRoboDrawerActivity {
     @Override
     public void init(Bundle savedInstanceState) {
         // repositories
-        addSection(newSection(getString(R.string.section_favourite_repositories), new FavouriteReposFragment()));
-        addSection(newSection(getString(R.string.section_all_repositories), new AllReposFragment()));
+        addSection(newSection(getString(R.string.section_favourite_repositories), R.drawable.ic_heart_white, new FavouriteReposFragment()));
+        addSection(newSection(getString(R.string.section_all_repositories), R.drawable.ic_list, new AllReposFragment()));
 
         //account information
         LoginManager.Account account = loginManager.getAccount();
