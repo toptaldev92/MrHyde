@@ -130,7 +130,6 @@ public final class LoginActivity extends AbstractActionBarActivity {
 				.subscribe(new Action1<LoginManager.Account>() {
 					@Override
 					public void call(LoginManager.Account account) {
-						hideSpinner();
 						Timber.d("gotten token " + account.getAccessToken());
 						loginManager.setAccount(account);
 						onLoginSuccess();
