@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.github.LoginManager;
 
 import javax.inject.Inject;
@@ -16,12 +17,17 @@ import it.neokree.materialnavigationdrawer.elements.MaterialAccount;
 public class MainDrawerActivity extends AbstractRoboDrawerActivity {
 
     @Inject LoginManager loginManager;
+    @Inject RepositoryManager repositoryManager;
 
     @Override
     public void init(Bundle savedInstanceState) {
         // repositories
         addSection(newSection(getString(R.string.section_favourite_repositories), R.drawable.ic_heart_white, new FavouriteReposFragment()));
         addSection(newSection(getString(R.string.section_all_repositories), R.drawable.ic_list, new AllReposFragment()));
+
+        // show favourites repo per default if not empty
+        if (repositoryManager.hasFavouriteRepositories()) setDefaultSectionLoaded(0);
+        else setDefaultSectionLoaded(1);
 
         //account information
         LoginManager.Account account = loginManager.getAccount();

@@ -97,6 +97,13 @@ public final class RepositoryManager {
 	}
 
 
+	public boolean hasFavouriteRepositories() {
+		if (favouriteRepositoriesMap != null) return !favouriteRepositoriesMap.isEmpty();
+		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+		return !prefs.getAll().isEmpty();
+	}
+
+
 	public Observable<Collection<Repository>> getFavouriteRepositories() {
 		// get cached values
 		if (favouriteRepositoriesMap != null) return Observable.just(favouriteRepositoriesMap.values());
