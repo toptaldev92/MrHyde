@@ -43,12 +43,14 @@ import timber.log.Timber;
 public final class LoginActivity extends AbstractActionBarActivity {
 
 	private static final String STATE_LOGIN_RUNNING = "STATE_LOGIN_RUNNING";
+	private static final String GITHUB_LOGIN_STATE = UUID.randomUUID().toString();
 
 	@InjectView(R.id.login_button) Button loginButton;
 	@Inject AuthApi authApi;
 	@Inject LoginManager loginManager;
 
 	private Dialog loginDialog = null;
+	private WebView loginView = null;
 	private boolean loginRunning = false;
 
 	@Override
@@ -66,7 +68,7 @@ public final class LoginActivity extends AbstractActionBarActivity {
 			@Override
 			public void onClick(View arg0) {
 				loginRunning = true;
-				startLogin();
+				startLogin(null);
 			}
 		});
 
@@ -74,7 +76,7 @@ public final class LoginActivity extends AbstractActionBarActivity {
 		if (savedInstanceState != null) {
 			loginRunning = savedInstanceState.getBoolean(STATE_LOGIN_RUNNING);
 			if (loginRunning) {
-				startLogin();
+				startLogin(savedInstanceState);
 			}
 		}
 	}
@@ -82,44 +84,45 @@ public final class LoginActivity extends AbstractActionBarActivity {
 
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
-		if (loginDialog != null) {
-			loginDialog.dismiss();
-			loginDialog = null;
-		}
 		outState.putBoolean(STATE_LOGIN_RUNNING, loginRunning);
+		if (loginDialog != null) {
+			loginView.saveState(outState);
+			hideDialog();
+		}
 		super.onSaveInstanceState(outState);
 	}
 
 
-	private void startLogin() {
-		final String state = UUID.randomUUID().toString();
+	private void startLogin(Bundle savedState) {
 		loginDialog = new Dialog(LoginActivity.this);
 		loginDialog.setContentView(R.layout.dialog_login);
-		WebView webView = (WebView) loginDialog.findViewById(R.id.webview);
-		webView.loadUrl("https://github.com/login/oauth/authorize?"
-				+ "&client_id=" + getString(R.string.gitHubClientId)
-				+ "&scope=user%2Crepo"
-				+ "&state=" + state);
-		webView.setWebViewClient(new WebViewClient() {
+		loginView = (WebView) loginDialog.findViewById(R.id.webview);
+		if (savedState != null) {
+			loginView.restoreState(savedState);
+		} else {
+			loginView.loadUrl("https://github.com/login/oauth/authorize?"
+					+ "&client_id=" + getString(R.string.gitHubClientId)
+					+ "&scope=user%2Crepo"
+					+ "&state=" + GITHUB_LOGIN_STATE);
+		}
+		loginView.setWebViewClient(new WebViewClient() {
 			@Override
 			public void onPageFinished(WebView view, String url) {
 				super.onPageFinished(view, url);
 				if (url.contains("code=")) {
 					Uri uri = Uri.parse(url);
 					String code = uri.getQueryParameter("code");
-					if (!state.equals(uri.getQueryParameter("state"))) {
+					if (!GITHUB_LOGIN_STATE.equals(uri.getQueryParameter("state"))) {
 						Timber.w("GitHub login states did not match");
 						onAccessDenied();
 						return;
 					}
 
-					loginDialog.dismiss();
-					loginDialog = null;
+					hideDialog();
 					getAccessToken(code);
 
 				} else if (url.contains("error=access_denied")) {
-					loginDialog.dismiss();
-					loginDialog = null;
+					hideDialog();
 					onAccessDenied();
 				}
 			}
@@ -185,6 +188,13 @@ public final class LoginActivity extends AbstractActionBarActivity {
 				.setMessage(R.string.login_error_message)
 				.setPositiveButton(android.R.string.ok, null)
 				.show();
+	}
+
+
+	private void hideDialog() {
+		loginDialog.dismiss();
+		loginDialog = null;
+		loginView = null;
 	}
 
 }
