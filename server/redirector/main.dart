@@ -11,7 +11,7 @@ Timer t;
 void  main() {
   s = '';
   querySelector('#status').text = 'Getting Jekyll Output';
-  t = new Timer.periodic(new Duration(seconds:5), timerTrigger);
+  t = new Timer.periodic(new Duration(seconds:1), timerTrigger);
 }
 
 void timerTrigger(Timer t){
@@ -39,7 +39,7 @@ void outputRequestComplete(HttpRequest h){
   var time = new DateTime.now().millisecondsSinceEpoch;
   var httpRequest = new HttpRequest();
     httpRequest
-      ..open('GET', path+statuscodefile+'?t='+time)
+      ..open('GET', path+statuscodefile+'?t='+time.toString())
       ..onLoadEnd.listen((e) => statusCodeRequestComplete(httpRequest))
       ..send('');
 }

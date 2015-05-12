@@ -7615,7 +7615,7 @@ var $$ = Object.create(null);
   main: [function() {
     $.s = "";
     document.querySelector("#status").textContent = "Getting Jekyll Output";
-    $.t = P.Timer_Timer$periodic(P.Duration$(0, 0, 0, 0, 0, 5), F.timerTrigger$closure());
+    $.t = P.Timer_Timer$periodic(P.Duration$(0, 0, 0, 0, 0, 1), F.timerTrigger$closure());
   }, "call$0", "main$closure", 0, 0, 2],
   timerTrigger: [function(t) {
     var httpRequest, t1, t2, t3;
@@ -7660,7 +7660,7 @@ var $$ = Object.create(null);
     t3 = $.statuscodefile;
     if (t2 == null)
       return t2.$add();
-    C.HttpRequest_methods.open$2(httpRequest, "GET", C.JSString_methods.$add(t2 + t3 + "?t=", t1));
+    C.HttpRequest_methods.open$2(httpRequest, "GET", t2 + t3 + "?t=" + C.JSNumber_methods.toString$0(t1));
     t1 = H.setRuntimeTypeInfo(new W._EventStream(httpRequest, "loadend", false), [null]);
     H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.outputRequestComplete_closure(httpRequest)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
     httpRequest.send("");
