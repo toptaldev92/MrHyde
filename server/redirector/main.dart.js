@@ -7618,20 +7618,21 @@ var $$ = Object.create(null);
     $.t = P.Timer_Timer$periodic(P.Duration$(0, 0, 0, 0, 0, 5), F.timerTrigger$closure());
   }, "call$0", "main$closure", 0, 0, 2],
   timerTrigger: [function(t) {
-    var httpRequest, t1, t2;
+    var httpRequest, t1, t2, t3;
     P.print("Timer");
     httpRequest = new XMLHttpRequest();
-    t1 = $.get$path();
-    t2 = $.outputfile;
-    if (t1 == null)
-      return t1.$add();
-    C.HttpRequest_methods.open$2(httpRequest, "GET", t1 + t2);
-    t2 = H.setRuntimeTypeInfo(new W._EventStream(httpRequest, "loadend", false), [null]);
-    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new F.timerTrigger_closure(httpRequest)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
+    t1 = Date.now();
+    t2 = $.get$path();
+    t3 = $.outputfile;
+    if (t2 == null)
+      return t2.$add();
+    C.HttpRequest_methods.open$2(httpRequest, "GET", t2 + t3 + "?t=" + C.JSNumber_methods.toString$0(t1));
+    t1 = H.setRuntimeTypeInfo(new W._EventStream(httpRequest, "loadend", false), [null]);
+    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.timerTrigger_closure(httpRequest)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
     httpRequest.send("");
   }, "call$1", "timerTrigger$closure", 2, 0, 7],
   outputRequestComplete: function(h) {
-    var t1, t2, response, list, line, element, httpRequest;
+    var t1, t2, response, list, line, element, httpRequest, t3;
     P.print("Log fetched");
     t1 = h.responseText;
     t2 = $.s;
@@ -7653,14 +7654,15 @@ var $$ = Object.create(null);
         J.get$children$x(document.querySelector("#output")).add$1(0, element);
       }
     }
+    t1 = Date.now();
     httpRequest = new XMLHttpRequest();
-    t1 = $.get$path();
-    t2 = $.statuscodefile;
-    if (t1 == null)
-      return t1.$add();
-    C.HttpRequest_methods.open$2(httpRequest, "GET", t1 + t2);
-    t2 = H.setRuntimeTypeInfo(new W._EventStream(httpRequest, "loadend", false), [null]);
-    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t2._target, t2._eventType, W._wrapZone(new F.outputRequestComplete_closure(httpRequest)), t2._useCapture), [H.getTypeArgumentByIndex(t2, 0)])._tryResume$0();
+    t2 = $.get$path();
+    t3 = $.statuscodefile;
+    if (t2 == null)
+      return t2.$add();
+    C.HttpRequest_methods.open$2(httpRequest, "GET", C.JSString_methods.$add(t2 + t3 + "?t=", t1));
+    t1 = H.setRuntimeTypeInfo(new W._EventStream(httpRequest, "loadend", false), [null]);
+    H.setRuntimeTypeInfo(new W._EventStreamSubscription(0, t1._target, t1._eventType, W._wrapZone(new F.outputRequestComplete_closure(httpRequest)), t1._useCapture), [H.getTypeArgumentByIndex(t1, 0)])._tryResume$0();
     httpRequest.send("");
   },
   timerTrigger_closure: {

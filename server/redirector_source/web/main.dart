@@ -17,8 +17,9 @@ void  main() {
 void timerTrigger(Timer t){
   print('Timer');
   var httpRequest = new HttpRequest();
+  var time = new DateTime.now().millisecondsSinceEpoch;
   httpRequest
-    ..open('GET', path+outputfile)
+    ..open('GET', path+outputfile+'?t='+time.toString())
     ..onLoadEnd.listen((e) => outputRequestComplete(httpRequest))
     ..send('');
 }
@@ -35,9 +36,10 @@ void outputRequestComplete(HttpRequest h){
       querySelector('#output').children.add(element);
     }
   }
+  var time = new DateTime.now().millisecondsSinceEpoch;
   var httpRequest = new HttpRequest();
     httpRequest
-      ..open('GET', path+statuscodefile)
+      ..open('GET', path+statuscodefile+'?t='+time)
       ..onLoadEnd.listen((e) => statusCodeRequestComplete(httpRequest))
       ..send('');
 }
