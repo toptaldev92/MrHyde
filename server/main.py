@@ -42,15 +42,16 @@ jekyll_server = Bottle()
 
 @jekyll_server.get('/jekyll/')
 def list_all_repositories():
-    repos = rm.list_repositories()
-
-    if request.content_type.startswith('application/json'):
-        return json.dumps(repos)
-    else:
-        if len(repos) < 1:
-            return template('list_view', rows=['No repositories available.'], header='Available repositories:')
-        else:
-            return template('repo_overview', rows=repos, header='Available repositories:')
+    return template('list_view', rows=['Your friendly Jekyll blogging client for Android.'], header='Welcome to Mr. Hyde!')
+    # repos = rm.list_repositories()
+    #
+    # if request.content_type.startswith('application/json'):
+    #     return json.dumps(repos)
+    # else:
+    #     if len(repos) < 1:
+    #         return template('list_view', rows=['No repositories available.'], header='Available repositories:')
+    #     else:
+    #         return template('repo_overview', rows=repos, header='Available repositories:')
 
 @jekyll_server.post('/jekyll/')
 def create_repository():
@@ -153,4 +154,4 @@ def update_repository(id):
     except SQLError:
         abort(500, 'Internal error. Sorry for that!')
 
-run(jekyll_server, host='127.0.0.1', port=8787, debug=True)
+run(jekyll_server, host='127.0.0.1', port=8787, debug=False)
