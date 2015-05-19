@@ -1,4 +1,4 @@
-#!/usr/bin/env python3.4
+#!/usr/local/bin/python3.4
 from os import makedirs
 
 from sqlite3 import Error as SQLError
@@ -26,7 +26,7 @@ class Caretaker:
 
     <body bgcolor="white" text="black">
         <p><strong>Link expired!</strong></p>
-        <p>Preview links expire after 10 minutes.</p>
+        <p>Preview links expire after %s minutes.</p>
     </body>
 </html>
 """
@@ -53,7 +53,7 @@ class Caretaker:
     def deactivate_repos(self):
         timestamp = int(time()-self.get_config().get_cleanup_time())
         try:
-            old_repos = self.database().list('repo', '', 'last_used < %s' % timestamp)
+            old_repos = self.database().list('repo', '', 'last_used < %s and active > 0' % timestamp)
             for repo in old_repos:
                 self.log().info('Deleting repo %s' % repo['path'])
                 rmtree(repo['path'])
@@ -61,10 +61,10 @@ class Caretaker:
                 makedirs(repo['deploy_path'], 0o755, True)
                 index_file_path = '/'.join([repo['deploy_path'], 'index.html'])
                 index_file = open(index_file_path, 'w')
-                index_file.write(self.__html_content)
+                index_file.write(self.__html_content % (self.get_config().get_cleanup_time()/60))
                 index_file.close()
                 #Set repo inactive
-                self.database().updateData('repo', "id='%s'" % repo['id'], 'active=0')
+                self.database().updateData('repo', "id='%s'" % repo['id'], 'active = 0')
         except OSError as exception:
             if exception.errno == errno.ENOENT:
                 self.log().error('Repository not found.')
@@ -81,10 +81,8 @@ class Caretaker:
         try:
             old_repos = self.database().list('repo', '', 'active < 1')
             for repo in old_repos:
-                self.log().info('Deleting repo %s' % repo['path'])
-                rmtree(repo['path'])
+                self.log().info('Cleaning up deploy path %s' % repo['deploy_path'])
                 rmtree(repo['deploy_path'])
-                makedirs(repo['deploy_path'], 0o755, True)
                 self.database().deleteData('repo', "id='%s'" % repo['id'])
         except OSError as exception:
             if exception.errno == errno.ENOENT:
