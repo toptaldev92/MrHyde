@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3.4
+from os import makedirs
 
 from sqlite3 import Error as SQLError
 from configparser import Error as ConfigError
@@ -14,6 +15,22 @@ logging.basicConfig(filename='caretaker.log', level=logging.DEBUG)
 
 
 class Caretaker:
+
+    __html_content = """
+<!doctype html>
+<html>
+    <head>
+    <meta charset="utf-8">
+    <title>MrHyde - a Jekyll scratchpad</title>
+    </head>
+
+    <body bgcolor="white" text="black">
+        <p><strong>Link expired!</strong></p>
+        <p>Preview links expire after 10 minutes.</p>
+    </body>
+</html>
+"""
+
     def __init__(self, config_file):
         self.__logger = logging.getLogger(__name__)
         try:
@@ -33,7 +50,7 @@ class Caretaker:
     def log(self):
         return self.__logger
 
-    def cleanup(self):
+    def deactivate_repos(self):
         timestamp = int(time()-self.get_config().get_cleanup_time())
         try:
             old_repos = self.database().list('repo', '', 'last_used < %s' % timestamp)
@@ -41,7 +58,13 @@ class Caretaker:
                 self.log().info('Deleting repo %s' % repo['path'])
                 rmtree(repo['path'])
                 rmtree(repo['deploy_path'])
-                self.database().deleteData('repo', "id='%s'" % repo['id'])
+                makedirs(repo['deploy_path'], 0o755, True)
+                index_file_path = '/'.join([repo['deploy_path'], 'index.html'])
+                index_file = open(index_file_path, 'w')
+                index_file.write(self.__html_content)
+                index_file.close()
+                #Set repo inactive
+                self.database().updateData('repo', "id='%s'" % repo['id'], 'active=0')
         except OSError as exception:
             if exception.errno == errno.ENOENT:
                 self.log().error('Repository not found.')
@@ -53,9 +76,34 @@ class Caretaker:
             self.log().error('Database error.')
             raise
 
+    def cleanup_subdomains(self):
+        self.log().info('Cleaning up subdomains.')
+        try:
+            old_repos = self.database().list('repo', '', 'active < 1')
+            for repo in old_repos:
+                self.log().info('Deleting repo %s' % repo['path'])
+                rmtree(repo['path'])
+                rmtree(repo['deploy_path'])
+                makedirs(repo['deploy_path'], 0o755, True)
+                self.database().deleteData('repo', "id='%s'" % repo['id'])
+        except OSError as exception:
+            if exception.errno == errno.ENOENT:
+                self.log().error('Repository not found.')
+                raise
+            elif exception.errno == errno.EPERM:
+                self.log().error('Insufficient permissions to remove repository.')
+                raise
+        except SQLError:
+            self.log().error('Database error.')
+            raise
+        pass
+
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        exit('Config file missing!\nUsage: %s <config_file>' % sys.argv[0])
+    if len(sys.argv) < 3:
+        exit('Parameters missing!\nUsage: %s <config_file> <mode=(DEACTIVATE|CLEANUP)>' % sys.argv[0])
     else:
         caretaker = Caretaker(sys.argv[1])
-        caretaker.cleanup()
+        if sys.argv[2] == 'DEACTIVATE':
+            caretaker.deactivate_repos()
+        elif sys.argv[2] == 'CLEANUP':
+            caretaker.cleanup_subdomains()

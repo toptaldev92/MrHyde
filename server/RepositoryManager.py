@@ -65,7 +65,7 @@ class RepositoryManager:
         if self.utils().repository_exists(id):
             return None
 
-        self.db().insertData('repo', id, repo_path, deploy_path, url, int(time()))
+        self.db().insertData('repo', id, repo_path, deploy_path, url, int(time()), 1)
         shutil.copytree(OWN_PATH+'/redirector/', deploy_path)
 
         t = threading.Thread(target=self.init_repository_async, args=(id, deploy_path, repo_path, url, diff))
@@ -73,7 +73,6 @@ class RepositoryManager:
         t.start()
 
         return (id, ''.join(['http://', id, '.', cm.get_base_url(), '/poller.html']))
-
 
     def init_repository_async(self, id, deploy_path, repo_path, url, diff):
         if not isdir(self.__base_dir):
