@@ -85,10 +85,8 @@ public final class LoginActivity extends AbstractActionBarActivity {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		outState.putBoolean(STATE_LOGIN_RUNNING, loginRunning);
-		if (loginDialog != null) {
-			loginView.saveState(outState);
-			hideDialog();
-		}
+		if (loginView != null) loginView.saveState(outState);
+		hideDialog();
 		super.onSaveInstanceState(outState);
 	}
 
@@ -192,6 +190,7 @@ public final class LoginActivity extends AbstractActionBarActivity {
 
 
 	private void hideDialog() {
+		if (loginDialog == null) return;
 		loginDialog.dismiss();
 		loginDialog = null;
 		loginView = null;
