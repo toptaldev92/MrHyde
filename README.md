@@ -51,3 +51,20 @@ As soon as the status code is 0, the script will redirect to the jekyll html out
  * [default]client_secret = # A secret the client has to know aswell, so you can make sure that only your clients use your server
  * [database]path = # the path and name of the database
  * [repo]id_length = <the length of the id that gets prepended to the deploy_path_append>
+
+
+## License
+
+### Source Code
+
+Copyright 2015 FauDroids
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+### Artwork
+
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
