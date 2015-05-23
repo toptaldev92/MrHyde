@@ -8,7 +8,8 @@ from git import GitCommandError
 from sqlite3 import Error as SQLError
 from configparser import Error as ConfigError
 
-from bottle import request, Bottle, run, abort, template, static_file
+from bottle import request, Bottle, run, abort, template, static_file, TEMPLATE_PATH
+from os.path import dirname, realpath, join
 import sys
 
 import RequirementsChecker
@@ -17,8 +18,15 @@ import FileManager
 import RepoUtils
 import RepositoryManager
 
-logging.basicConfig(filename='jekyll_server.log', level=logging.DEBUG)
+OWN_PATH = dirname(realpath(__file__))
+template_dir = join(OWN_PATH, 'views')
+logging_path = join(OWN_PATH, 'jekyll_server.log')
+
+logging.basicConfig(filename=logging_path, level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+
+TEMPLATE_PATH.insert(0, template_dir)
 
 if len(sys.argv) < 2:
     logger.error('Config file missing!\nUsage: %s <config_file>' % sys.argv[0])
@@ -40,9 +48,11 @@ RequirementsChecker.check_requirements(logger)
 
 jekyll_server = Bottle()
 
+
 @jekyll_server.get('/jekyll/')
 def list_all_repositories():
-    return template('list_view', rows=['Your friendly Jekyll blogging client for Android.'], header='Welcome to Mr. Hyde!')
+    return template('list_view', rows=['Your friendly Jekyll blogging client for Android.'],
+                    header='Welcome to Mr. Hyde!')
     # repos = rm.list_repositories()
     #
     # if request.content_type.startswith('application/json'):
@@ -52,6 +62,7 @@ def list_all_repositories():
     #         return template('list_view', rows=['No repositories available.'], header='Available repositories:')
     #     else:
     #         return template('repo_overview', rows=repos, header='Available repositories:')
+
 
 @jekyll_server.post('/jekyll/')
 def create_repository():
@@ -81,12 +92,13 @@ def create_repository():
     except OSError as exception:
         if exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
+    except GitCommandError:
+        abort(500, 'Failed to apply patch.')
     except KeyError:
         abort(500, 'Internal error. Sorry for that!')
-    except GitCommandError:
-        abort(400, 'Bad request')
     except IOError:
         abort(500, 'Internal error. Sorry for that!')
+
 
 @jekyll_server.get('/jekyll/<id:path>/')
 def show_repository(id):
@@ -102,6 +114,7 @@ def show_repository(id):
     else:
         abort(404, 'Repository not found!')
 
+
 @jekyll_server.get('/jekyll/<id:path>/<static_path>')
 def download_file(id, static_path):
     try:
@@ -114,6 +127,7 @@ def download_file(id, static_path):
         elif exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
 
+
 @jekyll_server.delete('/jekyll/<id:path>/')
 def delete_repository(id):
     try:
@@ -125,6 +139,7 @@ def delete_repository(id):
             abort(403, 'Permission denied.')
     except SQLError:
         abort(500, 'Internal error. Sorry for that!')
+
 
 @jekyll_server.put('/jekyll/<id:path>/')
 def update_repository(id):
@@ -153,5 +168,6 @@ def update_repository(id):
         abort(500, 'Failed to apply patch.')
     except SQLError:
         abort(500, 'Internal error. Sorry for that!')
+
 
 run(jekyll_server, host='127.0.0.1', port=8787, debug=False)
