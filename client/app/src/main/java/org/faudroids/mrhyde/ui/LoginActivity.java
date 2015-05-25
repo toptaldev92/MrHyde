@@ -15,6 +15,7 @@ import android.widget.Button;
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.service.UserService;
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.app.MigrationManager;
 import org.faudroids.mrhyde.github.AuthApi;
 import org.faudroids.mrhyde.github.LoginManager;
 import org.faudroids.mrhyde.github.TokenDetails;
@@ -46,9 +47,10 @@ public final class LoginActivity extends AbstractActionBarActivity {
 	private static final String STATE_LOGIN_RUNNING = "STATE_LOGIN_RUNNING";
 	private static final String GITHUB_LOGIN_STATE = UUID.randomUUID().toString();
 
-	@InjectView(R.id.login_button) Button loginButton;
-	@Inject AuthApi authApi;
-	@Inject LoginManager loginManager;
+	@InjectView(R.id.login_button) private Button loginButton;
+	@Inject private AuthApi authApi;
+	@Inject private LoginManager loginManager;
+	@Inject private MigrationManager migrationManager;
 
 	private Dialog loginDialog = null;
 	private WebView loginView = null;
@@ -57,6 +59,9 @@ public final class LoginActivity extends AbstractActionBarActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// start migration if necessary
+		migrationManager.doMigration();
 
 		// check if logged in
 		if (loginManager.getAccount() != null) {
