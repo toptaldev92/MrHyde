@@ -26,6 +26,7 @@ import org.faudroids.mrhyde.utils.HideSpinnerAction;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -147,9 +148,10 @@ public final class LoginActivity extends AbstractActionBarActivity {
 					public Observable<LoginManager.Account> call(TokenDetails tokenDetails) {
 						try {
 							// load user
-							UserService service = new UserService();
-							service.getClient().setOAuth2Token(tokenDetails.getAccessToken());
-							User user = service.getUser();
+							UserService userService = new UserService();
+							userService.getClient().setOAuth2Token(tokenDetails.getAccessToken());
+							User user = userService.getUser();
+							List<String> emails = userService.getEmails();
 
 							// load avatar
 							URL url = new URL(user.getAvatarUrl());
@@ -158,7 +160,7 @@ public final class LoginActivity extends AbstractActionBarActivity {
 							connection.connect();
 							InputStream input = connection.getInputStream();
 							Bitmap avatar = BitmapFactory.decodeStream(input);
-							return Observable.just(new LoginManager.Account(tokenDetails.getAccessToken(), user.getLogin(), user.getEmail(), avatar));
+							return Observable.just(new LoginManager.Account(tokenDetails.getAccessToken(), user.getLogin(), emails.get(0), avatar));
 
 						} catch (IOException e) {
 							return Observable.error(e);
