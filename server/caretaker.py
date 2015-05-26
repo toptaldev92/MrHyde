@@ -68,13 +68,10 @@ class Caretaker:
         except OSError as exception:
             if exception.errno == errno.ENOENT:
                 self.log().error('Repository not found.')
-                raise
             elif exception.errno == errno.EPERM:
                 self.log().error('Insufficient permissions to remove repository.')
-                raise
         except SQLError:
             self.log().error('Database error.')
-            raise
 
     def cleanup_subdomains(self):
         self.log().info('Cleaning up subdomains.')
@@ -87,14 +84,10 @@ class Caretaker:
         except OSError as exception:
             if exception.errno == errno.ENOENT:
                 self.log().error('Repository not found.')
-                raise
             elif exception.errno == errno.EPERM:
                 self.log().error('Insufficient permissions to remove repository.')
-                raise
         except SQLError:
             self.log().error('Database error.')
-            raise
-        pass
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
