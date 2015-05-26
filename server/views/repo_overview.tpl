@@ -17,5 +17,7 @@
         %end
         </table>
         <div align="center"><img src="../static/ic_background.svg"></div>
+        <p></p>
+        <footer style="text-align: center;">&copy; FauDroids 2015</footer>
     </body>
 </html>
