@@ -93,14 +93,20 @@ class RepositoryManager:
                 self.log().error("Permission to " + repo_path + " denied.")
                 self.deploy_error_page(deploy_path, 'I/O error',
                                        "An I/O error occurred, stay calm and wait for a technician!")
+                with open(deploy_path+'/statuscode.txt', 'w') as outfile:
+                    outfile.write(str(0))
         except SQLError as exception:
             self.log().error(exception.__str__())
             self.deploy_error_page(deploy_path, 'Database error',
                                    "We encountered an error in our database. (╯°□°）╯︵ ┻━┻")
+            with open(deploy_path+'/statuscode.txt', 'w') as outfile:
+                outfile.write(str(0))
         except git.GitCommandError as exception:
             self.log().error(exception.__str__())
             self.deploy_error_page(deploy_path, 'VCS error',
                                    "We're having problems applying your changes. Have you been sacrificing some branches to the gods of git lately?")
+            with open(deploy_path+'/statuscode.txt', 'w') as outfile:
+                outfile.write(str(0))
 
     def list_repositories(self):
         dir_list = [[f['path'].split('/')[-1], f['url']] for f in self.db().list('repo') if isdir(f['path'])]
