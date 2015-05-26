@@ -7,18 +7,19 @@ from os.path import isdir, join, dirname, realpath
 from os import makedirs, chdir, getcwd
 from configparser import ParsingError as ConfigError
 import threading
-import subprocess
 import shutil
 
 import git
+
+from bottle import template
 
 import DbHandler
 import JekyllManager
 import FileManager
 import RepoUtils
 
-
 OWN_PATH = dirname(realpath(__file__))
+
 
 class RepositoryManager:
     __db = None
@@ -32,6 +33,7 @@ class RepositoryManager:
 
     def __init__(self):
         from main import cm
+
         try:
             self.__base_dir = cm.get_base_dir()
             self.__base_url = cm.get_base_url()
@@ -58,6 +60,7 @@ class RepositoryManager:
 
     def init_repository(self, url, diff):
         from main import cm
+
         id = self.utils().generateId(cm.get_hash_size())
         repo_path = join(self.__base_dir, id)
         deploy_path = ''.join([cm.get_deploy_base_path(), id, cm.get_deploy_append_path()])
@@ -66,7 +69,7 @@ class RepositoryManager:
             return None
 
         self.db().insertData('repo', id, repo_path, deploy_path, url, int(time()), 1)
-        shutil.copytree(OWN_PATH+'/redirector/', deploy_path)
+        shutil.copytree(OWN_PATH + '/redirector/', deploy_path)
 
         t = threading.Thread(target=self.init_repository_async, args=(id, deploy_path, repo_path, url, diff))
         t.daemon = True
@@ -78,21 +81,26 @@ class RepositoryManager:
         if not isdir(self.__base_dir):
             makedirs(self.__base_dir, 0o755, True)
         try:
-            # TODO error handling
             self.__git.clone(url, repo_path)
             if diff is not None and diff is not '':
                 self.apply_diff(id, repo_path, diff)
             self.log().info('Repository cloned to ' + repo_path + '.')
-            #deploy_path = self.fm().setup_deployment(id)
+            # deploy_path = self.fm().setup_deployment(id)
             self.jm().build(repo_path, deploy_path)
 
         except OSError as exception:
             if exception.errno == errno.EPERM:
                 self.log().error("Permission to " + repo_path + " denied.")
-                raise
+                self.deploy_error_page(deploy_path, 'I/O error',
+                                       "An I/O error occurred, stay calm and wait for a technician!")
+        except SQLError as exception:
+            self.log().error(exception.__str__())
+            self.deploy_error_page(deploy_path, 'Database error',
+                                   "We encountered an error in our database. (╯°□°）╯︵ ┻━┻")
         except git.GitCommandError as exception:
             self.log().error(exception.__str__())
-            raise
+            self.deploy_error_page(deploy_path, 'VCS error',
+                                   "We're having problems applying your changes. Have you been sacrificing some branches to the gods of git lately?")
 
     def list_repositories(self):
         dir_list = [[f['path'].split('/')[-1], f['url']] for f in self.db().list('repo') if isdir(f['path'])]
@@ -103,7 +111,6 @@ class RepositoryManager:
             repo = self.db().list('repo', '', "id='%s'" % id)[0]
             rmtree(repo['path'])
             self.db().deleteData('repo', "id='%s'" % repo['id'])
-            return
         except OSError as exception:
             if exception.errno == errno.ENOENT:
                 self.log().error('Repository ' + id + ' not found.')
@@ -114,6 +121,7 @@ class RepositoryManager:
         except SQLError:
             raise
 
+    # TODO update repos async
     def update_repository(self, id, diff):
         try:
             repo_path = self.db().list('repo', 'path', "id='%s'" % id)[0]
@@ -124,13 +132,13 @@ class RepositoryManager:
             if build_successful:
                 return (id, ''.join(['https://', id, '.', self.__base_url]))
             else:
-                return (id, self.__jekyll.get_errors())
+                return (id, self.jm().get_errors())
         except OSError as exception:
             if exception.errno == errno.ENOENT:
-                self.log().error('Repository ' + repo_path['id'] + ' not found.')
+                self.log().error('Repository ' + repo_path + ' not found.')
                 raise
             elif exception.errno == errno.EPERM:
-                self.log().error('Insufficient permissions to remove repository ' + repo_path['id'] + '.')
+                self.log().error('Insufficient permissions to remove repository ' + repo_path + '.')
                 raise
         except SQLError:
             self.log().error('Database error.')
@@ -144,12 +152,12 @@ class RepositoryManager:
 
     def apply_diff(self, id, repo_path, diff):
         try:
-            #repo_path = self.db().list('repo', 'path', "id='%s'" % id)[0]
+            # repo_path = self.db().list('repo', 'path', "id='%s'" % id)[0]
             old_dir = getcwd()
             chdir(repo_path)
             diff_file = self.fm().create_diff_file(id, diff)
             self.__git.apply(diff_file)
-            #self.utils().update_timestamp(id)
+            # self.utils().update_timestamp(id)
             chdir(old_dir)
         except SQLError:
             raise
@@ -158,3 +166,11 @@ class RepositoryManager:
             raise
         except OSError:
             raise
+
+    def deploy_error_page(self, deploy_path, error_type, error_msg):
+        if not isdir(deploy_path):
+            makedirs(deploy_path, 0o755, True)
+        index_file_path = join(deploy_path, 'index.html')
+        index_file = open(index_file_path, 'w')
+        index_file.write(template('list_view', rows=[error_msg], header=error_type))
+        index_file.close()
