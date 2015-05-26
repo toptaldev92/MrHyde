@@ -18,6 +18,8 @@ import FileManager
 import RepoUtils
 import RepositoryManager
 
+DEBUG_MODE = False
+
 OWN_PATH = dirname(realpath(__file__))
 template_dir = join(OWN_PATH, 'views')
 logging_path = join(OWN_PATH, 'jekyll_server.log')
@@ -51,17 +53,18 @@ jekyll_server = Bottle()
 
 @jekyll_server.get('/jekyll/')
 def list_all_repositories():
-    return template('list_view', rows=['Your friendly Jekyll blogging client for Android.'],
-                    header='Welcome to Mr. Hyde!')
-    # repos = rm.list_repositories()
-    #
-    # if request.content_type.startswith('application/json'):
-    #     return json.dumps(repos)
-    # else:
-    #     if len(repos) < 1:
-    #         return template('list_view', rows=['No repositories available.'], header='Available repositories:')
-    #     else:
-    #         return template('repo_overview', rows=repos, header='Available repositories:')
+    if not DEBUG_MODE:
+        return static_file('welcome.html', root='static')
+    else:
+        repos = rm.list_repositories()
+
+        if request.content_type.startswith('application/json'):
+            return json.dumps(repos)
+        else:
+            if len(repos) < 1:
+                return template('list_view', rows=['No repositories available.'], header='Available repositories:')
+            else:
+                return template('repo_overview', rows=repos, header='Available repositories:')
 
 
 @jekyll_server.post('/jekyll/')
@@ -117,15 +120,18 @@ def show_repository(id):
 
 @jekyll_server.get('/jekyll/<id:path>/<static_path>')
 def download_file(id, static_path):
-    try:
-        file = fm.file_download(id, static_path)
-        if file is True:
-            return static_file('/'.join([id, static_path]), root=cm.get_base_dir(), download=True)
-    except OSError as exception:
-        if exception.errno == errno.ENOENT:
-            abort(404, 'File not found.')
-        elif exception.errno == errno.EPERM:
-            abort(403, 'Permission denied.')
+    if id == 'static':
+        return static_file(static_path, root='static')
+    else:
+        try:
+            file = fm.file_download(id, static_path)
+            if file is True:
+                return static_file('/'.join([id, static_path]), root=cm.get_base_dir(), download=True)
+        except OSError as exception:
+            if exception.errno == errno.ENOENT:
+                abort(404, 'File not found.')
+            elif exception.errno == errno.EPERM:
+                abort(403, 'Permission denied.')
 
 
 @jekyll_server.delete('/jekyll/<id:path>/')
@@ -170,4 +176,4 @@ def update_repository(id):
         abort(500, 'Internal error. Sorry for that!')
 
 
-run(jekyll_server, host='127.0.0.1', port=8787, debug=False)
+run(jekyll_server, host='127.0.0.1', port=8787, debug=DEBUG_MODE)
