@@ -164,7 +164,6 @@ class RepositoryManager:
             diff_file = self.fm().create_diff_file(id, diff)
             self.__git.apply(diff_file)
             # self.utils().update_timestamp(id)
-            chdir(old_dir)
         except SQLError:
             raise
         except git.GitCommandError:
@@ -172,6 +171,8 @@ class RepositoryManager:
             raise
         except OSError:
             raise
+        finally:
+            chdir(old_dir)
 
     def deploy_error_page(self, deploy_path, error_type, error_msg):
         if not isdir(deploy_path):
