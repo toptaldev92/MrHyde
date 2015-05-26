@@ -51,7 +51,7 @@ class Caretaker:
         return self.__logger
 
     def deactivate_repos(self):
-        timestamp = int(time()-self.get_config().get_cleanup_time())
+        timestamp = int(time()-float(self.get_config().get_cleanup_time()))
         try:
             old_repos = self.database().list('repo', '', 'last_used < %s and active > 0' % timestamp)
             for repo in old_repos:
