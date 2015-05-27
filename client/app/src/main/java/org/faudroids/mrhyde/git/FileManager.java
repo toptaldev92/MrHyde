@@ -140,16 +140,29 @@ public final class FileManager {
 	 */
 	public FileNode createNewFile(DirNode parentNode, String fileName) {
 		// create node
-		String path = fileName;
-		if (parentNode.getTreeEntry() != null) path = parentNode.getTreeEntry().getPath() + "/" + path;
-		FileNode fileNode = new FileNode(parentNode, fileName, new DummyTreeEntry(path, TreeEntry.MODE_BLOB));
+		String dirPath = null;
+		String filePath = fileName;
+		if (parentNode.getTreeEntry() != null) {
+			dirPath = parentNode.getTreeEntry().getPath();
+			filePath = dirPath + "/" + filePath;
+		}
+		FileNode fileNode = new FileNode(parentNode, fileName, new DummyTreeEntry(filePath, TreeEntry.MODE_BLOB));
 		parentNode.getEntries().put(fileName, fileNode);
 
-		// create file
-		Timber.d("creating new file " + path);
+		Timber.d("creating new file " + filePath);
 		try {
-			File file = new File(rootDir, path);
+			// create parent dir if any
+			if (dirPath != null) {
+				File dir = new File(rootDir, dirPath);
+				if (!dir.exists() && !dir.mkdirs()) {
+					Timber.w("failed to create parent dir while creating new file");
+				}
+			}
+
+			// create file
+			File file = new File(rootDir, filePath);
 			if (!file.exists()) if (!file.createNewFile()) Timber.w("failed to create new file");
+
 		} catch (IOException ioe) {
 			Timber.e(ioe, "failed to create file");
 		}
