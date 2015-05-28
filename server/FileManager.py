@@ -1,9 +1,9 @@
 from os import makedirs, listdir
-from os.path import isfile
-import errno
+from os.path import isfile, isdir, join
 import logging
-
 from sqlite3 import Error as SQLError
+
+from bottle import template
 
 import DbHandler
 
@@ -50,24 +50,19 @@ class FileManager:
             else:
                 return False
         except OSError as exception:
-            if exception.errno == errno.ENOENT:
-                self.log().error('File' + file_path + ' not found.')
-                raise
-            elif exception.errno == errno.EPERM:
-                self.log().error('Insufficient permissions to access file ' + file_path + '.')
-                raise
+            self.log().error(exception.strerror)
+            raise
+        except SQLError as exception:
+            self.log().error(exception.__str__())
+            raise
 
-    def setup_deployment(self, id):
-        from main import cm
-        try:
-            deploy_path = ''.join([cm.get_deploy_base_path(), id, cm.get_deploy_append_path()])
+    def deploy_error_page(self, deploy_path, error_type, error_msg):
+        if not isdir(deploy_path):
             makedirs(deploy_path, 0o755, True)
-            self.log().info('Created deploy path ' + deploy_path)
-            return deploy_path
-        except OSError as exception:
-            if exception.errno == errno.EPERM:
-                self.log().error('Insufficient permissions to create directory: ' + deploy_path)
-                return None
+        index_file_path = join(deploy_path, 'index.html')
+        index_file = open(index_file_path, 'w')
+        index_file.write(template('list_view', rows=[error_msg], header=error_type))
+        index_file.close()
 
     def list_directory(self, path):
         from main import cm
@@ -76,12 +71,8 @@ class FileManager:
             file_list = [f for f in listdir(repo_path)]
             return file_list
         except OSError as exception:
-            if exception.errno == errno.ENOENT:
-                self.log().error("Repository " + repo_path + " doesn't exist.")
-                raise
-            elif exception.errno == errno.EPERM:
-                self.log().error("Insufficient permissions to view " + repo_path + ".")
-                raise
-        except SQLError:
-            self.log().error('Database error.')
+            self.log().error(exception.strerror)
+            raise
+        except SQLError as exception:
+            self.log().error(exception.__str__())
             raise

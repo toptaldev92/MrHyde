@@ -1,4 +1,3 @@
-import errno
 from sqlite3 import Error as SQLError
 import logging
 from time import time
@@ -10,8 +9,6 @@ import threading
 import shutil
 
 import git
-
-from bottle import template
 
 import DbHandler
 import JekyllManager
@@ -85,27 +82,28 @@ class RepositoryManager:
             if diff is not None and diff is not '':
                 self.apply_diff(id, repo_path, diff)
             self.log().info('Repository cloned to ' + repo_path + '.')
-            # deploy_path = self.fm().setup_deployment(id)
             self.jm().build(repo_path, deploy_path)
 
         except OSError as exception:
-            if exception.errno == errno.EPERM:
-                self.log().error("Permission to " + repo_path + " denied.")
-                self.deploy_error_page(deploy_path, 'I/O error',
-                                       "An I/O error occurred, stay calm and wait for a technician!")
-                with open(deploy_path+'/statuscode.txt', 'w') as outfile:
-                    outfile.write(str(0))
+            self.log().error(exception.strerror)
+            self.fm().deploy_error_page(deploy_path,
+                                        'I/O error',
+                                        "An I/O error occurred, stay calm and wait for a technician!")
+            with open(deploy_path + '/statuscode.txt', 'w') as outfile:
+                outfile.write(str(0))
         except SQLError as exception:
             self.log().error(exception.__str__())
-            self.deploy_error_page(deploy_path, 'Database error',
-                                   "We encountered an error in our database. (╯°□°）╯︵ ┻━┻")
-            with open(deploy_path+'/statuscode.txt', 'w') as outfile:
+            self.fm().deploy_error_page(deploy_path,
+                                        'Database error',
+                                        "We encountered an error in our database. (╯°□°）╯︵ ┻━┻")
+            with open(deploy_path + '/statuscode.txt', 'w') as outfile:
                 outfile.write(str(0))
         except git.GitCommandError as exception:
             self.log().error(exception.__str__())
-            self.deploy_error_page(deploy_path, 'VCS error',
-                                   "We're having problems applying your changes. Have you been sacrificing some branches to the gods of git lately?")
-            with open(deploy_path+'/statuscode.txt', 'w') as outfile:
+            self.fm().deploy_error_page(deploy_path,
+                                        'VCS error',
+                                        "We're having problems applying your changes. Have you been sacrificing some branches to the gods of git lately?")
+            with open(deploy_path + '/statuscode.txt', 'w') as outfile:
                 outfile.write(str(0))
 
     def list_repositories(self):
@@ -118,13 +116,10 @@ class RepositoryManager:
             rmtree(repo['path'])
             self.db().deleteData('repo', "id='%s'" % repo['id'])
         except OSError as exception:
-            if exception.errno == errno.ENOENT:
-                self.log().error('Repository ' + id + ' not found.')
-                raise
-            elif exception.errno == errno.EPERM:
-                self.log().error('Insufficient permissions to remove repository ' + id + '.')
-                raise
-        except SQLError:
+            self.log().error(exception.strerror)
+            raise
+        except SQLError as exception:
+            self.log().error(exception.__str__())
             raise
 
     # TODO update repos async
@@ -140,14 +135,10 @@ class RepositoryManager:
             else:
                 return (id, self.jm().get_errors())
         except OSError as exception:
-            if exception.errno == errno.ENOENT:
-                self.log().error('Repository ' + repo_path + ' not found.')
-                raise
-            elif exception.errno == errno.EPERM:
-                self.log().error('Insufficient permissions to remove repository ' + repo_path + '.')
-                raise
-        except SQLError:
-            self.log().error('Database error.')
+            self.log().error(exception.strerror)
+            raise
+        except SQLError as exception:
+            self.log().error(exception.__str__())
             raise
         except git.GitCommandError as exception:
             self.log().error(exception.__str__())
@@ -158,26 +149,19 @@ class RepositoryManager:
 
     def apply_diff(self, id, repo_path, diff):
         try:
-            # repo_path = self.db().list('repo', 'path', "id='%s'" % id)[0]
             old_dir = getcwd()
             chdir(repo_path)
             diff_file = self.fm().create_diff_file(id, diff)
             self.__git.apply(diff_file)
             # self.utils().update_timestamp(id)
-        except SQLError:
+        except SQLError as exception:
+            self.log().error(exception.__str__())
             raise
-        except git.GitCommandError:
-            self.log().error('Unable to apply diff.')
+        except git.GitCommandError as exception:
+            self.log().error(exception.__str__())
             raise
-        except OSError:
+        except OSError as exception:
+            self.log().error(exception.strerror)
             raise
         finally:
             chdir(old_dir)
-
-    def deploy_error_page(self, deploy_path, error_type, error_msg):
-        if not isdir(deploy_path):
-            makedirs(deploy_path, 0o755, True)
-        index_file_path = join(deploy_path, 'index.html')
-        index_file = open(index_file_path, 'w')
-        index_file.write(template('list_view', rows=[error_msg], header=error_type))
-        index_file.close()
