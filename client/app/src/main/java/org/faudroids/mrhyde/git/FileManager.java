@@ -15,14 +15,10 @@ import org.eclipse.egit.github.core.TypedResource;
 import org.faudroids.mrhyde.github.ApiWrapper;
 import org.faudroids.mrhyde.github.LoginManager;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -92,34 +88,29 @@ public final class FileManager {
 	/**
 	 * Gets and stores a file on disk (!).
 	 */
-	public Observable<String> getFile(FileNode fileNode) {
+	public Observable<FileData> getFile(final FileNode fileNode) {
 		final TreeEntry treeEntry = fileNode.getTreeEntry();
 		final File file = new File(rootDir, treeEntry.getPath());
 
 		if (file.exists()) {
-			return Observable.defer(new Func0<Observable<String>>() {
+			return Observable.defer(new Func0<Observable<FileData>>() {
 				@Override
-				public Observable<String> call() {
-					return Observable.just(readFile(file));
+				public Observable<FileData> call() {
+					return Observable.just(new FileData(fileNode, readFile(file)));
 				}
 			});
 
 		} else {
 			Timber.d("getting file with sha " + treeEntry.getSha());
 			return apiWrapper.getBlob(repository, treeEntry.getSha())
-					.flatMap(new Func1<Blob, Observable<String>>() {
+					.flatMap(new Func1<Blob, Observable<FileData>>() {
 						@Override
-						public Observable<String> call(Blob blob) {
-							String content;
+						public Observable<FileData> call(Blob blob) {
+							byte[] content;
 							if (blob.getEncoding().equals(Blob.ENCODING_UTF8)) {
-								content = blob.getContent();
+								content = blob.getContent().getBytes();
 							} else {
-								byte[] bytes = Base64.decode(blob.getContent(), Base64.DEFAULT);
-								try {
-									content = new String(bytes, "UTF-8");
-								} catch (UnsupportedEncodingException e) {
-									throw new RuntimeException(e);
-								}
+								content = Base64.decode(blob.getContent().getBytes(), Base64.DEFAULT);
 							}
 
 							try {
@@ -127,10 +118,10 @@ public final class FileManager {
 							} catch (IOException e) {
 								return Observable.error(e);
 							}
-							return Observable.just(content);
+							return Observable.just(new FileData(fileNode, content));
 						}
 					})
-					.flatMap(gitManager.<String>commit(file));
+					.flatMap(gitManager.<FileData>commit(file));
 		}
 	}
 
@@ -174,11 +165,11 @@ public final class FileManager {
 	/**
 	 * Stores the content on disk.
 	 */
-	public void writeFile(FileNode fileNode, String content) throws IOException {
-		Timber.d("writing file " + fileNode.getTreeEntry().getPath());
-		File file = new File(rootDir, fileNode.getTreeEntry().getPath());
+	public void writeFile(FileData data) throws IOException {
+		Timber.d("writing file " + data.getFileNode().getTreeEntry().getPath());
+		File file = new File(rootDir, data.getFileNode().getTreeEntry().getPath());
 		if (!file.exists()) if (!file.createNewFile()) Timber.w("failed to create new file");
-		writeFile(file, content);
+		writeFile(file, data.getData());
 	}
 
 
@@ -207,9 +198,9 @@ public final class FileManager {
 	public Observable<Void> deleteFile(final FileNode node) {
 		// first download file to ensure proper diff
 		return getFile(node)
-				.flatMap(new Func1<String, Observable<Void>>() {
+				.flatMap(new Func1<FileData, Observable<Void>>() {
 					@Override
-					public Observable<Void> call(String fileContent) {
+					public Observable<Void> call(FileData fileContent) {
 						// remove from tree
 						DirNode parentNode = (DirNode) node.getParent();
 						parentNode.getEntries().remove(node.getPath());
@@ -250,7 +241,7 @@ public final class FileManager {
 							return Observable.empty();
 
 						} else {
-							blob.setContent(readFile(file)).setEncoding(Blob.ENCODING_UTF8);
+							blob.setContent(new String(Base64.encode(readFile(file), Base64.DEFAULT))).setEncoding(Blob.ENCODING_BASE64);
 							return apiWrapper.createBlob(repository, blob)
 									.flatMap(new Func1<String, Observable<SavedBlob>>() {
 										@Override
@@ -393,41 +384,39 @@ public final class FileManager {
 		}
 	}
 
-	private String readFile(File file) {
-		BufferedReader reader = null;
+
+	private byte[] readFile(File file) {
+		FileInputStream reader = null;
+		byte[] bytes = new byte[(int) file.length()];
 		try {
-			reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
-			StringBuilder builder = new StringBuilder();
-
-			String line;
-			while ((line = reader.readLine()) != null) {
-				builder.append(line).append('\n');
-			}
-			return builder.toString();
-
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} finally {
+			//convert file into array of bytes
+			reader = new FileInputStream(file);
+			reader.read(bytes);
+			reader.close();
+		} catch (IOException ioe) {
 			if (reader != null) {
 				try {
 					reader.close();
-				} catch (IOException ioe) {
-					Timber.e(ioe, "failed to close writer");
+				} catch (IOException e) {
+					Timber.e(e, "failed to close writer");
 				}
 			}
+
 		}
+
+		return bytes;
 	}
 
 
-	private void writeFile(File file, String content) throws IOException {
+	private void writeFile(File file, byte[] content) throws IOException {
 		File parentDir = file.getParentFile();
 		if (parentDir != null && !parentDir.exists()) {
 			if (!parentDir.mkdirs()) Timber.w("failed to create dirs " + parentDir.getPath());
 		}
 
-		OutputStreamWriter writer = null;
+		FileOutputStream writer = null;
 		try {
-			writer = new OutputStreamWriter(new FileOutputStream(file), "UTF-8");
+			writer = new FileOutputStream(file);
 			writer.write(content);
 			writer.close();
 		} finally {

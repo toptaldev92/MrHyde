@@ -17,6 +17,7 @@ import com.getbase.floatingactionbutton.FloatingActionButton;
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.DirNode;
+import org.faudroids.mrhyde.git.FileData;
 import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.NodeUtils;
@@ -27,6 +28,7 @@ import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import javax.inject.Inject;
 
@@ -54,7 +56,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 
 	@Inject NodeUtils nodeUtils;
 	private FileManager fileManager;
-	private FileNode fileNode; // file currently being edited
+	private FileData fileData; // file currently being edited
 
 
 	@Override
@@ -120,40 +122,33 @@ public final class FileActivity extends AbstractActionBarActivity {
 		// load selected file
 		showSpinner();
 		compositeSubscription.add(fileManager.getTree()
-				.flatMap(new Func1<DirNode, Observable<LoadedFile>>() {
+				.flatMap(new Func1<DirNode, Observable<FileData>>() {
 					@Override
-					public Observable<LoadedFile> call(DirNode rootNode) {
+					public Observable<FileData> call(DirNode rootNode) {
 						FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
 
-						final LoadedFile loadedFile = new LoadedFile();
-						loadedFile.node = node;
-
 						if (!isNewFile) {
-							return fileManager.getFile(node)
-									.flatMap(new Func1<String, Observable<LoadedFile>>() {
-										@Override
-										public Observable<LoadedFile> call(String content) {
-											loadedFile.content = content;
-											return Observable.just(loadedFile);
-										}
-									});
+							return fileManager.getFile(node);
 						} else {
-							loadedFile.content = "";
-							return Observable.just(loadedFile);
+							return Observable.just(new FileData(node, new byte[0]));
 						}
 					}
 				})
-				.compose(new DefaultTransformer<LoadedFile>())
-				.subscribe(new Action1<LoadedFile>() {
+				.compose(new DefaultTransformer<FileData>())
+				.subscribe(new Action1<FileData>() {
 					@Override
-					public void call(LoadedFile loadedFile) {
-						hideSpinner();
-						setTitle(loadedFile.node.getPath());
-						editText.setText(loadedFile.content);
-						editText.setTypeface(Typeface.MONOSPACE);
-						FileActivity.this.fileNode = loadedFile.node;
-						if (isNewFile) startEditMode();
-						else stopEditMode();
+					public void call(FileData file) {
+						try {
+							hideSpinner();
+							setTitle(file.getFileNode().getPath());
+							editText.setText(new String(file.getData(), "UTF-8"));
+							editText.setTypeface(Typeface.MONOSPACE);
+							FileActivity.this.fileData = file;
+							if (isNewFile) startEditMode();
+							else stopEditMode();
+						} catch (UnsupportedEncodingException uee) {
+							Timber.e(uee, "failed to read content");
+						}
 					}
 				}, new ErrorActionBuilder()
 						.add(new DefaultErrorAction(this, "failed to get file content"))
@@ -205,8 +200,9 @@ public final class FileActivity extends AbstractActionBarActivity {
 
 
 	private void saveFile() {
+		Timber.d("saving file");
 		try {
-			fileManager.writeFile(fileNode, editText.getText().toString());
+			fileManager.writeFile(new FileData(fileData.getFileNode(), editText.getText().toString().getBytes()));
 		} catch (IOException ioe) {
 			Timber.e(ioe, "failed to write file");
 			// TODO
@@ -242,14 +238,6 @@ public final class FileActivity extends AbstractActionBarActivity {
 
 	private boolean isEditMode() {
 		return editText.isFocusable();
-	}
-
-
-	private static final class LoadedFile {
-
-		private FileNode node;
-		private String content;
-
 	}
 
 }
