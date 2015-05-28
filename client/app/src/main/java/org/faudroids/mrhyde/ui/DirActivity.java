@@ -292,6 +292,29 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 					@Override
 					public void call(DirNode rootNode) {
 						hideSpinner();
+
+						// check for empty repository
+						if (rootNode == null) {
+							new AlertDialog.Builder(DirActivity.this)
+									.setTitle(R.string.error_empty_repo_title)
+									.setMessage(R.string.error_empty_repo_message)
+									.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+										@Override
+										public void onClick(DialogInterface dialog, int which) {
+											finish();
+										}
+									})
+									.setOnCancelListener(new DialogInterface.OnCancelListener() {
+										@Override
+										public void onCancel(DialogInterface dialog) {
+											finish();
+										}
+									})
+									.show();
+							return;
+						}
+
+						// update files list
 						pathNodeAdapter.setSelectedNode(rootNode);
 						if (savedInstanceState != null)
 							pathNodeAdapter.onRestoreInstanceState(savedInstanceState);

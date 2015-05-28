@@ -128,4 +128,6 @@
     <string name="error_internal_message">Unfortunately there was an internal error, we are sorry! Please retry or send us an email to resolve the issue.</string>
     <string name="error_network_title">No internet connection</string>
     <string name="error_network_message">Failed to perform request due to a problem with the internet connection</string>
+    <string name="error_empty_repo_title">Empty repository</string>
+    <string name="error_empty_repo_message">It seems that this repository is empty. Unfortunately we currently do not support empty repository, sorry.</string>
 </resources>

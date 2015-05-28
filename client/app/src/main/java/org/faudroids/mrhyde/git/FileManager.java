@@ -12,6 +12,7 @@ import org.eclipse.egit.github.core.RepositoryCommit;
 import org.eclipse.egit.github.core.Tree;
 import org.eclipse.egit.github.core.TreeEntry;
 import org.eclipse.egit.github.core.TypedResource;
+import org.eclipse.egit.github.core.client.RequestException;
 import org.faudroids.mrhyde.github.ApiWrapper;
 import org.faudroids.mrhyde.github.LoginManager;
 
@@ -55,13 +56,15 @@ public final class FileManager {
 
 
 	/**
-	 * Gets and stores a tree in memory (!).
+	 * Gets and stores a tree in memory (!). Returns null if the repository is empty.
 	 */
 	public Observable<DirNode> getTree() {
 		if (cachedTree != null) return Observable.just(cachedTree)
 				.compose(new InitRepoTransformer<Tree>())
 				.flatMap(new GitHubParseFunc())
 				.flatMap(new LoadLocalFilesFunc());
+
+
 		else return apiWrapper.getCommits(repository)
 				.flatMap(new Func1<List<RepositoryCommit>, Observable<Tree>>() {
 					@Override
@@ -81,7 +84,19 @@ public final class FileManager {
 				})
 				.compose(new InitRepoTransformer<Tree>())
 				.flatMap(new GitHubParseFunc())
-				.flatMap(new LoadLocalFilesFunc());
+				.flatMap(new LoadLocalFilesFunc())
+				.onErrorReturn(new Func1<Throwable, DirNode>() {
+					@Override
+					public DirNode call(Throwable throwable) {
+						if (throwable.getCause() instanceof RequestException) {
+							// if repository is empty, return null
+							RequestException exception = (RequestException) throwable.getCause();
+							if (exception.getMessage().toLowerCase().contains("git repository is empty"))
+								return null;
+						}
+						throw new RuntimeException(throwable);
+					}
+				});
 	}
 
 
