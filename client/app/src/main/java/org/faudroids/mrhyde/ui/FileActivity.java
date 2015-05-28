@@ -174,25 +174,29 @@ public final class FileActivity extends AbstractActionBarActivity {
 	@Override
 	public void onBackPressed() {
 		if (isEditMode()) {
-			new AlertDialog.Builder(this)
-					.setTitle(R.string.save_title)
-					.setMessage(R.string.save_message)
-					.setCancelable(false)
-					.setPositiveButton(getString(R.string.save_ok), new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							saveFile();
-							returnResult();
-						}
-					})
-					.setNegativeButton(getString(R.string.save_cancel), new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							returnResult();
-						}
-					})
-					.show();
+			if (!isDirty()) {
+				returnResult();
+			} else {
 
+				new AlertDialog.Builder(this)
+						.setTitle(R.string.save_title)
+						.setMessage(R.string.save_message)
+						.setCancelable(false)
+						.setPositiveButton(getString(R.string.save_ok), new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								saveFile();
+								returnResult();
+							}
+						})
+						.setNegativeButton(getString(R.string.save_cancel), new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								returnResult();
+							}
+						})
+						.show();
+			}
 		} else {
 			returnResult();
 		}
@@ -206,6 +210,20 @@ public final class FileActivity extends AbstractActionBarActivity {
 		} catch (IOException ioe) {
 			Timber.e(ioe, "failed to write file");
 			// TODO
+		}
+	}
+
+
+	/**
+	 * @return true if the file has been changed
+	 */
+	private boolean isDirty() {
+		if (fileData == null) return false;
+		try {
+			return !new String(fileData.getData(), "UTF-8").equals(editText.getText().toString());
+		} catch (UnsupportedEncodingException uee) {
+			Timber.e(uee, "failed to encoding content");
+			return false;
 		}
 	}
 
@@ -232,7 +250,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 		editText.setFocusable(false);
 		editText.setFocusableInTouchMode(false);
 		editButton.setVisibility(View.VISIBLE);
-		saveFile();
+		if (isDirty()) saveFile();
 	}
 
 
