@@ -2,6 +2,8 @@ package org.faudroids.mrhyde.ui;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
@@ -10,6 +12,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -47,14 +51,19 @@ public final class FileActivity extends AbstractActionBarActivity {
 			EXTRA_IS_NEW_FILE = "EXTRA_IS_NEW_FILE";
 
 
-	@Inject RepositoryManager repositoryManager;
-	@Inject InputMethodManager inputMethodManager;
+	@Inject private RepositoryManager repositoryManager;
+	@Inject private InputMethodManager inputMethodManager;
 
-	@InjectView(R.id.content) EditText editText;
-	@InjectView(R.id.edit) FloatingActionButton editButton;
-	@InjectView(R.id.line_numbers) TextView numLinesTextView;
+	@InjectView(R.id.layout_text) private RelativeLayout textContainer;
+	@InjectView(R.id.layout_image) private RelativeLayout imageContainer;
 
-	@Inject NodeUtils nodeUtils;
+	@InjectView(R.id.content) private EditText editText;
+	@InjectView(R.id.edit) private FloatingActionButton editButton;
+	@InjectView(R.id.line_numbers) private TextView numLinesTextView;
+
+	@InjectView(R.id.image) private ImageView imageView;
+
+	@Inject private NodeUtils nodeUtils;
 	private FileManager fileManager;
 	private FileData fileData; // file currently being edited
 
@@ -138,17 +147,10 @@ public final class FileActivity extends AbstractActionBarActivity {
 				.subscribe(new Action1<FileData>() {
 					@Override
 					public void call(FileData file) {
-						try {
-							hideSpinner();
-							setTitle(file.getFileNode().getPath());
-							editText.setText(new String(file.getData(), "UTF-8"));
-							editText.setTypeface(Typeface.MONOSPACE);
-							FileActivity.this.fileData = file;
-							if (isNewFile) startEditMode();
-							else stopEditMode();
-						} catch (UnsupportedEncodingException uee) {
-							Timber.e(uee, "failed to read content");
-						}
+						hideSpinner();
+						setTitle(file.getFileNode().getPath());
+						FileActivity.this.fileData = file;
+						setupContent(isNewFile);
 					}
 				}, new ErrorActionBuilder()
 						.add(new DefaultErrorAction(this, "failed to get file content"))
@@ -200,6 +202,44 @@ public final class FileActivity extends AbstractActionBarActivity {
 		} else {
 			returnResult();
 		}
+	}
+
+
+	private void setupContent(boolean isNewFile) {
+		if (!isImage(fileData.getFileNode().getPath())) {
+			textContainer.setVisibility(View.VISIBLE);
+			imageContainer.setVisibility(View.GONE);
+
+			try {
+				editText.setText(new String(fileData.getData(), "UTF-8"));
+				editText.setTypeface(Typeface.MONOSPACE);
+				if (isNewFile) startEditMode();
+				else stopEditMode();
+			} catch (UnsupportedEncodingException uee) {
+				Timber.e(uee, "failed to read content");
+			}
+
+		} else {
+			textContainer.setVisibility(View.GONE);
+			imageContainer.setVisibility(View.VISIBLE);
+
+			Bitmap bitmap = BitmapFactory.decodeByteArray(fileData.getData(), 0, fileData.getData().length);
+			imageView.setImageBitmap(bitmap);
+		}
+	}
+
+
+	private boolean isImage(String fileName) {
+		return (fileName.endsWith(".png")
+				|| fileName.endsWith(".PNG")
+				|| fileName.endsWith(".jpg")
+				|| fileName.endsWith(".JPG")
+				|| fileName.endsWith(".jpeg")
+				|| fileName.endsWith(".JPEG")
+				|| fileName.endsWith(".bmp")
+				|| fileName.endsWith(".BMP")
+				|| fileName.endsWith(".gif")
+				|| fileName.endsWith(".GIF"));
 	}
 
 

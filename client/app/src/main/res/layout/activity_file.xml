@@ -3,74 +3,97 @@
     xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="horizontal"
     android:background="@color/gray_light_2"
     >
 
-    <ScrollView
+    <RelativeLayout
+        android:id="@+id/layout_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         >
 
-        <LinearLayout
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginLeft="@dimen/list_horizontal_margin"
-            android:layout_marginRight="@dimen/list_horizontal_margin"
-            android:paddingLeft="@dimen/activity_vertical_margin"
-            android:paddingRight="@dimen/activity_vertical_margin"
-            android:paddingTop="@dimen/activity_vertical_margin"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:background="@android:color/white"
+            android:layout_height="match_parent"
             >
 
-            <TextView
-                android:id="@+id/line_numbers"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:textSize="14sp"
-                android:textColor="@color/gray_light_2"
-                android:text="1\n2\n3\n4\n"
-                />
-
-            <EditText
-                android:id="@+id/content"
-                android:textSize="14sp"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@android:color/transparent"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:clickable="true"
-                android:textCursorDrawable="@null"
-                android:textSelectHandle="@drawable/text_select_handle_middle"
-                android:textSelectHandleLeft="@drawable/text_select_handle_left_mtrl_alpha"
-                android:textSelectHandleRight="@drawable/text_select_handle_right_mtrl_alpha"
-                android:text="Hello world hello world\nThis is some serious content"
-                />
+                android:orientation="horizontal"
+                android:layout_marginLeft="@dimen/list_horizontal_margin"
+                android:layout_marginRight="@dimen/list_horizontal_margin"
+                android:paddingLeft="@dimen/activity_vertical_margin"
+                android:paddingRight="@dimen/activity_vertical_margin"
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:background="@android:color/white"
+                >
 
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/line_numbers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textSize="14sp"
+                    android:textColor="@color/gray_light_2"
+                    android:text="1\n2\n3\n4\n"
+                    />
 
-    </ScrollView>
+                <EditText
+                    android:id="@+id/content"
+                    android:textSize="14sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@android:color/transparent"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:clickable="true"
+                    android:textCursorDrawable="@null"
+                    android:textSelectHandle="@drawable/text_select_handle_middle"
+                    android:textSelectHandleLeft="@drawable/text_select_handle_left_mtrl_alpha"
+                    android:textSelectHandleRight="@drawable/text_select_handle_right_mtrl_alpha"
+                    android:text="Hello world hello world\nThis is some serious content"
+                    />
 
-    <com.getbase.floatingactionbutton.FloatingActionButton
-        android:id="@+id/edit"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="16dp"
-        fab:fab_colorNormal="@color/blue"
-        fab:fab_colorPressed="@color/blue_dark"
-        fab:fab_plusIconColor="@android:color/white"
-        fab:fab_icon="@drawable/ic_mode_edit_large"
-        />
+            </LinearLayout>
 
-    <include layout="@layout/spinner"/>
+        </ScrollView>
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginRight="16dp"
+            android:layout_marginBottom="16dp"
+            fab:fab_colorNormal="@color/blue"
+            fab:fab_colorPressed="@color/blue_dark"
+            fab:fab_plusIconColor="@android:color/white"
+            fab:fab_icon="@drawable/ic_mode_edit_large"
+            />
+
+        <include layout="@layout/spinner"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        >
+
+        <com.ortiz.touch.TouchImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true"
+            />
+
+    </RelativeLayout>
 
 </RelativeLayout>
 
