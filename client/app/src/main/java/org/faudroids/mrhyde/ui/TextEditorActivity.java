@@ -1,11 +1,15 @@
 package org.faudroids.mrhyde.ui;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -50,6 +54,12 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 			STATE_CONTENT = "STATE_CONTENT",
 			STATE_EDIT_MODE = "STATE_EDIT_MODE";
 
+	private static final String
+			PREFS_NAME = TextEditorActivity.class.getSimpleName();
+
+	private static final String
+			KEY_SHOW_LINE_NUMBERS = "KEY_SHOW_LINE_NUMBERS";
+
 	@Inject private RepositoryManager repositoryManager;
 	@Inject private InputMethodManager inputMethodManager;
 
@@ -60,6 +70,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	@Inject private NodeUtils nodeUtils;
 	private FileManager fileManager;
 	private FileData fileData; // file currently being edited
+	private boolean showingLineNumbers;
 
 
 	@Override
@@ -70,6 +81,9 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		final boolean isNewFile = getIntent().getBooleanExtra(EXTRA_IS_NEW_FILE, false);
 		final Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		fileManager = repositoryManager.getFileManager(repository);
+
+		// hide line numbers by default
+		showingLineNumbers = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(KEY_SHOW_LINE_NUMBERS, false);
 
 		// start editing on long click
 		editText.setOnLongClickListener(new View.OnLongClickListener() {
@@ -84,12 +98,10 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		// setup line numbers
 		editText.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-			}
+			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
 
 			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-			}
+			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
 
 			@Override
 			public void afterTextChanged(Editable s) {
@@ -150,14 +162,36 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		outState.putBoolean(STATE_EDIT_MODE, isEditMode());
 	}
 
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.text_editor, menu);
+		return true;
+	}
+
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		MenuItem item = menu.findItem(R.id.action_show_line_numbers);
+		if (showingLineNumbers) item.setChecked(true);
+		else item.setChecked(false);
+		return true;
+	}
+
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		switch(item.getItemId()) {
+		switch (item.getItemId()) {
 			case android.R.id.home:
 				Timber.d("back pressed");
 				if (isEditMode()) stopEditMode();
 				else onBackPressed();
+				return true;
+
+			case R.id.action_show_line_numbers:
+				if (item.isChecked()) item.setChecked(false);
+				else item.setChecked(true);
+				toggleLineNumbers();
 				return true;
 
 		}
@@ -268,7 +302,23 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	}
 
 
+	private void toggleLineNumbers() {
+		showingLineNumbers = !showingLineNumbers;
+		SharedPreferences.Editor editor = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
+		editor.putBoolean(KEY_SHOW_LINE_NUMBERS, showingLineNumbers);
+		editor.commit();
+		updateLineNumbers();
+	}
+
+
 	private void updateLineNumbers() {
+		if (showingLineNumbers) {
+			numLinesTextView.setVisibility(View.VISIBLE);
+		} else {
+			numLinesTextView.setVisibility(View.GONE);
+			return;
+		}
+
 		// delay updating lines until internal layout has been built
 		editText.post(new Runnable() {
 			@Override
@@ -294,4 +344,6 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 			}
 		});
 	}
+
+
 }
