@@ -2,8 +2,6 @@ package org.faudroids.mrhyde.ui;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,8 +10,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
@@ -43,8 +39,8 @@ import rx.functions.Action1;
 import rx.functions.Func1;
 import timber.log.Timber;
 
-@ContentView(R.layout.activity_file)
-public final class FileActivity extends AbstractActionBarActivity {
+@ContentView(R.layout.activity_text_editor)
+public final class TextEditorActivity extends AbstractActionBarActivity {
 
 	static final String
 			EXTRA_REPOSITORY = "EXTRA_REPOSITORY",
@@ -57,14 +53,9 @@ public final class FileActivity extends AbstractActionBarActivity {
 	@Inject private RepositoryManager repositoryManager;
 	@Inject private InputMethodManager inputMethodManager;
 
-	@InjectView(R.id.layout_text) private RelativeLayout textContainer;
-	@InjectView(R.id.layout_image) private RelativeLayout imageContainer;
-
 	@InjectView(R.id.content) private EditText editText;
 	@InjectView(R.id.edit) private FloatingActionButton editButton;
 	@InjectView(R.id.line_numbers) private TextView numLinesTextView;
-
-	@InjectView(R.id.image) private ImageView imageView;
 
 	@Inject private NodeUtils nodeUtils;
 	private FileManager fileManager;
@@ -140,7 +131,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 						@Override
 						public void call(FileData file) {
 							hideSpinner();
-							FileActivity.this.fileData = file;
+							TextEditorActivity.this.fileData = file;
 							setupContent(isNewFile);
 						}
 					}, new ErrorActionBuilder()
@@ -207,43 +198,17 @@ public final class FileActivity extends AbstractActionBarActivity {
 
 
 	private void setupContent(boolean startEditMode) {
-		// set title and text / image content
+		// set title and text
 		setTitle(fileData.getFileNode().getPath());
-		if (!isImage(fileData.getFileNode().getPath())) {
-			textContainer.setVisibility(View.VISIBLE);
-			imageContainer.setVisibility(View.GONE);
-
-			try {
-				editText.setText(new String(fileData.getData(), "UTF-8"));
-				editText.setTypeface(Typeface.MONOSPACE);
-				if (startEditMode) startEditMode();
-				else stopEditMode();
-			} catch (UnsupportedEncodingException uee) {
-				Timber.e(uee, "failed to read content");
-			}
-			updateLineNumbers();
-
-		} else {
-			textContainer.setVisibility(View.GONE);
-			imageContainer.setVisibility(View.VISIBLE);
-
-			Bitmap bitmap = BitmapFactory.decodeByteArray(fileData.getData(), 0, fileData.getData().length);
-			imageView.setImageBitmap(bitmap);
+		try {
+			editText.setText(new String(fileData.getData(), "UTF-8"));
+			editText.setTypeface(Typeface.MONOSPACE);
+			if (startEditMode) startEditMode();
+			else stopEditMode();
+		} catch (UnsupportedEncodingException uee) {
+			Timber.e(uee, "failed to read content");
 		}
-	}
-
-
-	private boolean isImage(String fileName) {
-		return (fileName.endsWith(".png")
-				|| fileName.endsWith(".PNG")
-				|| fileName.endsWith(".jpg")
-				|| fileName.endsWith(".JPG")
-				|| fileName.endsWith(".jpeg")
-				|| fileName.endsWith(".JPEG")
-				|| fileName.endsWith(".bmp")
-				|| fileName.endsWith(".BMP")
-				|| fileName.endsWith(".gif")
-				|| fileName.endsWith(".GIF"));
+		updateLineNumbers();
 	}
 
 

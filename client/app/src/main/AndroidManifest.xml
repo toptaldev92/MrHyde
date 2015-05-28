@@ -29,7 +29,10 @@
             android:name=".ui.DirActivity"
             />
         <activity
-            android:name=".ui.FileActivity"
+            android:name=".ui.TextEditorActivity"
+            />
+        <activity
+            android:name=".ui.ImageViewerActivity"
             />
         <activity
             android:name=".ui.CommitActivity"

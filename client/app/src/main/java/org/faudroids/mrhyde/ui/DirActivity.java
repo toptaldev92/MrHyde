@@ -25,6 +25,7 @@ import org.faudroids.mrhyde.git.AbstractNode;
 import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.FileNode;
+import org.faudroids.mrhyde.git.FileUtils;
 import org.faudroids.mrhyde.git.NodeUtils;
 import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
@@ -52,19 +53,20 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
-	@InjectView(R.id.list) RecyclerView recyclerView;
+	@InjectView(R.id.list) private RecyclerView recyclerView;
 	private PathNodeAdapter pathNodeAdapter;
 	private RecyclerView.LayoutManager layoutManager;
 
-	@InjectView(R.id.tint) View tintView;
-	@InjectView(R.id.add) FloatingActionsMenu addButton;
-	@InjectView(R.id.add_file) FloatingActionButton addFileButton;
-	@InjectView(R.id.add_folder) FloatingActionButton addFolderButton;
+	@InjectView(R.id.tint) private View tintView;
+	@InjectView(R.id.add) private FloatingActionsMenu addButton;
+	@InjectView(R.id.add_file) private FloatingActionButton addFileButton;
+	@InjectView(R.id.add_folder) private FloatingActionButton addFolderButton;
 
-	@Inject RepositoryManager repositoryManager;
+	@Inject private RepositoryManager repositoryManager;
 	private Repository repository;
 	private FileManager fileManager;
-	@Inject NodeUtils nodeUtils;
+	@Inject private NodeUtils nodeUtils;
+	@Inject private FileUtils fileUtils;
 
 	private DirActionModeListener actionModeListener = null;
 
@@ -302,14 +304,27 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 
 	private void startFileActivity(FileNode fileNode, boolean isNewFile) {
-		Bundle extras = new Bundle();
-		extras.putSerializable(FileActivity.EXTRA_REPOSITORY, repository);
-		extras.putBoolean(FileActivity.EXTRA_IS_NEW_FILE, isNewFile);
-		nodeUtils.saveInstanceState(extras, fileNode);
+		// start text or image activity depending on file name
+		if (!fileUtils.isImage(fileNode.getPath())) {
+			// start text editor
+			Intent editorIntent = new Intent(this, TextEditorActivity.class);
+			Bundle extras = new Bundle();
+			extras.putSerializable(TextEditorActivity.EXTRA_REPOSITORY, repository);
+			extras.putBoolean(TextEditorActivity.EXTRA_IS_NEW_FILE, isNewFile);
+			nodeUtils.saveInstanceState(extras, fileNode);
+			editorIntent.putExtras(extras);
+			startActivityForResult(editorIntent, REQUEST_EDIT_FILE);
 
-		Intent fileIntent = new Intent(DirActivity.this, FileActivity.class);
-		fileIntent.putExtras(extras);
-		startActivityForResult(fileIntent, REQUEST_EDIT_FILE);
+		} else {
+			// start image viewer
+			Intent viewerIntent = new Intent(this, ImageViewerActivity.class);
+			Bundle extras = new Bundle();
+			extras.putSerializable(ImageViewerActivity.EXTRA_REPOSITORY, repository);
+			nodeUtils.saveInstanceState(extras, fileNode);
+			viewerIntent.putExtras(extras);
+			startActivity(viewerIntent);
+		}
+
 	}
 
 
