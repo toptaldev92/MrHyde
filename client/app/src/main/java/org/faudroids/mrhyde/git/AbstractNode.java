@@ -3,7 +3,9 @@ package org.faudroids.mrhyde.git;
 
 import org.eclipse.egit.github.core.TreeEntry;
 
-public abstract class AbstractNode implements Comparable<AbstractNode> {
+import java.io.Serializable;
+
+public abstract class AbstractNode implements Comparable<AbstractNode>, Serializable {
 
 	private final AbstractNode parent;
 	private final String path;

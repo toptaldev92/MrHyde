@@ -3,7 +3,9 @@ package org.faudroids.mrhyde.git;
 
 import org.roboguice.shaded.goole.common.base.Objects;
 
-public class FileData {
+import java.io.Serializable;
+
+public class FileData implements Serializable {
 
 	private final FileNode fileNode;
 	private final byte[] data; // base 64 encoded

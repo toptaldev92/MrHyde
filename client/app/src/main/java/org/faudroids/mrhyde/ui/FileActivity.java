@@ -50,6 +50,9 @@ public final class FileActivity extends AbstractActionBarActivity {
 			EXTRA_REPOSITORY = "EXTRA_REPOSITORY",
 			EXTRA_IS_NEW_FILE = "EXTRA_IS_NEW_FILE";
 
+	private static final String
+			STATE_CONTENT = "STATE_CONTENT",
+			STATE_EDIT_MODE = "STATE_EDIT_MODE";
 
 	@Inject private RepositoryManager repositoryManager;
 	@Inject private InputMethodManager inputMethodManager;
@@ -99,24 +102,7 @@ public final class FileActivity extends AbstractActionBarActivity {
 
 			@Override
 			public void afterTextChanged(Editable s) {
-				numLinesTextView.setText("");
-				int numLines = editText.getLineCount();
-				int numCount = 1;
-				for (int i = 0; i < numLines; ++i) {
-					int start = editText.getLayout().getLineStart(i);
-					if (start == 0) {
-						numLinesTextView.append(numCount + "\n");
-						numCount++;
-
-					} else if (editText.getText().charAt(start - 1) == '\n') {
-						numLinesTextView.append(numCount + "\n");
-						numCount++;
-
-					} else {
-						numLinesTextView.append("\n");
-					}
-				}
-				numLinesTextView.setTypeface(Typeface.MONOSPACE);
+				updateLineNumbers();
 			}
 		});
 
@@ -129,33 +115,48 @@ public final class FileActivity extends AbstractActionBarActivity {
 		});
 
 		// load selected file
-		showSpinner();
-		compositeSubscription.add(fileManager.getTree()
-				.flatMap(new Func1<DirNode, Observable<FileData>>() {
-					@Override
-					public Observable<FileData> call(DirNode rootNode) {
-						FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
+		if (savedInstanceState != null && savedInstanceState.getSerializable(STATE_CONTENT) != null) {
+			fileData = (FileData) savedInstanceState.getSerializable(STATE_CONTENT);
+			boolean startEditMode = savedInstanceState.getBoolean(STATE_EDIT_MODE);
+			setupContent(startEditMode);
 
-						if (!isNewFile) {
-							return fileManager.getFile(node);
-						} else {
-							return Observable.just(new FileData(node, new byte[0]));
+		} else {
+			showSpinner();
+			compositeSubscription.add(fileManager.getTree()
+					.flatMap(new Func1<DirNode, Observable<FileData>>() {
+						@Override
+						public Observable<FileData> call(DirNode rootNode) {
+							FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
+
+							if (!isNewFile) {
+								return fileManager.getFile(node);
+							} else {
+								return Observable.just(new FileData(node, new byte[0]));
+							}
 						}
-					}
-				})
-				.compose(new DefaultTransformer<FileData>())
-				.subscribe(new Action1<FileData>() {
-					@Override
-					public void call(FileData file) {
-						hideSpinner();
-						setTitle(file.getFileNode().getPath());
-						FileActivity.this.fileData = file;
-						setupContent(isNewFile);
-					}
-				}, new ErrorActionBuilder()
-						.add(new DefaultErrorAction(this, "failed to get file content"))
-						.add(new HideSpinnerAction(this))
-						.build()));
+					})
+					.compose(new DefaultTransformer<FileData>())
+					.subscribe(new Action1<FileData>() {
+						@Override
+						public void call(FileData file) {
+							hideSpinner();
+							FileActivity.this.fileData = file;
+							setupContent(isNewFile);
+						}
+					}, new ErrorActionBuilder()
+							.add(new DefaultErrorAction(this, "failed to get file content"))
+							.add(new HideSpinnerAction(this))
+							.build()));
+		}
+
+	}
+
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+		outState.putSerializable(STATE_CONTENT, fileData);
+		outState.putBoolean(STATE_EDIT_MODE, isEditMode());
 	}
 
 
@@ -205,7 +206,9 @@ public final class FileActivity extends AbstractActionBarActivity {
 	}
 
 
-	private void setupContent(boolean isNewFile) {
+	private void setupContent(boolean startEditMode) {
+		// set title and text / image content
+		setTitle(fileData.getFileNode().getPath());
 		if (!isImage(fileData.getFileNode().getPath())) {
 			textContainer.setVisibility(View.VISIBLE);
 			imageContainer.setVisibility(View.GONE);
@@ -213,11 +216,12 @@ public final class FileActivity extends AbstractActionBarActivity {
 			try {
 				editText.setText(new String(fileData.getData(), "UTF-8"));
 				editText.setTypeface(Typeface.MONOSPACE);
-				if (isNewFile) startEditMode();
+				if (startEditMode) startEditMode();
 				else stopEditMode();
 			} catch (UnsupportedEncodingException uee) {
 				Timber.e(uee, "failed to read content");
 			}
+			updateLineNumbers();
 
 		} else {
 			textContainer.setVisibility(View.GONE);
@@ -298,4 +302,31 @@ public final class FileActivity extends AbstractActionBarActivity {
 		return editText.isFocusable();
 	}
 
+
+	private void updateLineNumbers() {
+		// delay updating lines until internal layout has been built
+		editText.post(new Runnable() {
+			@Override
+			public void run() {
+				numLinesTextView.setText("");
+				int numLines = editText.getLineCount();
+				int numCount = 1;
+				for (int i = 0; i < numLines; ++i) {
+					int start = editText.getLayout().getLineStart(i);
+					if (start == 0) {
+						numLinesTextView.append(numCount + "\n");
+						numCount++;
+
+					} else if (editText.getText().charAt(start - 1) == '\n') {
+						numLinesTextView.append(numCount + "\n");
+						numCount++;
+
+					} else {
+						numLinesTextView.append("\n");
+					}
+				}
+				numLinesTextView.setTypeface(Typeface.MONOSPACE);
+			}
+		});
+	}
 }
