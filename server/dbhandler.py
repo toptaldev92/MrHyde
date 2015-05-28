@@ -2,11 +2,12 @@ import sqlite3
 import sys
 import logging
 
+logger = logging.getLogger(__name__)
+
 
 class DbHandler:
     """A class for communication with an sqlite3 database"""
 
-    __logger = logging.getLogger(__name__)
     __db = None
     __cursor = None
 
@@ -19,13 +20,13 @@ class DbHandler:
         self.__dbFile = dbFile
 
         if dbFile:
-            self.__logger.info("Loading %s" % self.__dbFile)
+            logger.info("Loading %s" % self.__dbFile)
             try:
                 self.__db = sqlite3.connect(self.__dbFile)
                 self.__db.row_factory = sqlite3.Row
                 self.__cursor = self.__db.cursor()
             except sqlite3.Error as exception:
-                self.__logger.error("Error %s occured!" % exception.args[0])
+                logger.error("Error %s occured!" % exception.args[0])
                 raise
 
     def __del__(self):
@@ -41,7 +42,7 @@ class DbHandler:
                 self.__cursor.execute(dbString)
             self.__db.commit()
         except sqlite3.Error as exception:
-            self.__logger.error("Error %s occured!" % exception.args[0])
+            logger.error("Error %s occured!" % exception.args[0])
             raise
 
     def fetch(self):
@@ -49,7 +50,7 @@ class DbHandler:
         try:
             return self.__cursor.fetchall()
         except sqlite3.Error as exception:
-            self.__logger.error("Error %s occured!" % exception.args[0])
+            logger.error("Error %s occured!" % exception.args[0])
             raise
 
     def list(self, table, column="", where=""):
@@ -74,7 +75,7 @@ class DbHandler:
             self.__cursor = self.__db.cursor()
 
         except sqlite3.Error as exception:
-            self.__logger.error("SQL error %s occured!" % exception.args[0])
+            logger.error("SQL error %s occured!" % exception.args[0])
 
     def useDatabase(self, dbFile):
         """Change database file"""
@@ -88,7 +89,7 @@ class DbHandler:
             self.__cursor = self.__db.cursor()
 
         except sqlite3.Error as exception:
-            self.__logger.error("SQL error %s occured!" % exception.args[0])
+            logger.error("SQL error %s occured!" % exception.args[0])
 
     def createTable(self, table, *args):
         """Creates a new table. Elements are passed as arguments.
@@ -116,7 +117,7 @@ class DbHandler:
             dbString = "".join([dbString, ");"])
             self.comm(dbString, args)
         else:
-            self.__logger.error("Error! No values to insert!")
+            logger.error("Error! No values to insert!")
 
     def updateData(self, table, where="", *args):
         """Changes data in table.
@@ -152,7 +153,7 @@ class DbHandler:
                 print("%s" % elem["name"])
 
         else:
-            self.__logger.error("Error! No database connection!")
+            logger.error("Error! No database connection!")
 
     def deleteTable(self, table):
         """Deletes an existing table"""

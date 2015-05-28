@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MrHyde</string>
+    <string name="app_name">MrHyde_testing</string>
 
     <string name="title_repos">Repositories</string>
     <string name="title_preview">Preview</string>
@@ -62,6 +62,11 @@
     <string name="commit_message_default">Mr Hyde was here …</string>
     <string name="commit_action">Commit</string>
     <string name="commit_success">Commit success</string>
+
+    <string name="gitHubClientSecret">3f830f03847872bd3f2dfaeb2a53076c0e161edf</string>
+    <string name="gitHubClientId">bec1da051d782d9fc8b6</string>
+    <string name="jekyllServerClientSecret">Oy0livEANmpRAdVMeQe8YDamtbFxrOF3</string>
+    <string name="jekyllServerEndpoint">/jekyll/</string>
 
     <string name="version">Version</string>
     <string name="about">About</string>

@@ -5,13 +5,13 @@ from sqlite3 import Error as SQLError
 from configparser import Error as ConfigError
 from shutil import rmtree
 import sys
-import ConfigManager
-import DbHandler
+import configmanager
+import dbhandler
 import logging
 from time import time
 
 logging.basicConfig(filename='caretaker.log', level=logging.DEBUG)
-
+logger = logging.getLogger(__name__)
 
 class Caretaker:
 
@@ -39,42 +39,33 @@ class Caretaker:
 """
 
     def __init__(self, config_file):
-        self.__logger = logging.getLogger(__name__)
         try:
-            self.__cm = ConfigManager.ConfigManager(config_file)
-            self.__db = DbHandler.DbHandler(self.get_config().get_db_file())
-        except SQLError:
-            exit('Unable to connect to database.')
+            self.__cm = configmanager.ConfigManager(config_file)
         except ConfigError:
             exit('Unable to parse config file.')
 
     def get_config(self):
         return self.__cm
 
-    def database(self):
-        return self.__db
-
-    def log(self):
-        return self.__logger
-
     def deactivate_repos(self):
         timestamp = int(time()-float(self.get_config().get_cleanup_time()))
         try:
-            old_repos = self.database().list('repo', '', 'last_used < %s and active > 0' % timestamp)
+            database = dbhandler.DbHandler(self.get_config().get_db_file())
+            old_repos = database.list('repo', '', 'last_used < %s and active > 0' % timestamp)
             for repo in old_repos:
-                self.log().info('Deleting repo %s' % repo['path'])
+                logger.info('Deleting repo %s' % repo['path'])
                 try:
                     rmtree(repo['path'])
                 except OSError as exception:
-                    self.log().error(exception.strerror)
+                    logger.error(exception.strerror)
                 finally:
                     # Set repo inactive
-                    self.database().updateData('repo', "id='%s'" % repo['id'], 'active = 0')
+                    database.updateData('repo', "id='%s'" % repo['id'], 'active = 0')
 
                 try:
                     rmtree(repo['deploy_path'])
                 except OSError as exception:
-                    self.log().error(exception.strerror)
+                    logger.error(exception.strerror)
 
                 makedirs(repo['deploy_path'], 0o755, True)
                 try:
@@ -82,27 +73,28 @@ class Caretaker:
                     index_file = open(index_file_path, 'w')
                     index_file.write(self.__html_content % (int(self.get_config().get_cleanup_time())/60))
                 except IOError as exception:
-                    self.log().error(exception.strerror)
+                    logger.error(exception.strerror)
                 finally:
                     index_file.close()
         except SQLError:
-            self.log().error("Database error, we're in trouble!")
+            logger.error("Database error, we're in trouble!")
             raise
 
     def cleanup_subdomains(self):
-        self.log().info('Cleaning up subdomains.')
+        logger.info('Cleaning up subdomains.')
         try:
-            old_repos = self.database().list('repo', '', 'active < 1')
+            database = dbhandler.DbHandler(self.get_config().get_db_file())
+            old_repos = database.list('repo', '', 'active < 1')
             for repo in old_repos:
                 try:
-                    self.log().info('Cleaning up deploy path %s' % repo['deploy_path'])
+                    logger.info('Cleaning up deploy path %s' % repo['deploy_path'])
                     rmtree(repo['deploy_path'])
                 except OSError as exception:
-                    self.log().error(exception.strerror)
+                    logger.error(exception.strerror)
                 else:
-                    self.database().deleteData('repo', "id='%s'" % repo['id'])
+                    database.deleteData('repo', "id='%s'" % repo['id'])
         except SQLError:
-            self.log().error("Database error, we're in trouble!")
+            logger.error("Database error, we're in trouble!")
             raise
 
 if __name__ == '__main__':

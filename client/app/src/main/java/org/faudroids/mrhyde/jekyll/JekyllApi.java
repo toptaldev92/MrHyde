@@ -10,7 +10,7 @@ import rx.Observable;
 public interface JekyllApi {
 
     static final String
-            JEKYLL_URL = "/jekyll/",
+            JEKYLL_URL = "/jekyll_testing/",
             ID_URL = JEKYLL_URL + "{previewId}/";
 
     /**

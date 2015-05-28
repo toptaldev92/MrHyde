@@ -12,11 +12,11 @@ from bottle import request, Bottle, run, abort, template, static_file, TEMPLATE_
 from os.path import dirname, realpath, join
 import sys
 
-import RequirementsChecker
-import ConfigManager
-import FileManager
-import RepoUtils
-import RepositoryManager
+import requirementschecker
+import configmanager
+import filemanager
+import repoutils
+import repositorymanager
 
 DEBUG_MODE = False
 
@@ -37,16 +37,16 @@ else:
     config_file = sys.argv[1]
 
 try:
-    cm = ConfigManager.ConfigManager(config_file)
-    fm = FileManager.FileManager()
-    utils = RepoUtils.RepoUtils()
-    rm = RepositoryManager.RepositoryManager()
+    cm = configmanager.ConfigManager(config_file)
+    fm = filemanager.FileManager(cm)
+    utils = repoutils.RepoUtils(cm)
+    rm = repositorymanager.RepositoryManager(cm)
 except ConfigError:
     exit('Unable to parse config file.')
 except SQLError:
     exit('Error connecting to database.')
 
-RequirementsChecker.check_requirements(logger)
+requirementschecker.check_requirements(logger)
 
 jekyll_server = Bottle()
 
@@ -95,11 +95,13 @@ def create_repository():
     except OSError as exception:
         if exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
+        else:
+            abort(500, 'Internal error. Sorry for that!')
     except GitCommandError:
         abort(500, 'Failed to apply patch.')
     except KeyError:
         abort(500, 'Internal error. Sorry for that!')
-    except IOError:
+    except SQLError:
         abort(500, 'Internal error. Sorry for that!')
 
 
@@ -124,8 +126,7 @@ def download_file(id, static_path):
         return static_file(static_path, root='static')
     else:
         try:
-            file = fm.file_download(id, static_path)
-            if file is True:
+            if fm.file_download(id, static_path):
                 return static_file('/'.join([id, static_path]), root=cm.get_base_dir(), download=True)
         except OSError as exception:
             if exception.errno == errno.ENOENT:
@@ -166,12 +167,14 @@ def update_repository(id):
             url = rm.update_repository(id, diff)
             return template('list_view', rows=[url], header='Repository updated.')
     except OSError as exception:
-        if exception.errno == errno.ENOENT:
-            abort(404, 'Repository not found.')
-        elif exception.errno == errno.EPERM:
+        if exception.errno == errno.EPERM:
             abort(403, 'Permission denied.')
+        else:
+            abort(500, 'Internal error. Sorry for that!')
     except GitCommandError:
         abort(500, 'Failed to apply patch.')
+    except KeyError:
+        abort(500, 'Internal error. Sorry for that!')
     except SQLError:
         abort(500, 'Internal error. Sorry for that!')
 

@@ -4,18 +4,14 @@ import re
 import os
 
 OWN_DIR = os.path.dirname(os.path.realpath(__file__))
+logger = logging.getLogger(__name__)
 
 class JekyllManager:
     __regex = None
     __error_list = None
 
-    __logger = logging.getLogger(__name__)
-
     def __init__(self):
         self.__regex = re.compile("Error.*\.")
-
-    def log(self):
-        return self.__logger
 
     def build(self, build_path, deploy_path):
         cmd = ['jekyll', 'build', '--source', build_path, '--destination', deploy_path, '--config', build_path+'/_config.yml,'+OWN_DIR+'/keep_files.yml']
