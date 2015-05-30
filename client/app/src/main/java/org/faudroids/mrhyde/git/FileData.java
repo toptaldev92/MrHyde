@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class FileData implements Serializable {
 
 	private final FileNode fileNode;
-	private final byte[] data; // base 64 encoded
+	private final byte[] data;
 
 	public FileData(FileNode fileNode, byte[] data) {
 		this.fileNode = fileNode;

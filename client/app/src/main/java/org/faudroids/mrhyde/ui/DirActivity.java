@@ -3,6 +3,7 @@ package org.faudroids.mrhyde.ui;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,6 +24,7 @@ import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.AbstractNode;
 import org.faudroids.mrhyde.git.DirNode;
+import org.faudroids.mrhyde.git.FileData;
 import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.FileUtils;
@@ -33,6 +35,7 @@ import org.faudroids.mrhyde.utils.DefaultTransformer;
 import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -43,13 +46,15 @@ import javax.inject.Inject;
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
 import rx.functions.Action1;
+import timber.log.Timber;
 
 @ContentView(R.layout.activity_dir)
 public final class DirActivity extends AbstractActionBarActivity implements DirActionModeListener.ActionSelectionListener {
 
 	private static final int
 			REQUEST_COMMIT = 42,
-			REQUEST_EDIT_FILE = 43;
+			REQUEST_EDIT_FILE = 43,
+			REQUEST_SELECT_PHOTO = 44;
 
 	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
@@ -60,6 +65,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	@InjectView(R.id.tint) private View tintView;
 	@InjectView(R.id.add) private FloatingActionsMenu addButton;
 	@InjectView(R.id.add_file) private FloatingActionButton addFileButton;
+	@InjectView(R.id.add_image) private FloatingActionButton addImageButton;
 	@InjectView(R.id.add_folder) private FloatingActionButton addFolderButton;
 
 	@Inject private RepositoryManager repositoryManager;
@@ -67,6 +73,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	private FileManager fileManager;
 	@Inject private NodeUtils nodeUtils;
 	@Inject private FileUtils fileUtils;
+	@Inject private ImageUtils imageUtils;
 
 	private DirActionModeListener actionModeListener = null;
 
@@ -97,6 +104,15 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 			public void onClick(View v) {
 				addButton.collapse();
 				addAndOpenFile();
+			}
+		});
+		addImageButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addButton.collapse();
+				Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+				photoPickerIntent.setType("image/*");
+				startActivityForResult(photoPickerIntent, REQUEST_SELECT_PHOTO);
 			}
 		});
 		addFolderButton.setOnClickListener(new View.OnClickListener() {
@@ -221,9 +237,45 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 				if (resultCode != RESULT_OK) return;
 			case REQUEST_EDIT_FILE:
 				// refresh tree after successful commit or updated file (in case of new files)
-				Bundle tmpSavedState = new Bundle();
-				pathNodeAdapter.onSaveInstanceState(tmpSavedState);
-				updateTree(tmpSavedState);
+				refreshTree();
+				break;
+
+			case REQUEST_SELECT_PHOTO:
+				if (resultCode != RESULT_OK) return;
+				final Uri selectedImage = data.getData();
+				Timber.d(selectedImage.toString());
+
+				// get image name
+				uiUtils.createInputDialog(
+						R.string.image_new_title,
+						R.string.image_new_message,
+						new UiUtils.OnInputListener() {
+							@Override
+							public void onInput(String imageName) {
+								// store image
+								FileNode imageNode = fileManager.createNewFile(pathNodeAdapter.getSelectedNode(), imageName);
+								showSpinner();
+								compositeSubscription.add(imageUtils.loadImage(imageNode, selectedImage)
+										.compose(new DefaultTransformer<FileData>())
+										.subscribe(new Action1<FileData>() {
+											@Override
+											public void call(FileData data) {
+												hideSpinner();
+												try {
+													fileManager.writeFile(data);
+													refreshTree();
+												} catch (IOException ioe) {
+													Timber.e(ioe, "failed to write file");
+												}
+											}
+										}, new ErrorActionBuilder()
+												.add(new DefaultErrorAction(DirActivity.this, "failed to write file"))
+												.add(new HideSpinnerAction(DirActivity.this))
+												.build()));
+							}
+						})
+						.show();
+				break;
 		}
 	}
 
@@ -284,6 +336,19 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	}
 
 
+	/**
+	 * Recreates the file tree without changing directory
+	 */
+	private void refreshTree() {
+		Bundle tmpSavedState = new Bundle();
+		pathNodeAdapter.onSaveInstanceState(tmpSavedState);
+		updateTree(tmpSavedState);
+	}
+
+
+	/**
+	 * Recreates the file tree
+	 */
 	private void updateTree(final Bundle savedInstanceState) {
 		showSpinner();
 		compositeSubscription.add(fileManager.getTree()
