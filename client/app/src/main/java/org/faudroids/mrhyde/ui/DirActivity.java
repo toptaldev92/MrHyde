@@ -444,6 +444,8 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 				titleView.setText(pathNode.getPath());
 				if (pathNode instanceof DirNode) {
 					iconView.setImageResource(R.drawable.folder);
+				} else if (fileUtils.isImage(pathNode.getPath())) {
+					iconView.setImageResource(R.drawable.image);
 				} else {
 					iconView.setImageResource(R.drawable.file);
 				}
