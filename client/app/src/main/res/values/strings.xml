@@ -116,6 +116,7 @@
         Thanks everyone!
     </string>
     <string name="logout">Logout</string>
+    <string name="settings_quick_message">Made by a small team of night time coders in Erlangen, Germany\nThanks for your support!</string>
 
     <string name="feedback_mail_chooser">Thanks for the feedback!</string>
     <string name="feedback_mail_address"> ideas@faudroids.org</string>
