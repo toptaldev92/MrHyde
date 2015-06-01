@@ -51,7 +51,7 @@ class RepositoryManager:
     def cm(self):
         return self.__cm
 
-    def init_repository(self, url, diff):
+    def init_repository(self, url, diff, static_files):
         try:
             database = dbhandler.DbHandler(self.cm().get_db_file())
             id = self.utils().generateId(self.cm().get_hash_size())
@@ -64,7 +64,7 @@ class RepositoryManager:
             database.insertData('repo', id, repo_path, deploy_path, url, int(time()), 1)
             shutil.copytree(OWN_PATH + '/redirector/', deploy_path)
 
-            t = threading.Thread(target=self.init_repository_async, args=(id, deploy_path, repo_path, url, diff))
+            t = threading.Thread(target=self.init_repository_async, args=(id, deploy_path, repo_path, url, diff, static_files))
             t.daemon = True
             t.start()
 
@@ -73,7 +73,7 @@ class RepositoryManager:
             logger.error(exception.__str__())
             raise
 
-    def init_repository_async(self, id, deploy_path, repo_path, url, diff):
+    def init_repository_async(self, id, deploy_path, repo_path, url, diff, static_files):
         if not isdir(self.__base_dir):
             makedirs(self.__base_dir, 0o755, True)
         try:
@@ -82,6 +82,7 @@ class RepositoryManager:
                 self.apply_diff(id, repo_path, diff)
             logger.info('Repository cloned to ' + repo_path + '.')
             self.jm().build(repo_path, deploy_path)
+            self.fm().dispatch_static_files(deploy_path, static_files)
 
         except OSError as exception:
             logger.error(exception.strerror)
@@ -106,7 +107,8 @@ class RepositoryManager:
                 outfile.write(str(0))
 
     def list_repositories(self):
-        dir_list = [[f['path'].split('/')[-1], f['url']] for f in self.db().list('repo') if isdir(f['path'])]
+        database = dbhandler.DbHandler(self.cm().get_db_file())
+        dir_list = [[f['path'].split('/')[-1], f['url']] for f in database.list('repo') if isdir(f['path'])]
         return dir_list
 
     def delete_repository(self, id):
