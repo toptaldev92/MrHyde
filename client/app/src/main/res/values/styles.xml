@@ -7,6 +7,7 @@
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">@color/colorPrimaryDark</item>
         <item name="android:actionModeCloseDrawable">@drawable/ic_arrow_back</item>
+        <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
     </style>
 
     <style name="DrawerTheme" parent="MaterialNavigationDrawerTheme">
@@ -16,6 +17,7 @@
         <item name="singleAccount">true</item>
         <item name="learningPattern">false</item>
         <item name="drawerColor">@color/gray_dark</item>
+        <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
     </style>
 
     <style name="DefaultLayout">
@@ -50,5 +52,8 @@
         <item name="android:textSize">15sp</item>
     </style>
 
+    <style name="CheckBoxStyle" parent="@android:style/Widget.CompoundButton.CheckBox">
+        <item name="android:button">@drawable/checkbox</item>
+    </style>
 
 </resources>
