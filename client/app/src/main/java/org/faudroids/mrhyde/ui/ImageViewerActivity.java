@@ -3,7 +3,8 @@ package org.faudroids.mrhyde.ui;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.widget.ImageView;
+
+import com.ortiz.touch.TouchImageView;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
@@ -33,7 +34,7 @@ public final class ImageViewerActivity extends AbstractActionBarActivity {
 
 	private static final String STATE_CONTENT = "STATE_CONTENT";
 
-	@InjectView(R.id.image) private ImageView imageView;
+	@InjectView(R.id.image) private TouchImageView imageView;
 
 	@Inject private RepositoryManager repositoryManager;
 	@Inject private NodeUtils nodeUtils;
@@ -84,6 +85,7 @@ public final class ImageViewerActivity extends AbstractActionBarActivity {
 		setTitle(fileData.getFileNode().getPath());
 		Bitmap bitmap = BitmapFactory.decodeByteArray(fileData.getData(), 0, fileData.getData().length);
 		imageView.setImageBitmap(bitmap);
+		imageView.setZoom(0.999999f);
 	}
 
 
