@@ -140,7 +140,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 		updateTree(savedInstanceState);
 
 		// prepare action mode
-		actionModeListener = new DirActionModeListener(this, this);
+		actionModeListener = new DirActionModeListener(this, this, uiUtils);
 	}
 
 
@@ -305,6 +305,24 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	@Override
 	public void onEdit(FileNode fileNode) {
 		startFileActivity(fileNode, false);
+	}
+
+
+	@Override
+	public void onRename(FileNode fileNode, String newFileName) {
+		showSpinner();
+		compositeSubscription.add(fileManager.renameFile(fileNode, newFileName)
+				.compose(new DefaultTransformer<FileNode>())
+				.subscribe(new Action1<FileNode>() {
+					@Override
+					public void call(FileNode newFileNode) {
+						hideSpinner();
+						updateTree(null);
+					}
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(this, "failed to rename file"))
+						.add(new HideSpinnerAction(this))
+						.build()));
 	}
 
 

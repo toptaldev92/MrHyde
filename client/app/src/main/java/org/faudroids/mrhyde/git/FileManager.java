@@ -148,6 +148,34 @@ public final class FileManager {
 
 
 	/**
+	 * Renames and existing file (deleting the old one and copying the data to the new file name)
+	 * and returns the new {@link FileNode}.
+	 */
+	public Observable<FileNode> renameFile(final FileNode oldFileNode, final String newFileName) {
+		return readFile(oldFileNode)
+				.flatMap(new Func1<FileData, Observable<FileNode>>() {
+					@Override
+					public Observable<FileNode> call(FileData data) {
+						final FileNode newFileNode = createNewFile((DirNode) oldFileNode.getParent(), newFileName);
+						FileData newData = new FileData(newFileNode, data.getData());
+						try {
+							writeFile(newData);
+						} catch (IOException ioe) {
+							return Observable.error(ioe);
+						}
+						return deleteFile(oldFileNode)
+								.flatMap(new Func1<Void, Observable<FileNode>>() {
+									@Override
+									public Observable<FileNode> call(Void aVoid) {
+										return Observable.just(newFileNode);
+									}
+								});
+					}
+				});
+	}
+
+
+	/**
 	 * Creates a new file node and updates the file system.
 	 */
 	public FileNode createNewFile(DirNode parentNode, String fileName) {

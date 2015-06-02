@@ -14,15 +14,17 @@ class DirActionModeListener implements ActionMode.Callback {
 
 	private final Activity activity;
 	private final ActionSelectionListener selectionListener;
+	private final UiUtils uiUtils;
 
 	private View selectedView = null;
 	private FileNode selectedNode = null;
 	private ActionMode actionMode;
 
 
-	public DirActionModeListener(Activity activity, ActionSelectionListener selectionListener) {
+	public DirActionModeListener(Activity activity, ActionSelectionListener selectionListener, UiUtils uiUtils) {
 		this.activity = activity;
 		this.selectionListener = selectionListener;
+		this.uiUtils = uiUtils;
 	}
 
 
@@ -68,6 +70,17 @@ class DirActionModeListener implements ActionMode.Callback {
 				selectionListener.onDelete(selectedNode);
 				stopActionMode();
 				return true;
+
+			case R.id.action_rename:
+				uiUtils.createInputDialog(activity.getString(R.string.rename_title), selectedNode.getPath(), new UiUtils.OnInputListener() {
+					@Override
+					public void onInput(String newFileName) {
+						selectionListener.onRename(selectedNode, newFileName);
+						stopActionMode();
+					}
+				}).show();
+				return true;
+
 		}
 		return false;
 	}
@@ -86,6 +99,7 @@ class DirActionModeListener implements ActionMode.Callback {
 
 		void onDelete(FileNode fileNode);
 		void onEdit(FileNode fileNode);
+		void onRename(FileNode fileNode, String newFileName);
 
 	}
 

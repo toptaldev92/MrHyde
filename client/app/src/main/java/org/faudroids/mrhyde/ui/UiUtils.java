@@ -47,13 +47,18 @@ public class UiUtils {
 	 * @param inputListener callback that will be called when user input is ready.
 	 */
 	public AlertDialog createInputDialog(int titleResource, int messageResource, final OnInputListener inputListener) {
+		return createInputDialog(context.getString(titleResource), context.getString(messageResource), inputListener);
+	}
+
+
+	public AlertDialog createInputDialog(String title, String message, final OnInputListener inputListener) {
 		final EditText inputView = new EditText(context);
 		inputView.setInputType(InputType.TYPE_CLASS_TEXT);
-		inputView.setText(context.getString(messageResource));
+		inputView.setText(message);
 		inputView.setSelectAllOnFocus(true);
 
 		return new AlertDialog.Builder(context)
-				.setTitle(titleResource)
+				.setTitle(title)
 				.setView(inputView)
 				.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
 					@Override

@@ -25,6 +25,7 @@
     <string name="action_settings">Settings</string>
     <string name="action_edit">Edit</string>
     <string name="action_delete">Delete</string>
+    <string name="action_rename">Rename</string>
     <string name="action_commit">Commit</string>
     <string name="action_preview">Preview</string>
     <string name="action_mark_repository">Mark repo as favourite</string>
@@ -47,6 +48,7 @@
     <string name="dir_new_title">Dir Name</string>
     <string name="dir_new_message">NewDir</string>
     <string name="dir_empty">Empty</string>
+    <string name="rename_title">Rename</string>
 
     <string name="discard_changes_title">Discard changes</string>
     <string name="discard_changes_message">Undo all local changes to this repository? Cannot be undone!</string>
