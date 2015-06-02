@@ -8,7 +8,7 @@ from git import GitCommandError
 from sqlite3 import Error as SQLError
 from configparser import Error as ConfigError
 
-from bottle import request, Bottle, run, abort, template, static_file, TEMPLATE_PATH
+from bottle import request, Bottle, run, abort, template, static_file, TEMPLATE_PATH, BaseRequest
 from os.path import dirname, realpath, join
 import sys
 
@@ -17,6 +17,7 @@ import configmanager
 import filemanager
 import repoutils
 import repositorymanager
+import json
 
 DEBUG_MODE = False
 
@@ -29,6 +30,8 @@ logger = logging.getLogger(__name__)
 
 
 TEMPLATE_PATH.insert(0, template_dir)
+# Maximum request body size = 102,4 MB
+BaseRequest.MEMFILE_MAX = 1024 * 1e5
 
 if len(sys.argv) < 2:
     logger.error('Config file missing!\nUsage: %s <config_file>' % sys.argv[0])
@@ -74,18 +77,25 @@ def create_repository():
             url = request.json.get('gitCheckoutUrl')
             diff = request.json.get('gitDiff')
             client_secret = request.json.get('clientSecret')
-            if client_secret != cm.get_client_secret():
+            payload = request.json.get('staticFiles')
+            if client_secret not in cm.get_client_secret():
                 abort(400, 'Bad request')
-            (repo_id, repo_url) = rm.init_repository(url, diff)
+            try:
+                (repo_id, repo_url) = rm.init_repository(url, diff, payload)
+            except SQLError:
+                abort(500, 'Internal error. Sorry for that!')
             expires = utils.get_expiration_date(repo_id)
             return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': repo_id})
         else:
             url = request.POST.get('gitCheckoutUrl')
             diff = request.POST.get('gitDiff')
             client_secret = request.POST.get('clientSecret')
-            if client_secret != cm.get_client_secret():
+            if client_secret not in cm.get_client_secret():
                 abort(400, 'Bad request')
-            (repo_id, repo_url) = rm.init_repository(url, diff)
+            try:
+                (repo_id, repo_url) = rm.init_repository(url, diff)
+            except SQLError:
+                abort(500, 'Internal error. Sorry for that!')
             if repo_url is not None and isinstance(repo_url, str):
                 return template('list_view', rows=[repo_url, repo_id], header='Your new repository is available at:')
             elif isinstance(repo_url, list):
@@ -100,8 +110,6 @@ def create_repository():
     except GitCommandError:
         abort(500, 'Failed to apply patch.')
     except KeyError:
-        abort(500, 'Internal error. Sorry for that!')
-    except SQLError:
         abort(500, 'Internal error. Sorry for that!')
 
 
@@ -154,7 +162,7 @@ def update_repository(id):
         if request.content_type.startswith('application/json'):
             diff = request.json.get('gitDiff')
             client_secret = request.json.get('clientSecret')
-            if client_secret != cm.get_client_secret():
+            if client_secret not in cm.get_client_secret():
                 abort(400, 'Bad request')
             repo_url = rm.update_repository(id, diff)
             expires = utils.get_expiration_date(id)
@@ -162,7 +170,7 @@ def update_repository(id):
         else:
             diff = request.POST.get('gitDiff')
             client_secret = request.POST.get('clientSecret')
-            if client_secret != cm.get_client_secret():
+            if client_secret not in cm.get_client_secret():
                 abort(400, 'Bad request')
             url = rm.update_repository(id, diff)
             return template('list_view', rows=[url], header='Repository updated.')

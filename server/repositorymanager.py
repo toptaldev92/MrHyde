@@ -1,4 +1,5 @@
 from sqlite3 import Error as SQLError
+from binascii import Error as Base64Error
 import logging
 from time import time
 from shutil import rmtree
@@ -103,6 +104,13 @@ class RepositoryManager:
             self.fm().deploy_error_page(deploy_path,
                                         'VCS error',
                                         "We're having problems applying your changes. Have you been sacrificing some branches to the gods of git lately?")
+            with open(deploy_path + '/statuscode.txt', 'w') as outfile:
+                outfile.write(str(0))
+        except Base64Error as exception:
+            logger.error(exception.__str__())
+            self.fm().deploy_error_page(deploy_path,
+                                        'Encoding error',
+                                        "It looks like your data is corrupted!")
             with open(deploy_path + '/statuscode.txt', 'w') as outfile:
                 outfile.write(str(0))
 

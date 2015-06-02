@@ -1,6 +1,8 @@
 from os import makedirs, listdir
 from os.path import isfile, isdir, join
 import logging
+import base64
+from binascii import Error as Base64Error
 from sqlite3 import Error as SQLError
 
 from bottle import template
@@ -73,3 +75,21 @@ class FileManager:
         except SQLError as exception:
             logger.error(exception.__str__())
             raise
+
+    def dispatch_static_files(self, deploy_path, files):
+        for file in files:
+            raw_path = file['path'].split('/')
+            raw_data = file['data']
+            file = raw_path[-1]
+            data = None
+            try:
+                data = base64.standard_b64decode(raw_data)
+            except Base64Error as exception:
+                logger.warning(exception.__str__())
+            rel_path = '/'.join(raw_path[0:-1])
+            abs_path = '/'.join([deploy_path, rel_path])
+            makedirs(abs_path, 0o755, True)
+            filepath = '/'.join([abs_path, file])
+            with open(filepath, 'wb') as out:
+                if data is not None:
+                    out.write(data)
