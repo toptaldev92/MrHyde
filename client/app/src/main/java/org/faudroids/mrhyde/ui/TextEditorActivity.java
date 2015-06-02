@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 
@@ -46,13 +47,17 @@ import timber.log.Timber;
 @ContentView(R.layout.activity_text_editor)
 public final class TextEditorActivity extends AbstractActionBarActivity {
 
+	private static final int EDITOR_MAX_HISTORY = 100;
+
 	static final String
 			EXTRA_REPOSITORY = "EXTRA_REPOSITORY",
 			EXTRA_IS_NEW_FILE = "EXTRA_IS_NEW_FILE";
 
 	private static final String
-			STATE_CONTENT = "STATE_CONTENT",
-			STATE_EDIT_MODE = "STATE_EDIT_MODE";
+			STATE_FILE_DATA = "STATE_FILE_DATA",
+			STATE_TEXT = "STATE_TEXT",
+			STATE_EDIT_MODE = "STATE_EDIT_MODE",
+			STATE_UNDO_REDO = "STATE_UNDO_REDO";
 
 	private static final String
 			PREFS_NAME = TextEditorActivity.class.getSimpleName();
@@ -64,6 +69,8 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	@Inject private InputMethodManager inputMethodManager;
 
 	@InjectView(R.id.content) private EditText editText;
+	private UndoRedoEditText undoRedoEditText;
+
 	@InjectView(R.id.edit) private FloatingActionButton editButton;
 	@InjectView(R.id.line_numbers) private TextView numLinesTextView;
 
@@ -76,7 +83,6 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
 		// load arguments
 		final boolean isNewFile = getIntent().getBooleanExtra(EXTRA_IS_NEW_FILE, false);
 		final Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
@@ -118,10 +124,17 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		});
 
 		// load selected file
-		if (savedInstanceState != null && savedInstanceState.getSerializable(STATE_CONTENT) != null) {
-			fileData = (FileData) savedInstanceState.getSerializable(STATE_CONTENT);
-			boolean startEditMode = savedInstanceState.getBoolean(STATE_EDIT_MODE);
-			setupContent(startEditMode);
+		if (savedInstanceState != null && savedInstanceState.getSerializable(STATE_FILE_DATA) != null) {
+			editText.post(new Runnable() {
+				@Override
+				public void run() {
+					fileData = (FileData) savedInstanceState.getSerializable(STATE_FILE_DATA);
+					boolean startEditMode = savedInstanceState.getBoolean(STATE_EDIT_MODE);
+					String restoredText = savedInstanceState.getString(STATE_TEXT);
+					setupContent(startEditMode, restoredText);
+					undoRedoEditText.restoreInstanceState(savedInstanceState, STATE_UNDO_REDO);
+				}
+			});
 
 		} else {
 			showSpinner();
@@ -144,7 +157,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 						public void call(FileData file) {
 							hideSpinner();
 							TextEditorActivity.this.fileData = file;
-							setupContent(isNewFile);
+							setupContent(isNewFile, null);
 						}
 					}, new ErrorActionBuilder()
 							.add(new DefaultErrorAction(this, "failed to get file content"))
@@ -158,9 +171,12 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	@Override
 	public void onSaveInstanceState(Bundle outState) {
 		super.onSaveInstanceState(outState);
-		outState.putSerializable(STATE_CONTENT, fileData);
+		outState.putSerializable(STATE_FILE_DATA, fileData);
 		outState.putBoolean(STATE_EDIT_MODE, isEditMode());
+		outState.putString(STATE_TEXT, editText.getText().toString());
+		undoRedoEditText.saveInstanceState(outState, STATE_UNDO_REDO);
 	}
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -172,9 +188,9 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		MenuItem item = menu.findItem(R.id.action_show_line_numbers);
-		if (showingLineNumbers) item.setChecked(true);
-		else item.setChecked(false);
+		MenuItem lineItem = menu.findItem(R.id.action_show_line_numbers);
+		if (showingLineNumbers) lineItem.setChecked(true);
+		else lineItem.setChecked(false);
 		return true;
 	}
 
@@ -192,6 +208,22 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 				if (item.isChecked()) item.setChecked(false);
 				else item.setChecked(true);
 				toggleLineNumbers();
+				return true;
+
+			case R.id.action_undo:
+				if (undoRedoEditText.getCanUndo()) {
+					undoRedoEditText.undo();
+				} else {
+					Toast.makeText(this, getString(R.string.nothing_to_undo), Toast.LENGTH_SHORT).show();
+				}
+				return true;
+
+			case R.id.action_redo:
+				if (undoRedoEditText.getCanRedo()) {
+					undoRedoEditText.redo();
+				} else {
+					Toast.makeText(this, getString(R.string.nothing_to_redo), Toast.LENGTH_SHORT).show();
+				}
 				return true;
 
 		}
@@ -231,12 +263,19 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	}
 
 
-	private void setupContent(boolean startEditMode) {
-		// set title and text
+	private void setupContent(boolean startEditMode, String restoredText) {
 		setTitle(fileData.getFileNode().getPath());
 		try {
-			editText.setText(new String(fileData.getData(), "UTF-8"));
+			// set text
+			if (restoredText != null) editText.setText(restoredText);
+			else editText.setText(new String(fileData.getData(), "UTF-8"));
 			editText.setTypeface(Typeface.MONOSPACE);
+
+			// setup undo / redo
+			undoRedoEditText = new UndoRedoEditText(editText);
+			undoRedoEditText.setMaxHistorySize(EDITOR_MAX_HISTORY);
+
+			// start edit mode
 			if (startEditMode) startEditMode();
 			else stopEditMode();
 		} catch (UnsupportedEncodingException uee) {
@@ -344,6 +383,5 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 			}
 		});
 	}
-
 
 }
