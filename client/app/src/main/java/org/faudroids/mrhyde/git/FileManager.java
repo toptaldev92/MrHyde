@@ -44,8 +44,7 @@ public final class FileManager {
 	private final FileUtils fileUtils;
 	private final File rootDir;
 
-	private Tree cachedTree = null;
-	private String cachedBaseCommitSha = null;
+	private final MetaDataCache cache = new MetaDataCache();
 
 
 	FileManager(Context context, LoginManager loginManager, ApiWrapper apiWrapper, Repository repository, FileUtils fileUtils) {
@@ -67,26 +66,25 @@ public final class FileManager {
 	 * Gets and stores a tree in memory (!). Returns null if the repository is empty.
 	 */
 	public Observable<DirNode> getTree() {
-		if (cachedTree != null) return Observable.just(cachedTree)
+		if (cache.getTree().isPresent()) return Observable.just(cache.getTree().get())
 				.compose(new InitRepoTransformer<Tree>())
 				.flatMap(new GitHubParseFunc())
 				.flatMap(new LoadLocalFilesFunc());
-
 
 		else return apiWrapper.getCommits(repository)
 				.flatMap(new Func1<List<RepositoryCommit>, Observable<Tree>>() {
 					@Override
 					public Observable<Tree> call(List<RepositoryCommit> repositoryCommits) {
 						Timber.d("loaded last commit");
-						cachedBaseCommitSha = repositoryCommits.get(0).getSha();
-						return apiWrapper.getTree(repository, cachedBaseCommitSha, true);
+						cache.cacheBaseCommitSha(repositoryCommits.get(0).getSha());
+						return apiWrapper.getTree(repository, cache.getBaseCommitSha().get(), true);
 					}
 				})
 				.flatMap(new Func1<Tree, Observable<Tree>>() {
 					@Override
 					public Observable<Tree> call(Tree tree) {
 						Timber.d("loaded tree");
-						FileManager.this.cachedTree = tree;
+						cache.cacheTree(tree);
 						return Observable.just(tree);
 					}
 				})
@@ -289,7 +287,7 @@ public final class FileManager {
 
 						// update existing files
 						Collection<TreeEntry> treeEntries = new ArrayList<>();
-						for (TreeEntry entry : cachedTree.getTree()) {
+						for (TreeEntry entry : cache.getTree().get().getTree()) {
 							SavedBlob blob = blobsMap.remove(entry.getPath());
 
 							// do not add deleted files
@@ -347,7 +345,7 @@ public final class FileManager {
 						commit.setCommitter(author);
 
 						List<Commit> commitList = new ArrayList<>();
-						commitList.add(new Commit().setSha(cachedBaseCommitSha));
+						commitList.add(new Commit().setSha(cache.getBaseCommitSha().get()));
 						commit.setParents(commitList);
 						return apiWrapper.createCommit(repository, commit);
 					}
@@ -439,8 +437,7 @@ public final class FileManager {
 
 
 	public void resetRepository() {
-		this.cachedTree = null;
-		this.cachedBaseCommitSha = null;
+		cache.reset();
 		try {
 			delete(rootDir);
 		} catch (IOException ioe) {
