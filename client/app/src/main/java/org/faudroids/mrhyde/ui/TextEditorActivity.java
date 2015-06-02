@@ -132,7 +132,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 							FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
 
 							if (!isNewFile) {
-								return fileManager.getFile(node);
+								return fileManager.readFile(node);
 							} else {
 								return Observable.just(new FileData(node, new byte[0]));
 							}

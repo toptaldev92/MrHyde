@@ -33,22 +33,24 @@ public final class RepositoryManager {
 	private final Context context;
 	private final LoginManager loginManager;
 	private final ApiWrapper apiWrapper;
+	private final FileUtils fileUtils;
 	private final Map<String, FileManager> fileManagerMap = new HashMap<>();
 	private Map<String, Repository> allRepositoryMap, favouriteRepositoriesMap;
 
 
 	@Inject
-	RepositoryManager(Context context, LoginManager loginManager, ApiWrapper apiWrapper) {
+	RepositoryManager(Context context, LoginManager loginManager, ApiWrapper apiWrapper, FileUtils fileUtils) {
 		this.context = context;
 		this.loginManager = loginManager;
 		this.apiWrapper = apiWrapper;
+		this.fileUtils = fileUtils;
 	}
 
 
 	public FileManager getFileManager(Repository repository) {
 		FileManager fileManager = fileManagerMap.get(getFullRepoName(repository));
 		if (fileManager == null) {
-			fileManager = new FileManager(context, loginManager, apiWrapper, repository);
+			fileManager = new FileManager(context, loginManager, apiWrapper, repository, fileUtils);
 			fileManagerMap.put(getFullRepoName(repository), fileManager);
 		}
 		return fileManager;

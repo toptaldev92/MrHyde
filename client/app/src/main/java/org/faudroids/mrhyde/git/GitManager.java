@@ -18,6 +18,7 @@ import org.eclipse.jgit.treewalk.FileTreeIterator;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -77,6 +78,11 @@ public final class GitManager {
 
 
 	public Observable<String> diff() {
+		return diff(null);
+	}
+
+
+	public Observable<String> diff(final Set<String> filesToIgnore) {
 		return Observable.defer(new Func0<Observable<String>>() {
 			@Override
 			public Observable<String> call() {
@@ -91,6 +97,16 @@ public final class GitManager {
 					formatter.setRepository(git.getRepository());
 
 					List<DiffEntry> diffs = formatter.scan(commitTreeIterator, workTreeIterator);
+					// remove ignored files
+					if (filesToIgnore != null) {
+						Iterator<DiffEntry> entryIterator = diffs.iterator();
+						while (entryIterator.hasNext()) {
+							if (filesToIgnore.contains(entryIterator.next().getNewPath())) {
+								entryIterator.remove();
+							}
+						}
+					}
+
 					formatter.format(diffs);
 					return Observable.just(outputStream.toString());
 

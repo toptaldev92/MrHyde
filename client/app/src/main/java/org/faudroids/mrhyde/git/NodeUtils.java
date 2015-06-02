@@ -41,8 +41,17 @@ public class NodeUtils {
 	public AbstractNode restoreInstanceState(Bundle inState, DirNode rootNode) {
 		String selectedPath = inState.getString(STATE_NODE);
 		if (selectedPath == null) return null;
+		return getNodeByPath(rootNode, selectedPath);
+	}
 
-		String[] paths = selectedPath.split("/");
+
+	/**
+	 * Returns a node based on a given path relative to a root.
+	 */
+	public AbstractNode getNodeByPath(DirNode rootNode, String path) {
+		if (!path.startsWith("/")) path = "/" + path;
+		Timber.d("restoring " + path);
+		String[] paths = path.split("/");
 		AbstractNode iter = rootNode;
 		for (int i = 1; i < paths.length; ++i) {
 			iter = ((DirNode) iter).getEntries().get(paths[i]);

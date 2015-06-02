@@ -62,7 +62,7 @@ public final class ImageViewerActivity extends AbstractActionBarActivity {
 						@Override
 						public Observable<FileData> call(DirNode rootNode) {
 							FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
-							return fileManager.getFile(node);
+							return fileManager.readFile(node);
 						}
 					})
 					.compose(new DefaultTransformer<FileData>())

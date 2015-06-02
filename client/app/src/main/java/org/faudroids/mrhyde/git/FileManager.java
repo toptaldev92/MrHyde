@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,18 +41,25 @@ public final class FileManager {
 	private final GitManager gitManager;
 	private final ApiWrapper apiWrapper;
 	private final Repository repository;
+	private final FileUtils fileUtils;
 	private final File rootDir;
 
 	private Tree cachedTree = null;
 	private String cachedBaseCommitSha = null;
 
 
-	FileManager(Context context, LoginManager loginManager, ApiWrapper apiWrapper, Repository repository) {
+	FileManager(Context context, LoginManager loginManager, ApiWrapper apiWrapper, Repository repository, FileUtils fileUtils) {
 		this.loginManager = loginManager;
 		this.apiWrapper = apiWrapper;
 		this.repository = repository;
 		this.rootDir = new File(context.getFilesDir(), repository.getOwner().getLogin() + "/" + repository.getName());
+		this.fileUtils = fileUtils;
 		this.gitManager = new GitManager(rootDir);
+	}
+
+
+	public Repository getRepository() {
+		return repository;
 	}
 
 
@@ -103,7 +111,7 @@ public final class FileManager {
 	/**
 	 * Gets and stores a file on disk (!).
 	 */
-	public Observable<FileData> getFile(final FileNode fileNode) {
+	public Observable<FileData> readFile(final FileNode fileNode) {
 		final TreeEntry treeEntry = fileNode.getTreeEntry();
 		final File file = new File(rootDir, treeEntry.getPath());
 
@@ -212,7 +220,7 @@ public final class FileManager {
 	 */
 	public Observable<Void> deleteFile(final FileNode node) {
 		// first download file to ensure proper diff
-		return getFile(node)
+		return readFile(node)
 				.flatMap(new Func1<FileData, Observable<Void>>() {
 					@Override
 					public Observable<Void> call(FileData fileContent) {
@@ -374,13 +382,54 @@ public final class FileManager {
 	}
 
 
+	/**
+	 * Returns a regular Git diff.
+	 */
 	public Observable<String> getDiff() {
 		return gitManager.diff();
 	}
 
 
+	/**
+	 * Returns a Git excluding any binary filese that might have changed.
+	 */
+	public Observable<String> getNonBinaryDiff() {
+		return getChangedBinaryFiles()
+				.flatMap(new Func1<Set<String>, Observable<String>>() {
+					@Override
+					public Observable<String> call(Set<String> changedBinaryFiles) {
+						return gitManager.diff(changedBinaryFiles);
+					}
+				});
+	}
+
+
 	public Observable<Set<String>> getChangedFiles() {
 		return gitManager.getChangedFiles();
+	}
+
+
+	public Observable<Set<String>> getChangedBinaryFiles() {
+		return getChangedFiles()
+				.flatMap(new Func1<Set<String>, Observable<Set<String>>>() {
+					@Override
+					public Observable<Set<String>> call(Set<String> changedFiles) {
+						Set<String> binaryFiles = new HashSet<>();
+						for (String changedFile : changedFiles) {
+							try {
+								File file = new File(rootDir, changedFile);
+								if (file.isDirectory()) continue;
+								if (fileUtils.isBinary(new File(rootDir, changedFile))) {
+									binaryFiles.add(changedFile);
+								}
+							} catch (IOException ioe) {
+								return Observable.error(ioe);
+							}
+						}
+
+						return Observable.just(binaryFiles);
+					}
+				});
 	}
 
 

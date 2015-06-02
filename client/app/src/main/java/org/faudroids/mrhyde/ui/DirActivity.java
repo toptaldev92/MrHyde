@@ -191,9 +191,13 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 				compositeSubscription.add(fileManager.getDiff().subscribe(new Action1<String>() {
 					@Override
 					public void call(String diff) {
+						// get root node
+						DirNode rootNode = pathNodeAdapter.getSelectedNode();
+						while (rootNode.getParent() != null) rootNode = (DirNode) rootNode.getParent();
+
 						Intent previewIntent = new Intent(DirActivity.this, PreviewActivity.class);
 						previewIntent.putExtra(PreviewActivity.EXTRA_REPO, repository);
-						previewIntent.putExtra(PreviewActivity.EXTRA_DIFF, diff);
+						previewIntent.putExtra(PreviewActivity.EXTRA_ROOT_NODE, rootNode);
 						startActivity(previewIntent);
 					}
 				}, new ErrorActionBuilder()

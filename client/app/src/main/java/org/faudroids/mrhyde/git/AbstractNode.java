@@ -28,6 +28,11 @@ public abstract class AbstractNode implements Comparable<AbstractNode>, Serializ
 	}
 
 
+	public String getFullPath() {
+		return treeEntry.getPath();
+	}
+
+
 	TreeEntry getTreeEntry() {
 		return treeEntry;
 	}
