@@ -333,6 +333,12 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	}
 
 
+	@Override
+	public void onStopActionMode() {
+		pathNodeAdapter.notifyDataSetChanged();
+	}
+
+
 	private void addAndOpenFile() {
 		uiUtils.createInputDialog(
 				R.string.file_new_title,
@@ -424,6 +430,8 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 
 	private void startFileActivity(FileNode fileNode, boolean isNewFile) {
+		actionModeListener.stopActionMode();
+
 		// start text or image activity depending on file name
 		if (!fileUtils.isImage(fileNode.getPath())) {
 			// start text editor
@@ -483,6 +491,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 
 		public void setSelectedNode(DirNode newSelectedNode) {
+			actionModeListener.stopActionMode();
 			if (newSelectedNode.getPath().equals("")) setTitle(repository.getName());
 			else setTitle(newSelectedNode.getPath());
 			selectedNode = newSelectedNode;
@@ -538,6 +547,14 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 			}
 
 			public void setPathNode(final AbstractNode pathNode) {
+				// check for action mode
+				if (actionModeListener.getSelectedNode() != null && actionModeListener.getSelectedNode().equals(pathNode)) {
+					view.setSelected(true);
+				} else {
+					view.setSelected(false);
+				}
+
+				// setup node content
 				titleView.setText(pathNode.getPath());
 				if (pathNode instanceof DirNode) {
 					iconView.setImageResource(R.drawable.folder);
@@ -564,10 +581,13 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 					view.setOnLongClickListener(new View.OnLongClickListener() {
 						@Override
 						public boolean onLongClick(View v) {
-							actionModeListener.startActionMode(view, (FileNode) pathNode);
+							view.setSelected(true);
+							actionModeListener.startActionMode((FileNode) pathNode);
 							return true;
 						}
 					});
+				} else {
+					view.setLongClickable(false);
 				}
 			}
 		}

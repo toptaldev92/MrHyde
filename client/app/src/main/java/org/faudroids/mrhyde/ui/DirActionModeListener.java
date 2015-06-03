@@ -5,7 +5,6 @@ import android.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.FileNode;
@@ -16,7 +15,6 @@ class DirActionModeListener implements ActionMode.Callback {
 	private final ActionSelectionListener selectionListener;
 	private final UiUtils uiUtils;
 
-	private View selectedView = null;
 	private FileNode selectedNode = null;
 	private ActionMode actionMode;
 
@@ -28,19 +26,21 @@ class DirActionModeListener implements ActionMode.Callback {
 	}
 
 
-	public boolean startActionMode(View selectedView, FileNode selectedNode) {
+	public boolean startActionMode(FileNode selectedNode) {
 		if (this.selectedNode != null) return false;
 		this.actionMode = this.activity.startActionMode(this);
-		this.selectedView = selectedView;
-		this.selectedView.setSelected(true);
 		this.selectedNode = selectedNode;
 		return true;
 	}
 
 
-
 	public void stopActionMode() {
-		this.actionMode.finish();
+		if (actionMode != null) actionMode.finish();
+	}
+
+
+	public FileNode getSelectedNode() {
+		return selectedNode;
 	}
 
 
@@ -88,10 +88,9 @@ class DirActionModeListener implements ActionMode.Callback {
 
 	@Override
 	public void onDestroyActionMode(ActionMode mode) {
-		this.selectedView.setSelected(false);
-		this.selectedView = null;
 		this.selectedNode = null;
 		this.actionMode = null;
+		selectionListener.onStopActionMode();
 	}
 
 
@@ -100,6 +99,7 @@ class DirActionModeListener implements ActionMode.Callback {
 		void onDelete(FileNode fileNode);
 		void onEdit(FileNode fileNode);
 		void onRename(FileNode fileNode, String newFileName);
+		void onStopActionMode();
 
 	}
 
