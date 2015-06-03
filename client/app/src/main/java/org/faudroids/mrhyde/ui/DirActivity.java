@@ -292,20 +292,30 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 
 	@Override
-	public void onDelete(FileNode fileNode) {
-		showSpinner();
-		compositeSubscription.add(fileManager.deleteFile(fileNode)
-				.compose(new DefaultTransformer<Void>())
-				.subscribe(new Action1<Void>() {
+	public void onDelete(final FileNode fileNode) {
+		new AlertDialog.Builder(this)
+				.setTitle(R.string.delete_title)
+				.setMessage(getString(R.string.delete_message, fileNode.getPath()))
+				.setPositiveButton(getString(R.string.action_delete), new DialogInterface.OnClickListener() {
 					@Override
-					public void call(Void aVoid) {
-						hideSpinner();
-						updateTree(null);
+					public void onClick(DialogInterface dialog, int which) {
+						showSpinner();
+						compositeSubscription.add(fileManager.deleteFile(fileNode)
+								.compose(new DefaultTransformer<Void>())
+								.subscribe(new Action1<Void>() {
+									@Override
+									public void call(Void aVoid) {
+										hideSpinner();
+										updateTree(null);
+									}
+								}, new ErrorActionBuilder()
+										.add(new DefaultErrorAction(DirActivity.this, "failed to delete file"))
+										.add(new HideSpinnerAction(DirActivity.this))
+										.build()));
 					}
-				}, new ErrorActionBuilder()
-						.add(new DefaultErrorAction(this, "failed to delete file"))
-						.add(new HideSpinnerAction(this))
-						.build()));
+				})
+				.setNegativeButton(android.R.string.cancel, null)
+				.show();
 	}
 
 
