@@ -3,6 +3,10 @@ package org.faudroids.mrhyde.utils;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
 
 import org.faudroids.mrhyde.R;
 
@@ -37,12 +41,33 @@ public class DefaultErrorAction extends AbstractErrorAction {
 		} else {
 			// default internal message
 			Timber.e(throwable, logMessage);
-			new AlertDialog.Builder(context)
+			AlertDialog.Builder builder = new AlertDialog.Builder(context)
 					.setTitle(R.string.error_internal_title)
-					.setMessage(R.string.error_internal_message)
-					.setPositiveButton(android.R.string.ok, null)
-					.show();
+					.setPositiveButton(android.R.string.ok, null);
 
+			LayoutInflater inflater = LayoutInflater.from(context);
+			View messageView = inflater.inflate(R.layout.dialog_internal_error, null, false);
+
+			View expandDetailsView = messageView.findViewById(R.id.details_expand);
+			final TextView detailsTextView = (TextView) messageView.findViewById(R.id.details);
+			detailsTextView.setText(Log.getStackTraceString(throwable));
+
+			expandDetailsView.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					// toggle details
+					if (detailsTextView.getVisibility() == View.GONE) {
+						detailsTextView.setVisibility(View.VISIBLE);
+					} else {
+						detailsTextView.setVisibility(View.GONE);
+					}
+
+				}
+			});
+
+			builder
+					.setView(messageView)
+					.show();
 		}
 
 	}
