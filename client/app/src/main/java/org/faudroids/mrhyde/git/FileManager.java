@@ -235,7 +235,7 @@ public final class FileManager {
 		// create dir
 		Timber.d("creating new dir " + path);
 		File file = new File(rootDir, path);
-		if (!file.exists()) if (!file.mkdir()) Timber.w("did not create dir");
+		if (!file.exists()) if (!file.mkdirs()) Timber.w("did not create dir");
 
 		return dirNode;
 	}
