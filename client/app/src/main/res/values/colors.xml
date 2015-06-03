@@ -3,6 +3,7 @@
     <color name="gray_light">#ffdcdcdc</color>
     <color name="gray_light_2">#ffcecece</color>
     <color name="gray">#ff8d8d8d</color>
+    <color name="gray_2">#ff606060</color>
     <color name="gray_dark">#ff424242</color>
 
     <color name="black_transparent">#97000000</color>
