@@ -191,6 +191,13 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		MenuItem lineItem = menu.findItem(R.id.action_show_line_numbers);
 		if (showingLineNumbers) lineItem.setChecked(true);
 		else lineItem.setChecked(false);
+
+		// toggle undo / redo buttons
+		if (!isEditMode()) {
+			menu.findItem(R.id.action_undo).setVisible(false);
+			menu.findItem(R.id.action_redo).setVisible(false);
+		}
+
 		return true;
 	}
 
@@ -323,6 +330,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		editButton.setVisibility(View.GONE);
 		getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_done);
 		inputMethodManager.showSoftInput(editText, 0);
+		invalidateOptionsMenu();
 	}
 
 
@@ -333,6 +341,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		editText.setFocusableInTouchMode(false);
 		editButton.setVisibility(View.VISIBLE);
 		if (isDirty()) saveFile();
+		invalidateOptionsMenu();
 	}
 
 
