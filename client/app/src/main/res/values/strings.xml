@@ -43,8 +43,10 @@
 
     <string name="posts">Posts</string>
     <string name="new_post">New post</string>
+    <string name="no_posts">No posts</string>
     <string name="drafts">Drafts</string>
     <string name="new_draft">New draft</string>
+    <string name="no_drafts">No drafts</string>
     <string name="all_files">All files</string>
     <string name="view_all_files">View all files</string>
 
