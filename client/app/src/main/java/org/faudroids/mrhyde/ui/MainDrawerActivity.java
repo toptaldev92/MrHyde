@@ -7,6 +7,7 @@ import android.os.Bundle;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.github.LoginManager;
+import org.faudroids.mrhyde.ui.utils.AbstractRoboDrawerActivity;
 
 import javax.inject.Inject;
 

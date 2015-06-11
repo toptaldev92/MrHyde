@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde.ui;
+package org.faudroids.mrhyde.ui.utils;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -39,7 +39,7 @@ import roboguice.util.RoboContext;
  *
  * The sole purpose of this class is to provide DI and should hence be ignored for the most part ...
  */
-abstract class AbstractRoboDrawerActivity extends MaterialNavigationDrawer<Fragment> implements RoboContext {
+public abstract class AbstractRoboDrawerActivity extends MaterialNavigationDrawer<Fragment> implements RoboContext {
 
     protected EventManager eventManager;
     protected HashMap<Key<?>,Object> scopedObjects = new HashMap<Key<?>, Object>();

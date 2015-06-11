@@ -1,8 +1,8 @@
 package org.faudroids.mrhyde.utils;
 
 
-import org.faudroids.mrhyde.ui.AbstractActionBarActivity;
-import org.faudroids.mrhyde.ui.AbstractFragment;
+import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
+import org.faudroids.mrhyde.ui.utils.AbstractFragment;
 
 public class HideSpinnerAction extends AbstractErrorAction {
 

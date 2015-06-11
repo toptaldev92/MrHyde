@@ -1,6 +1,7 @@
 package org.faudroids.mrhyde.ui;
 
 import org.eclipse.egit.github.core.Repository;
+import org.faudroids.mrhyde.ui.utils.AbstractReposFragment;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 import org.faudroids.mrhyde.utils.ErrorActionBuilder;

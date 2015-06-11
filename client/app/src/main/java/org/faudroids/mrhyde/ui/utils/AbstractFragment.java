@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde.ui;
+package org.faudroids.mrhyde.ui.utils;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,11 +19,11 @@ public abstract class AbstractFragment extends RoboFragment {
 
 	private final int layoutResource;
 	protected CompositeSubscription compositeSubscription = new CompositeSubscription();
-	@Inject UiUtils uiUtils;
-	@InjectView(R.id.spinner) View spinnerContainerView;
-	@InjectView(R.id.spinner_image) ImageView spinnerImageView;
+	@Inject protected UiUtils uiUtils;
+	@InjectView(R.id.spinner) protected View spinnerContainerView;
+	@InjectView(R.id.spinner_image) protected ImageView spinnerImageView;
 
-	AbstractFragment(int layoutResource) {
+	protected AbstractFragment(int layoutResource) {
 		this.layoutResource = layoutResource;
 	}
 

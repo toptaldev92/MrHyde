@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.FileNode;
+import org.faudroids.mrhyde.ui.utils.UiUtils;
 
 class DirActionModeListener implements ActionMode.Callback {
 

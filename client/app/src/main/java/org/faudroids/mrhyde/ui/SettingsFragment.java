@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.github.LoginManager;
+import org.faudroids.mrhyde.ui.utils.AbstractFragment;
 
 import javax.inject.Inject;
 

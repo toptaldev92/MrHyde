@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde.ui;
+package org.faudroids.mrhyde.ui.utils;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -18,9 +18,9 @@ import rx.subscriptions.CompositeSubscription;
 public abstract class AbstractActionBarActivity extends RoboActionBarActivity {
 
 	protected final CompositeSubscription compositeSubscription = new CompositeSubscription();
-	@Inject UiUtils uiUtils;
-	@InjectView(R.id.spinner) View spinnerContainerView;
-	@InjectView(R.id.spinner_image) ImageView spinnerImageView;
+	@Inject protected UiUtils uiUtils;
+	@InjectView(R.id.spinner) protected View spinnerContainerView;
+	@InjectView(R.id.spinner_image) protected ImageView spinnerImageView;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {

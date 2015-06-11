@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde.ui;
+package org.faudroids.mrhyde.ui.utils;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -17,6 +17,7 @@ import com.squareup.picasso.Picasso;
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.ui.RepoOverviewActivity;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -29,14 +30,14 @@ import javax.inject.Inject;
 
 import roboguice.inject.InjectView;
 
-abstract class AbstractReposFragment extends AbstractFragment {
+public abstract class AbstractReposFragment extends AbstractFragment {
 
 	private static final int REQUEST_OVERVIEW = 41; // used to mark the end of an overview activity
 	private static final DateFormat dateFormat = DateFormat.getDateInstance();
 
-	@Inject RepositoryManager repositoryManager;
+	@Inject protected RepositoryManager repositoryManager;
 
-	@InjectView(R.id.list) RecyclerView recyclerView;
+	@InjectView(R.id.list) protected RecyclerView recyclerView;
 	protected RepositoryAdapter repoAdapter;
 	private RecyclerView.LayoutManager layoutManager;
 
@@ -79,7 +80,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 
 	protected void onRepositorySelected(Repository repository) {
 		Intent intent = new Intent(AbstractReposFragment.this.getActivity(), RepoOverviewActivity.class);
-		intent.putExtra(DirActivity.EXTRA_REPOSITORY, repository);
+		intent.putExtra(RepoOverviewActivity.EXTRA_REPOSITORY, repository);
 		startActivityForResult(intent, REQUEST_OVERVIEW);
 	}
 

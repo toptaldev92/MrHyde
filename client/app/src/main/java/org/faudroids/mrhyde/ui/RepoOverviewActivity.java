@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
 
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
@@ -14,7 +15,7 @@ import roboguice.inject.InjectView;
 @ContentView(R.layout.activity_repo_overview)
 public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
-	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
+	public static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
 	@InjectView(R.id.header_posts) private View postsHeader;
 	@InjectView(R.id.item_add_post) private View addPostView;

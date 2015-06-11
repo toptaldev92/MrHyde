@@ -17,6 +17,7 @@ import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.jekyll.PreviewManager;
+import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 import org.faudroids.mrhyde.utils.ErrorActionBuilder;

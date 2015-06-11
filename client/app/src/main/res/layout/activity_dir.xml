@@ -8,7 +8,7 @@
     android:animateLayoutChanges="true"
     >
 
-    <org.faudroids.mrhyde.ui.UnscrollableRecyclerView
+    <org.faudroids.mrhyde.ui.utils.UnscrollableRecyclerView
         android:id="@+id/list"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
@@ -17,7 +17,7 @@
         android:clipToPadding="false"
         />
 
-    <org.faudroids.mrhyde.ui.TintOverlayView
+    <org.faudroids.mrhyde.ui.utils.TintOverlayView
         android:id="@+id/tint"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

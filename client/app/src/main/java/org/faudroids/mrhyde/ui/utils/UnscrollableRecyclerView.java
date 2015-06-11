@@ -1,4 +1,4 @@
-package org.faudroids.mrhyde.ui;
+package org.faudroids.mrhyde.ui.utils;
 
 
 import android.content.Context;
