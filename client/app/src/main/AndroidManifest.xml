@@ -26,6 +26,9 @@
             android:theme="@style/DrawerTheme"
             />
         <activity
+            android:name=".ui.RepoOverviewActivity"
+            />
+        <activity
             android:name=".ui.DirActivity"
             />
         <activity

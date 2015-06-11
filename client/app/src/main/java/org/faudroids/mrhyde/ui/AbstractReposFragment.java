@@ -31,7 +31,7 @@ import roboguice.inject.InjectView;
 
 abstract class AbstractReposFragment extends AbstractFragment {
 
-	private static final int REQUEST_DIRS = 41; // used to mark the end of a dirs activity
+	private static final int REQUEST_OVERVIEW = 41; // used to mark the end of an overview activity
 	private static final DateFormat dateFormat = DateFormat.getDateInstance();
 
 	@Inject RepositoryManager repositoryManager;
@@ -67,7 +67,7 @@ abstract class AbstractReposFragment extends AbstractFragment {
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
-			case REQUEST_DIRS:
+			case REQUEST_OVERVIEW:
 				loadRepositories();
 				return;
 		}
@@ -78,9 +78,9 @@ abstract class AbstractReposFragment extends AbstractFragment {
 
 
 	protected void onRepositorySelected(Repository repository) {
-		Intent intent = new Intent(AbstractReposFragment.this.getActivity(), DirActivity.class);
+		Intent intent = new Intent(AbstractReposFragment.this.getActivity(), RepoOverviewActivity.class);
 		intent.putExtra(DirActivity.EXTRA_REPOSITORY, repository);
-		startActivityForResult(intent, REQUEST_DIRS);
+		startActivityForResult(intent, REQUEST_OVERVIEW);
 	}
 
 

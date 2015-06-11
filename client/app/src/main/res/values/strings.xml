@@ -41,6 +41,13 @@
 
     <string name="repos_last_update">Last pushed to on %1$s</string>
 
+    <string name="posts">Posts</string>
+    <string name="new_post">New post</string>
+    <string name="drafts">Drafts</string>
+    <string name="new_draft">New draft</string>
+    <string name="all_files">All files</string>
+    <string name="view_all_files">View all files</string>
+
     <string name="file_new_title">File Name</string>
     <string name="file_new_message">NewFile</string>
     <string name="image_new_title">Image Name</string>

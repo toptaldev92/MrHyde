@@ -50,7 +50,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
                         android:text="@string/commit_changed_files"
-                        style="@style/DefaultTextTitle"
+                        style="@style/TextLarge"
                         />
 
                     <TextView
@@ -61,7 +61,7 @@
                         android:layout_below="@id/changed_files_title"
                         android:textColor="@color/gray_dark"
                         android:visibility="gone"
-                        style="@style/DefaultText"
+                        style="@style/Text"
                         />
 
                 </RelativeLayout>
@@ -98,7 +98,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
                         android:text="@string/commit_git_diff"
-                        style="@style/DefaultTextTitle"
+                        style="@style/TextLarge"
                         />
 
                     <TextView
@@ -109,7 +109,7 @@
                         android:layout_marginTop="10dp"
                         android:textColor="@color/gray_dark"
                         android:visibility="gone"
-                        style="@style/DefaultText"
+                        style="@style/Text"
                         />
 
 
@@ -147,7 +147,7 @@
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
                         android:text="@string/commit_message"
-                        style="@style/DefaultTextTitle"
+                        style="@style/TextLarge"
                         />
 
                     <EditText
@@ -160,7 +160,7 @@
                         android:hint="@string/commit_message_default"
                         android:visibility="gone"
                         android:textCursorDrawable="@null"
-                        style="@style/DefaultText"
+                        style="@style/Text"
                         />
 
 
