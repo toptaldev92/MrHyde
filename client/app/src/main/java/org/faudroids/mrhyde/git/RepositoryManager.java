@@ -7,7 +7,7 @@ import android.content.SharedPreferences;
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.User;
 import org.faudroids.mrhyde.github.GitHubApiWrapper;
-import org.faudroids.mrhyde.github.LoginManager;
+import org.faudroids.mrhyde.github.GitHubUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,16 +31,16 @@ public final class RepositoryManager {
 	private static final String PREFS_NAME = RepositoryManager.class.getName();
 
 	private final Context context;
-	private final LoginManager loginManager;
 	private final GitHubApiWrapper gitHubApiWrapper;
+	private final GitHubUtils gitHubUtils;
 	private Map<String, Repository> allRepositoryMap, favouriteRepositoriesMap;
 
 
 	@Inject
-	RepositoryManager(Context context, LoginManager loginManager, GitHubApiWrapper gitHubApiWrapper) {
+	RepositoryManager(Context context, GitHubApiWrapper gitHubApiWrapper, GitHubUtils gitHubUtils) {
 		this.context = context;
-		this.loginManager = loginManager;
 		this.gitHubApiWrapper = gitHubApiWrapper;
+		this.gitHubUtils = gitHubUtils;
 	}
 
 
@@ -77,7 +77,7 @@ public final class RepositoryManager {
 						public Observable<Collection<Repository>> call(List<Repository> repositories) {
 							allRepositoryMap = new HashMap<>();
 							for (Repository repository : repositories) {
-								allRepositoryMap.put(getFullRepoName(repository), repository);
+								allRepositoryMap.put(gitHubUtils.getFullRepoName(repository), repository);
 							}
 							return Observable.just(allRepositoryMap.values());
 						}
@@ -142,7 +142,7 @@ public final class RepositoryManager {
 					@Override
 					public Observable<Collection<Repository>> call(List<Repository> repositories) {
 						favouriteRepositoriesMap = new HashMap<>();
-						for (Repository repo : repositories) favouriteRepositoriesMap.put(getFullRepoName(repo), repo);
+						for (Repository repo : repositories) favouriteRepositoriesMap.put(gitHubUtils.getFullRepoName(repo), repo);
 						return Observable.<Collection<Repository>>just(repositories);
 					}
 				});
@@ -150,25 +150,25 @@ public final class RepositoryManager {
 
 
 	public void markRepositoryAsFavourite(Repository repository) {
-		Timber.d("marking repo " + getFullRepoName(repository) + " as favourite");
+		Timber.d("marking repo " + gitHubUtils.getFullRepoName(repository) + " as favourite");
 		SharedPreferences.Editor editor = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit();
-		editor.putString(getFullRepoName(repository), "");
+		editor.putString(gitHubUtils.getFullRepoName(repository), "");
 		editor.commit();
 
 		if (favouriteRepositoriesMap != null) {
-			favouriteRepositoriesMap.put(getFullRepoName(repository), repository);
+			favouriteRepositoriesMap.put(gitHubUtils.getFullRepoName(repository), repository);
 		}
 	}
 
 
 	public boolean isRepositoryFavourite(Repository repository) {
 		SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-		return prefs.contains(getFullRepoName(repository));
+		return prefs.contains(gitHubUtils.getFullRepoName(repository));
 	}
 
 
 	public void unmarkRepositoryAsFavourite(Repository repository) {
-		unmarkRepositoryAsFavourite(getFullRepoName(repository));
+		unmarkRepositoryAsFavourite(gitHubUtils.getFullRepoName(repository));
 	}
 
 
@@ -181,11 +181,6 @@ public final class RepositoryManager {
 		if (favouriteRepositoriesMap != null) {
 			favouriteRepositoriesMap.remove(repoName);
 		}
-	}
-
-
-	private String getFullRepoName(Repository repository) {
-		return repository.getOwner().getLogin() + "/" + repository.getName();
 	}
 
 }

@@ -17,6 +17,7 @@ import com.squareup.picasso.Picasso;
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.github.GitHubUtils;
 import org.faudroids.mrhyde.ui.RepoOverviewActivity;
 
 import java.text.DateFormat;
@@ -36,6 +37,7 @@ public abstract class AbstractReposFragment extends AbstractFragment {
 	private static final DateFormat dateFormat = DateFormat.getDateInstance();
 
 	@Inject protected RepositoryManager repositoryManager;
+	@Inject protected GitHubUtils gitHubUtils;
 
 	@InjectView(R.id.list) protected RecyclerView recyclerView;
 	protected RepositoryAdapter repoAdapter;
@@ -115,7 +117,7 @@ public abstract class AbstractReposFragment extends AbstractFragment {
 			Collections.sort(this.repositoryList, new Comparator<Repository>() {
 				@Override
 				public int compare(Repository lhs, Repository rhs) {
-					return (lhs.getOwner().getLogin() + "/" +  lhs.getName()).compareTo(rhs.getOwner().getLogin() + "/" + rhs.getName());
+					return gitHubUtils.getFullRepoName(lhs).compareTo(gitHubUtils.getFullRepoName(rhs));
 				}
 			});
 			notifyDataSetChanged();
