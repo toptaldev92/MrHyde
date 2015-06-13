@@ -14,7 +14,7 @@ import android.widget.Toast;
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.FileManager;
-import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.git.FileManagerFactory;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
@@ -45,21 +45,21 @@ public final class CommitActivity extends AbstractActionBarActivity {
 			STATE_DIFF_EXPAND = "STATE_DIFF_EXPAND",
 			STATE_MESSAGE_EXPAND = "STATE_MESSAGE_EXPAND";
 
-	@Inject RepositoryManager repositoryManager;
+	@Inject private FileManagerFactory fileManagerFactory;
 
-	@InjectView(R.id.changed_files_expand) ImageButton changedFilesExpandButton;
-	@InjectView(R.id.changed_files_title) TextView changedFilesTitleView;
-	@InjectView(R.id.changed_files) TextView changedFilesView;
+	@InjectView(R.id.changed_files_expand) private ImageButton changedFilesExpandButton;
+	@InjectView(R.id.changed_files_title) private TextView changedFilesTitleView;
+	@InjectView(R.id.changed_files) private TextView changedFilesView;
 
-	@InjectView(R.id.diff_expand) ImageButton diffExpandButton;
-	@InjectView(R.id.diff_title) TextView diffTitleView;
-	@InjectView(R.id.diff) TextView diffView;
+	@InjectView(R.id.diff_expand) private ImageButton diffExpandButton;
+	@InjectView(R.id.diff_title) private TextView diffTitleView;
+	@InjectView(R.id.diff) private TextView diffView;
 
-	@InjectView(R.id.message_expand) ImageButton messageExpandButton;
-	@InjectView(R.id.message_title) TextView messageTitleView;
-	@InjectView(R.id.message) EditText messageView;
+	@InjectView(R.id.message_expand) private ImageButton messageExpandButton;
+	@InjectView(R.id.message_title) private TextView messageTitleView;
+	@InjectView(R.id.message) private EditText messageView;
 
-	@InjectView(R.id.commit_button) Button commitButton;
+	@InjectView(R.id.commit_button) private Button commitButton;
 
 
 	@Override
@@ -69,7 +69,7 @@ public final class CommitActivity extends AbstractActionBarActivity {
 		setTitle(getString(R.string.title_commit));
 		changedFilesTitleView.setText(getString(R.string.commit_changed_files, ""));
 		final Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
-		final FileManager fileManager = repositoryManager.getFileManager(repository);
+		final FileManager fileManager = fileManagerFactory.createFileManager(repository);
 
 		// load file content
 		compositeSubscription.add(Observable.zip(

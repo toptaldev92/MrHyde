@@ -15,7 +15,7 @@ import android.webkit.WebViewClient;
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.DirNode;
-import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.git.FileManagerFactory;
 import org.faudroids.mrhyde.jekyll.PreviewManager;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
@@ -39,9 +39,9 @@ public class PreviewActivity extends AbstractActionBarActivity {
             EXTRA_REPO = "EXTRA_REPO",
             EXTRA_ROOT_NODE = "EXTRA_ROOT_NODE";
 
-    @Inject PreviewManager previewManager;
-    @Inject RepositoryManager repositoryManager;
-    @InjectView(R.id.web_view) WebView webView;
+    @Inject private PreviewManager previewManager;
+	@Inject private FileManagerFactory fileManagerFactory;
+    @InjectView(R.id.web_view) private WebView webView;
 
     private String previewUrl;
 
@@ -78,20 +78,20 @@ public class PreviewActivity extends AbstractActionBarActivity {
         } else {
             showSpinner();
             compositeSubscription.add(previewManager
-                    .loadPreview(repositoryManager.getFileManager(repository), rootNode)
-                    .compose(new DefaultTransformer<String>())
-                    .subscribe(new Action1<String>() {
-                                   @Override
-                                   public void call(String previewUrl) {
-                                       Timber.d("getting url " + previewUrl);
-                                       webView.loadUrl(previewUrl);
-                                       hideSpinner();
-                                   }
-                               },
-                            new ErrorActionBuilder()
-                                    .add(new DefaultErrorAction(this, "failed to get preview from server"))
-                                    .add(new HideSpinnerAction(this))
-                                    .build()));
+					.loadPreview(fileManagerFactory.createFileManager(repository), rootNode)
+					.compose(new DefaultTransformer<String>())
+					.subscribe(new Action1<String>() {
+								   @Override
+								   public void call(String previewUrl) {
+									   Timber.d("getting url " + previewUrl);
+									   webView.loadUrl(previewUrl);
+									   hideSpinner();
+								   }
+							   },
+							new ErrorActionBuilder()
+									.add(new DefaultErrorAction(this, "failed to get preview from server"))
+									.add(new HideSpinnerAction(this))
+									.build()));
         }
     }
 

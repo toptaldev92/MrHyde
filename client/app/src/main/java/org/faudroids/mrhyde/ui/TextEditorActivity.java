@@ -24,9 +24,9 @@ import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileData;
 import org.faudroids.mrhyde.git.FileManager;
+import org.faudroids.mrhyde.git.FileManagerFactory;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.NodeUtils;
-import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
 import org.faudroids.mrhyde.ui.utils.UndoRedoEditText;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
@@ -67,7 +67,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	private static final String
 			KEY_SHOW_LINE_NUMBERS = "KEY_SHOW_LINE_NUMBERS";
 
-	@Inject private RepositoryManager repositoryManager;
+	@Inject private FileManagerFactory fileManagerFactory;
 	@Inject private InputMethodManager inputMethodManager;
 
 	@InjectView(R.id.content) private EditText editText;
@@ -88,7 +88,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		// load arguments
 		final boolean isNewFile = getIntent().getBooleanExtra(EXTRA_IS_NEW_FILE, false);
 		final Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
-		fileManager = repositoryManager.getFileManager(repository);
+		fileManager = fileManagerFactory.createFileManager(repository);
 
 		// hide line numbers by default
 		showingLineNumbers = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(KEY_SHOW_LINE_NUMBERS, false);

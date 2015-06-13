@@ -26,6 +26,7 @@ import org.faudroids.mrhyde.git.AbstractNode;
 import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileData;
 import org.faudroids.mrhyde.git.FileManager;
+import org.faudroids.mrhyde.git.FileManagerFactory;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.FileUtils;
 import org.faudroids.mrhyde.git.NodeUtils;
@@ -73,6 +74,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	@InjectView(R.id.add_folder) private FloatingActionButton addFolderButton;
 
 	@Inject private RepositoryManager repositoryManager;
+	@Inject private FileManagerFactory fileManagerFactory;
 	private Repository repository;
 	private FileManager fileManager;
 	@Inject private NodeUtils nodeUtils;
@@ -88,7 +90,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 		// get arguments
 		repository = (Repository) this.getIntent().getSerializableExtra(EXTRA_REPOSITORY);
-		fileManager = repositoryManager.getFileManager(repository);
+		fileManager = fileManagerFactory.createFileManager(repository);
 		setTitle(repository.getName());
 
 		// setup add buttons
@@ -198,7 +200,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 				return true;
 
 			case R.id.action_preview:
-				fileManager = repositoryManager.getFileManager(repository);
+				fileManager = fileManagerFactory.createFileManager(repository);
 				compositeSubscription.add(fileManager.getDiff().subscribe(new Action1<String>() {
 					@Override
 					public void call(String diff) {

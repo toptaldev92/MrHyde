@@ -11,9 +11,9 @@ import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileData;
 import org.faudroids.mrhyde.git.FileManager;
+import org.faudroids.mrhyde.git.FileManagerFactory;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.NodeUtils;
-import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
@@ -37,7 +37,7 @@ public final class ImageViewerActivity extends AbstractActionBarActivity {
 
 	@InjectView(R.id.image) private TouchImageView imageView;
 
-	@Inject private RepositoryManager repositoryManager;
+	@Inject private FileManagerFactory fileManagerFactory;
 	@Inject private NodeUtils nodeUtils;
 	private FileManager fileManager;
 	private FileData fileData; // image currently being viewed
@@ -49,7 +49,7 @@ public final class ImageViewerActivity extends AbstractActionBarActivity {
 
 		// load arguments
 		final Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
-		fileManager = repositoryManager.getFileManager(repository);
+		fileManager = fileManagerFactory.createFileManager(repository);
 
 		// load image
 		if (savedInstanceState != null && savedInstanceState.getSerializable(STATE_CONTENT) != null) {
