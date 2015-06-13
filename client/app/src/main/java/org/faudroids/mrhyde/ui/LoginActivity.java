@@ -16,7 +16,7 @@ import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.service.UserService;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.app.MigrationManager;
-import org.faudroids.mrhyde.github.AuthApi;
+import org.faudroids.mrhyde.github.GitHubAuthApi;
 import org.faudroids.mrhyde.github.LoginManager;
 import org.faudroids.mrhyde.github.TokenDetails;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
@@ -49,7 +49,7 @@ public final class LoginActivity extends AbstractActionBarActivity {
 	private static final String GITHUB_LOGIN_STATE = UUID.randomUUID().toString();
 
 	@InjectView(R.id.login_button) private Button loginButton;
-	@Inject private AuthApi authApi;
+	@Inject private GitHubAuthApi gitHubAuthApi;
 	@Inject private LoginManager loginManager;
 	@Inject private MigrationManager migrationManager;
 
@@ -148,7 +148,7 @@ public final class LoginActivity extends AbstractActionBarActivity {
 		String clientId = getString(R.string.gitHubClientId);
 		String clientSecret = getString(R.string.gitHubClientSecret);
 		showSpinner();
-		compositeSubscription.add(authApi.getAccessToken(clientId, clientSecret, code)
+		compositeSubscription.add(gitHubAuthApi.getAccessToken(clientId, clientSecret, code)
 				.flatMap(new Func1<TokenDetails, Observable<LoginManager.Account>>() {
 					@Override
 					public Observable<LoginManager.Account> call(TokenDetails tokenDetails) {

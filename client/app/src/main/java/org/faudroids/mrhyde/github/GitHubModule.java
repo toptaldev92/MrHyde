@@ -33,8 +33,8 @@ public final class GitHubModule implements Module {
 
 	@Provides
 	@Inject
-	public AuthApi provideGitHubApi(RestAdapter restAdapter) {
-		return restAdapter.create(AuthApi.class);
+	public GitHubAuthApi provideGitHubApi(RestAdapter restAdapter) {
+		return restAdapter.create(GitHubAuthApi.class);
 	}
 
 

@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 
 import org.eclipse.egit.github.core.Repository;
 import org.eclipse.egit.github.core.User;
-import org.faudroids.mrhyde.github.ApiWrapper;
+import org.faudroids.mrhyde.github.GitHubApiWrapper;
 import org.faudroids.mrhyde.github.LoginManager;
 
 import java.util.ArrayList;
@@ -32,17 +32,17 @@ public final class RepositoryManager {
 
 	private final Context context;
 	private final LoginManager loginManager;
-	private final ApiWrapper apiWrapper;
+	private final GitHubApiWrapper gitHubApiWrapper;
 	private final FileUtils fileUtils;
 	private final Map<String, FileManager> fileManagerMap = new HashMap<>();
 	private Map<String, Repository> allRepositoryMap, favouriteRepositoriesMap;
 
 
 	@Inject
-	RepositoryManager(Context context, LoginManager loginManager, ApiWrapper apiWrapper, FileUtils fileUtils) {
+	RepositoryManager(Context context, LoginManager loginManager, GitHubApiWrapper gitHubApiWrapper, FileUtils fileUtils) {
 		this.context = context;
 		this.loginManager = loginManager;
-		this.apiWrapper = apiWrapper;
+		this.gitHubApiWrapper = gitHubApiWrapper;
 		this.fileUtils = fileUtils;
 	}
 
@@ -50,7 +50,7 @@ public final class RepositoryManager {
 	public FileManager getFileManager(Repository repository) {
 		FileManager fileManager = fileManagerMap.get(getFullRepoName(repository));
 		if (fileManager == null) {
-			fileManager = new FileManager(context, loginManager, apiWrapper, repository, fileUtils);
+			fileManager = new FileManager(context, loginManager, gitHubApiWrapper, repository, fileUtils);
 			fileManagerMap.put(getFullRepoName(repository), fileManager);
 		}
 		return fileManager;
@@ -62,8 +62,8 @@ public final class RepositoryManager {
 			return Observable.just(allRepositoryMap.values());
 		} else {
 			return Observable.zip(
-					apiWrapper.getRepositories(),
-					apiWrapper.getOrganizations()
+					gitHubApiWrapper.getRepositories(),
+					gitHubApiWrapper.getOrganizations()
 							.flatMap(new Func1<List<User>, Observable<User>>() {
 								@Override
 								public Observable<User> call(List<User> users) {
@@ -73,7 +73,7 @@ public final class RepositoryManager {
 							.flatMap(new Func1<User, Observable<List<Repository>>>() {
 								@Override
 								public Observable<List<Repository>> call(User org) {
-									return apiWrapper.getOrgRepositories(org.getLogin());
+									return gitHubApiWrapper.getOrgRepositories(org.getLogin());
 								}
 							})
 							.toList(),
@@ -134,7 +134,7 @@ public final class RepositoryManager {
 					@Override
 					public Observable<Repository> call(String repoName) {
 						String[] repoParts = repoName.split("/");
-						return apiWrapper.getRepository(repoParts[0], repoParts[1]);
+						return gitHubApiWrapper.getRepository(repoParts[0], repoParts[1]);
 					}
 				})
 				.onErrorResumeNext(new Func1<Throwable, Observable<Repository>>() {

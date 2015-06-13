@@ -13,7 +13,7 @@ import org.eclipse.egit.github.core.Tree;
 import org.eclipse.egit.github.core.TreeEntry;
 import org.eclipse.egit.github.core.TypedResource;
 import org.eclipse.egit.github.core.client.RequestException;
-import org.faudroids.mrhyde.github.ApiWrapper;
+import org.faudroids.mrhyde.github.GitHubApiWrapper;
 import org.faudroids.mrhyde.github.LoginManager;
 
 import java.io.File;
@@ -39,7 +39,7 @@ public final class FileManager {
 
 	private final LoginManager loginManager;
 	private final GitManager gitManager;
-	private final ApiWrapper apiWrapper;
+	private final GitHubApiWrapper gitHubApiWrapper;
 	private final Repository repository;
 	private final FileUtils fileUtils;
 	private final File rootDir;
@@ -47,9 +47,9 @@ public final class FileManager {
 	private final MetaDataCache cache = new MetaDataCache();
 
 
-	FileManager(Context context, LoginManager loginManager, ApiWrapper apiWrapper, Repository repository, FileUtils fileUtils) {
+	FileManager(Context context, LoginManager loginManager, GitHubApiWrapper gitHubApiWrapper, Repository repository, FileUtils fileUtils) {
 		this.loginManager = loginManager;
-		this.apiWrapper = apiWrapper;
+		this.gitHubApiWrapper = gitHubApiWrapper;
 		this.repository = repository;
 		this.rootDir = new File(context.getFilesDir(), repository.getOwner().getLogin() + "/" + repository.getName());
 		this.fileUtils = fileUtils;
@@ -71,13 +71,13 @@ public final class FileManager {
 				.flatMap(new GitHubParseFunc())
 				.flatMap(new LoadLocalFilesFunc());
 
-		else return apiWrapper.getCommits(repository)
+		else return gitHubApiWrapper.getCommits(repository)
 				.flatMap(new Func1<List<RepositoryCommit>, Observable<Tree>>() {
 					@Override
 					public Observable<Tree> call(List<RepositoryCommit> repositoryCommits) {
 						Timber.d("loaded last commit");
 						cache.cacheBaseCommitSha(repositoryCommits.get(0).getSha());
-						return apiWrapper.getTree(repository, cache.getBaseCommitSha().get(), true);
+						return gitHubApiWrapper.getTree(repository, cache.getBaseCommitSha().get(), true);
 					}
 				})
 				.flatMap(new Func1<Tree, Observable<Tree>>() {
@@ -123,7 +123,7 @@ public final class FileManager {
 
 		} else {
 			Timber.d("getting file with sha " + treeEntry.getSha());
-			return apiWrapper.getBlob(repository, treeEntry.getSha())
+			return gitHubApiWrapper.getBlob(repository, treeEntry.getSha())
 					.flatMap(new Func1<Blob, Observable<FileData>>() {
 						@Override
 						public Observable<FileData> call(Blob blob) {
@@ -291,7 +291,7 @@ public final class FileManager {
 
 						} else {
 							blob.setContent(new String(Base64.encode(readFile(file), Base64.DEFAULT))).setEncoding(Blob.ENCODING_BASE64);
-							return apiWrapper.createBlob(repository, blob)
+							return gitHubApiWrapper.createBlob(repository, blob)
 									.flatMap(new Func1<String, Observable<SavedBlob>>() {
 										@Override
 										public Observable<SavedBlob> call(String blobSha) {
@@ -354,7 +354,7 @@ public final class FileManager {
 				.flatMap(new Func1<Collection<TreeEntry>, Observable<Tree>>() {
 					@Override
 					public Observable<Tree> call(Collection<TreeEntry> treeEntries) {
-						return apiWrapper.createTree(repository, treeEntries);
+						return gitHubApiWrapper.createTree(repository, treeEntries);
 					}
 				})
 				// create new commit on GitHub
@@ -375,7 +375,7 @@ public final class FileManager {
 						List<Commit> commitList = new ArrayList<>();
 						commitList.add(new Commit().setSha(cache.getBaseCommitSha().get()));
 						commit.setParents(commitList);
-						return apiWrapper.createCommit(repository, commit);
+						return gitHubApiWrapper.createCommit(repository, commit);
 					}
 				})
 				// get and update reference from GitHub
@@ -387,12 +387,12 @@ public final class FileManager {
 						commitResource.setType(TypedResource.TYPE_COMMIT);
 						commitResource.setUrl(commit.getUrl());
 
-						return apiWrapper.getReference(repository, "heads/master")
+						return gitHubApiWrapper.getReference(repository, "heads/master")
 								.flatMap(new Func1<Reference, Observable<Reference>>() {
 									@Override
 									public Observable<Reference> call(Reference reference) {
 										reference.setObject(commitResource);
-										return apiWrapper.editReference(repository, reference);
+										return gitHubApiWrapper.editReference(repository, reference);
 									}
 								});
 					}

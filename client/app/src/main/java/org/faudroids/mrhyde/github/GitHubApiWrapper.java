@@ -30,7 +30,7 @@ import rx.functions.Func0;
  *
  * Methods are added as needed.
  */
-public final class ApiWrapper {
+public final class GitHubApiWrapper {
 
 	private final RepositoryService repositoryService;
 	private final CommitService commitService;
@@ -38,7 +38,7 @@ public final class ApiWrapper {
 	private final OrganizationService organizationService;
 
 	@Inject
-	public ApiWrapper(
+	public GitHubApiWrapper(
 			RepositoryService repositoryService,
 			CommitService commitService,
 			DataService dataService,

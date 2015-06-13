@@ -9,7 +9,7 @@ import rx.Observable;
 /**
  * Retrofit interface for fetching the access token.
  */
-public interface AuthApi {
+public interface GitHubAuthApi {
 
 	@POST("/login/oauth/access_token")
 	@Headers("Accept: application/json")
