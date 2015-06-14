@@ -112,10 +112,7 @@ public class JekyllManager {
 			calendar.set(year, month, day);
 
 			// get title
-			String title = matcher.group(4);
-			title = title.replaceAll("-", " ");
-			title = title.trim();
-			title = Character.toUpperCase(title.charAt(0)) + title.substring(1);
+			String title = formatTitle(matcher.group(4));
 
 			return Optional.of(new Post(title, calendar.getTime(), node));
 
@@ -131,7 +128,22 @@ public class JekyllManager {
 		Matcher matcher = DRAFT_TITLE_PATTERN.matcher(node.getPath());
 		if (!matcher.matches()) return Optional.absent();
 
-		return Optional.of(new Draft(matcher.group(1), node));
+		// get title
+		String title = formatTitle(matcher.group(1));
+
+		return Optional.of(new Draft(title, node));
+	}
+
+
+	/**
+	 * Removes dashes (-) from a title, replaces those with spaces ( ) and capitalizes
+	 * the first character.
+	 */
+	private String formatTitle(String title) {
+		title = title.replaceAll("-", " ");
+		title = title.trim();
+		title = Character.toUpperCase(title.charAt(0)) + title.substring(1);
+		return title;
 	}
 
 }
