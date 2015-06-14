@@ -9,6 +9,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:paddingBottom="@dimen/list_padding_bottom"
+        android:clipToPadding="false"
         >
 
         <LinearLayout
