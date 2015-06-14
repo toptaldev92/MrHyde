@@ -2,6 +2,7 @@ package org.faudroids.mrhyde.ui;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,7 @@ import rx.functions.Func2;
 public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
 	private static final DateFormat DATE_FORMAT = DateFormat.getDateInstance();
+	private static final Typeface SANS_SERIF_LIGHT = Typeface.create("sans-serif-light", Typeface.NORMAL);
 
 	public static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
@@ -181,6 +183,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			// set title
 			TextView titleView = (TextView) view.findViewById(R.id.text_title);
 			titleView.setText(post.getTitle());
+			titleView.setTypeface(SANS_SERIF_LIGHT);
 
 			// set date
 			TextView dateView = (TextView) view.findViewById(R.id.text_date);
@@ -210,6 +213,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			// set title
 			TextView titleView = (TextView) view.findViewById(R.id.text_title);
 			titleView.setText(draft.getTitle());
+			titleView.setTypeface(SANS_SERIF_LIGHT);
 
 			return view;
 		}
