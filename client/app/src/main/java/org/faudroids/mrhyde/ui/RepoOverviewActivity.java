@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.jekyll.Draft;
 import org.faudroids.mrhyde.jekyll.JekyllManager;
 import org.faudroids.mrhyde.jekyll.JekyllManagerFactory;
 import org.faudroids.mrhyde.jekyll.Post;
@@ -30,7 +31,9 @@ import javax.inject.Inject;
 
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
+import rx.Observable;
 import rx.functions.Action1;
+import rx.functions.Func2;
 
 @ContentView(R.layout.activity_repo_overview)
 public final class RepoOverviewActivity extends AbstractActionBarActivity {
@@ -47,6 +50,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
 	@InjectView(R.id.header_drafts) private View draftsHeader;
 	@InjectView(R.id.list_drafts) private ListView draftsListView;
+	private DraftsListAdapter draftsListAdapter;
 	@InjectView(R.id.item_no_drafts) private View noDraftsView;
 	@InjectView(R.id.item_add_draft) private View addDraftView;
 
@@ -69,31 +73,28 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		postsListAdapter = new PostsListAdapter(this);
 		postsListView.setAdapter(postsListAdapter);
 
-		// load posts
+		// setup drafts lists
+		draftsListAdapter = new DraftsListAdapter(this);
+		draftsListView.setAdapter(draftsListAdapter);
+
+		// load content
 		showSpinner();
-		compositeSubscription.add(jekyllManager.getAllPosts()
-				.compose(new DefaultTransformer<List<Post>>())
-				.subscribe(new Action1<List<Post>>() {
+		compositeSubscription.add(Observable.zip(
+				jekyllManager.getAllPosts(),
+				jekyllManager.getAllDrafts(),
+				new Func2<List<Post>, List<Draft>, JekyllContent>() {
 					@Override
-					public void call(List<Post> posts) {
+					public JekyllContent call(List<Post> posts, List<Draft> drafts) {
+						return new JekyllContent(posts, drafts);
+					}
+				})
+				.compose(new DefaultTransformer<JekyllContent>())
+				.subscribe(new Action1<JekyllContent>() {
+					@Override
+					public void call(JekyllContent jekyllContent) {
 						hideSpinner();
-
-						// setup list
-						if (posts.isEmpty()) {
-							noPostsView.setVisibility(View.VISIBLE);
-
-						} else {
-							noPostsView.setVisibility(View.GONE);
-
-							// get first 3 posts
-							List<Post> firstPosts = new ArrayList<>();
-							for (int i = 0; i < 3 && i < posts.size(); ++i) {
-								firstPosts.add(posts.get(i));
-							}
-							postsListAdapter.clear();
-							postsListAdapter.addAll(firstPosts);
-							postsListAdapter.notifyDataSetChanged();
-						}
+						setupFirstThreeEntries(jekyllContent.posts, postsListAdapter, noPostsView);
+						setupFirstThreeEntries(jekyllContent.drafts, draftsListAdapter, noDraftsView);
 					}
 				}, new ErrorActionBuilder()
 						.add(new DefaultErrorAction(RepoOverviewActivity.this, "failed to load posts"))
@@ -114,12 +115,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			}
 		});
 
-		// setup drafts card
-		if (jekyllManager.getAllDrafts().isEmpty()) {
-			noDraftsView.setVisibility(View.VISIBLE);
-		} else {
-			noDraftsView.setVisibility(View.GONE);
-		}
+		// setup drafts clicks
 		draftsHeader.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -145,6 +141,30 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	}
 
 
+
+	private <T> void setupFirstThreeEntries(List<T> items, ArrayAdapter<T> listAdapter, View emptyView) {
+		// setup list
+		if (items.isEmpty()) {
+			emptyView.setVisibility(View.VISIBLE);
+
+		} else {
+			emptyView.setVisibility(View.GONE);
+
+			// get first 3 posts
+			List<T> firstItems = new ArrayList<>();
+			for (int i = 0; i < 3 && i < items.size(); ++i) {
+				firstItems.add(items.get(i));
+			}
+			listAdapter.clear();
+			listAdapter.addAll(firstItems);
+			listAdapter.notifyDataSetChanged();
+		}
+	}
+
+
+	/**
+	 * List adapter for displaying {@link org.faudroids.mrhyde.jekyll.Post}s.
+	 */
 	private static class PostsListAdapter extends ArrayAdapter<Post> {
 
 		public PostsListAdapter(Context context) {
@@ -168,6 +188,47 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
 			return view;
 		}
+	}
+
+
+	/**
+	 * List adapter for displaying {@link org.faudroids.mrhyde.jekyll.Draft}s.
+	 */
+	private static class DraftsListAdapter extends ArrayAdapter<Draft> {
+
+		public DraftsListAdapter(Context context) {
+			super(context, R.layout.item_overview_draft);
+		}
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			Draft draft =getItem(position);
+
+			// create view
+			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View view = inflater.inflate(R.layout.item_overview_draft, parent, false);
+
+			// set title
+			TextView titleView = (TextView) view.findViewById(R.id.text_title);
+			titleView.setText(draft.getTitle());
+
+			return view;
+		}
+	}
+
+
+	/**
+	 * Container class for holding all loaded Jekyll content
+	 */
+	private static class JekyllContent {
+
+		private final List<Post> posts;
+		private final List<Draft> drafts;
+
+		public JekyllContent(List<Post> posts, List<Draft> drafts) {
+			this.posts = posts;
+			this.drafts = drafts;
+		}
+
 	}
 
 }

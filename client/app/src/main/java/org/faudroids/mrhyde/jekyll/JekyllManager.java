@@ -21,8 +21,13 @@ import timber.log.Timber;
  */
 public class JekyllManager {
 
-	private static final String DIR_POSTS = "_posts";
-	private static final Pattern POST_TITLE_PATTERN = Pattern.compile("(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)(.*)\\..*");
+	private static final String
+			DIR_POSTS = "_posts",
+			DIR_DRAFTS = "_drafts";
+
+	private static final Pattern
+			POST_TITLE_PATTERN = Pattern.compile("(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)(.*)\\..*"),
+			DRAFT_TITLE_PATTERN = Pattern.compile("(.*)\\..*");
 
 	private final FileManager fileManager;
 
@@ -60,12 +65,35 @@ public class JekyllManager {
 	}
 
 
-	public List<String> getAllDrafts() {
-		return new ArrayList<>();
+	/**
+	 * Returns all drafts sorted by title.
+	 */
+	public Observable<List<Draft>> getAllDrafts() {
+		return fileManager.getTree()
+				.flatMap(new Func1<DirNode, Observable<List<Draft>>>() {
+					@Override
+					public Observable<List<Draft>> call(DirNode dirNode) {
+						// check if drafts dir exists
+						List<Draft> drafts = new ArrayList<>();
+						if (!dirNode.getEntries().containsKey(DIR_DRAFTS)) return Observable.just(drafts);
+
+						// parse titles
+						DirNode draftsDir = (DirNode) dirNode.getEntries().get(DIR_DRAFTS);
+						for (AbstractNode draftNode: draftsDir.getEntries().values()) {
+							Optional<Draft> draft = parseDraftTitle(draftNode.getPath());
+							if (draft.isPresent()) drafts.add(draft.get());
+						}
+
+						// sort by title
+						Collections.sort(drafts);
+
+						return Observable.just(drafts);
+					}
+				});
 	}
 
 
-	public Optional<Post> parsePostTitle(String fileName) {
+	private Optional<Post> parsePostTitle(String fileName) {
 		// check for match
 		Matcher matcher = POST_TITLE_PATTERN.matcher(fileName);
 		if (!matcher.matches()) return Optional.absent();
@@ -90,6 +118,15 @@ public class JekyllManager {
 			Timber.w(nfe, "failed to parse post tile \"" + fileName + "\"");
 			return Optional.absent();
 		}
+	}
+
+
+	private Optional<Draft> parseDraftTitle(String fileName) {
+		// check for match
+		Matcher matcher = DRAFT_TITLE_PATTERN.matcher(fileName);
+		if (!matcher.matches()) return Optional.absent();
+
+		return Optional.of(new Draft(matcher.group(1)));
 	}
 
 }
