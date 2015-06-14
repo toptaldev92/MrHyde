@@ -86,7 +86,7 @@ public final class ImageViewerActivity extends AbstractActionBarActivity {
 		setTitle(fileData.getFileNode().getPath());
 		Bitmap bitmap = BitmapFactory.decodeByteArray(fileData.getData(), 0, fileData.getData().length);
 		imageView.setImageBitmap(bitmap);
-		imageView.setZoom(0.999999f);
+		imageView.setZoom(0.999999f); // hack, if not present image is sometimes empty
 	}
 
 

@@ -80,6 +80,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	@Inject private NodeUtils nodeUtils;
 	@Inject private FileUtils fileUtils;
 	@Inject private ImageUtils imageUtils;
+	@Inject private ActivityIntentFactory intentFactory;
 
 	private DirActionModeListener actionModeListener = null;
 
@@ -451,21 +452,12 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 		// start text or image activity depending on file name
 		if (!fileUtils.isImage(fileNode.getPath())) {
 			// start text editor
-			Intent editorIntent = new Intent(this, TextEditorActivity.class);
-			Bundle extras = new Bundle();
-			extras.putSerializable(TextEditorActivity.EXTRA_REPOSITORY, repository);
-			extras.putBoolean(TextEditorActivity.EXTRA_IS_NEW_FILE, isNewFile);
-			nodeUtils.saveInstanceState(extras, fileNode);
-			editorIntent.putExtras(extras);
+			Intent editorIntent = intentFactory.createTextEditorIntent(repository, fileNode, isNewFile);
 			startActivityForResult(editorIntent, REQUEST_EDIT_FILE);
 
 		} else {
 			// start image viewer
-			Intent viewerIntent = new Intent(this, ImageViewerActivity.class);
-			Bundle extras = new Bundle();
-			extras.putSerializable(ImageViewerActivity.EXTRA_REPOSITORY, repository);
-			nodeUtils.saveInstanceState(extras, fileNode);
-			viewerIntent.putExtras(extras);
+			Intent viewerIntent = intentFactory.createImageViewerIntent(repository, fileNode);
 			startActivity(viewerIntent);
 		}
 
