@@ -1,5 +1,6 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/gray_light"
@@ -8,6 +9,9 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/list_padding_bottom"
+        android:clipToPadding="false"
+        android:scrollbars="none"
         >
 
         <LinearLayout
@@ -83,36 +87,8 @@
                             android:padding="15dp"
                             android:text="@string/no_posts"
                             android:textStyle="italic"
-                            style="@style/Text"
+                            style="@style/TextSecondary"
                             />
-
-                        <include layout="@layout/divider_cards" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="15dp"
-                            android:orientation="horizontal"
-                            android:id="@+id/item_add_post"
-                            >
-
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/ic_add"
-                                />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/new_post"
-                                android:textColor="@color/gray"
-                                android:layout_gravity="center"
-                                android:layout_marginLeft="15dp"
-                                style="@style/TextSecondary"
-                                />
-
-                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -176,36 +152,10 @@
                             android:padding="15dp"
                             android:text="@string/no_drafts"
                             android:textStyle="italic"
-                            style="@style/Text"
+                            style="@style/TextSecondary"
                             />
 
                         <include layout="@layout/divider_cards" />
-
-                        <LinearLayout
-                            android:id="@+id/item_add_draft"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:padding="15dp"
-                            android:orientation="horizontal"
-                            >
-
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:src="@drawable/ic_add"
-                                />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="@string/new_draft"
-                                android:textColor="@color/gray"
-                                android:layout_gravity="center"
-                                android:layout_marginLeft="15dp"
-                                style="@style/TextSecondary"
-                                />
-
-                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -287,6 +237,47 @@
         </LinearLayout>
 
     </ScrollView>
+
+    <include layout="@layout/tint"/>
+
+    <com.getbase.floatingactionbutton.FloatingActionsMenu
+        android:id="@+id/add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="16dp"
+        android:layout_marginBottom="16dp"
+        fab:fab_addButtonColorNormal="@color/red"
+        fab:fab_addButtonColorPressed="@color/red_dark"
+        fab:fab_addButtonPlusIconColor="@android:color/white"
+        fab:fab_labelsPosition="left"
+        fab:fab_labelStyle="@style/AddButtonLabelStyle"
+        >
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@android:color/white"
+            fab:fab_colorPressed="@color/gray_light_2"
+            fab:fab_icon="@drawable/file"
+            fab:fab_size="mini"
+            fab:fab_title="@string/post"
+            />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_draft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_colorNormal="@android:color/white"
+            fab:fab_colorPressed="@color/gray_light_2"
+            fab:fab_icon="@drawable/file"
+            fab:fab_size="mini"
+            fab:fab_title="@string/draft"
+            />
+
+    </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
     <include layout="@layout/spinner"/>
 

@@ -73,4 +73,9 @@
         <item name="android:button">@drawable/checkbox</item>
     </style>
 
+    <style name="AddButtonLabelStyle">
+        <item name="android:background">@drawable/floating_action_label_background</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
 </resources>

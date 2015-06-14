@@ -17,13 +17,7 @@
         android:clipToPadding="false"
         />
 
-    <org.faudroids.mrhyde.ui.utils.TintOverlayView
-        android:id="@+id/tint"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/black_transparent"
-        android:alpha="0"
-        />
+    <include layout="@layout/tint"/>
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/add"

@@ -12,6 +12,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
+
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.Draft;
@@ -48,15 +51,18 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	@InjectView(R.id.list_posts) private ListView postsListView;
 	private PostsListAdapter postsListAdapter;
 	@InjectView(R.id.item_no_posts) private View noPostsView;
-	@InjectView(R.id.item_add_post) private View addPostView;
 
 	@InjectView(R.id.header_drafts) private View draftsHeader;
 	@InjectView(R.id.list_drafts) private ListView draftsListView;
 	private DraftsListAdapter draftsListAdapter;
 	@InjectView(R.id.item_no_drafts) private View noDraftsView;
-	@InjectView(R.id.item_add_draft) private View addDraftView;
 
 	@InjectView(R.id.card_all_files) private View allFilesView;
+
+	@InjectView(R.id.add) private FloatingActionsMenu addButton;
+	@InjectView(R.id.add_post) private FloatingActionButton addPostButton;
+	@InjectView(R.id.add_draft) private FloatingActionButton addDraftButton;
+	@InjectView(R.id.tint) private View tintView;
 
 	@Inject private JekyllManagerFactory jekyllManagerFactory;
 	private JekyllManager jekyllManager;
@@ -110,21 +116,9 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				Toast.makeText(RepoOverviewActivity.this, "Dummy", Toast.LENGTH_SHORT).show();
 			}
 		});
-		addPostView.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast.makeText(RepoOverviewActivity.this, "Dummy", Toast.LENGTH_SHORT).show();
-			}
-		});
 
 		// setup drafts clicks
 		draftsHeader.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Toast.makeText(RepoOverviewActivity.this, "Dummy", Toast.LENGTH_SHORT).show();
-			}
-		});
-		addDraftView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				Toast.makeText(RepoOverviewActivity.this, "Dummy", Toast.LENGTH_SHORT).show();
@@ -138,6 +132,37 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				Intent intent = new Intent(RepoOverviewActivity.this, DirActivity.class);
 				intent.putExtra(DirActivity.EXTRA_REPOSITORY, repository);
 				startActivity(intent);
+			}
+		});
+
+		// setup add buttons
+		addButton.setOnFloatingActionsMenuUpdateListener(new FloatingActionsMenu.OnFloatingActionsMenuUpdateListener() {
+			@Override
+			public void onMenuExpanded() {
+				tintView.animate().alpha(1).setDuration(200).start();
+			}
+
+			@Override
+			public void onMenuCollapsed() {
+				tintView.animate().alpha(0).setDuration(200).start();
+			}
+		});
+		addPostButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addButton.collapse();
+			}
+		});
+		addDraftButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addButton.collapse();
+			}
+		});
+		tintView.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addButton.collapse();
 			}
 		});
 	}
