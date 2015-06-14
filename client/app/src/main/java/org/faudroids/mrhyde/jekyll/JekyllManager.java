@@ -3,6 +3,7 @@ package org.faudroids.mrhyde.jekyll;
 import org.faudroids.mrhyde.git.AbstractNode;
 import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileManager;
+import org.faudroids.mrhyde.git.FileNode;
 import org.roboguice.shaded.goole.common.base.Optional;
 
 import java.util.ArrayList;
@@ -51,7 +52,8 @@ public class JekyllManager {
 						// parse titles
 						DirNode postsDir = (DirNode) dirNode.getEntries().get(DIR_POSTS);
 						for (AbstractNode postNode : postsDir.getEntries().values()) {
-							Optional<Post> post = parsePostTitle(postNode.getPath());
+							if (!(postNode instanceof FileNode)) continue;
+							Optional<Post> post = parsePost((FileNode) postNode);
 							if (post.isPresent()) posts.add(post.get());
 						}
 
@@ -80,7 +82,8 @@ public class JekyllManager {
 						// parse titles
 						DirNode draftsDir = (DirNode) dirNode.getEntries().get(DIR_DRAFTS);
 						for (AbstractNode draftNode: draftsDir.getEntries().values()) {
-							Optional<Draft> draft = parseDraftTitle(draftNode.getPath());
+							if (!(draftNode instanceof FileNode)) continue;
+							Optional<Draft> draft = parseDraftTitle((FileNode) draftNode);
 							if (draft.isPresent()) drafts.add(draft.get());
 						}
 
@@ -93,7 +96,9 @@ public class JekyllManager {
 	}
 
 
-	private Optional<Post> parsePostTitle(String fileName) {
+	private Optional<Post> parsePost(FileNode node) {
+		String fileName = node.getPath();
+
 		// check for match
 		Matcher matcher = POST_TITLE_PATTERN.matcher(fileName);
 		if (!matcher.matches()) return Optional.absent();
@@ -112,7 +117,7 @@ public class JekyllManager {
 			title = title.trim();
 			title = Character.toUpperCase(title.charAt(0)) + title.substring(1);
 
-			return Optional.of(new Post(title, calendar.getTime()));
+			return Optional.of(new Post(title, calendar.getTime(), node));
 
 		} catch (NumberFormatException nfe) {
 			Timber.w(nfe, "failed to parse post tile \"" + fileName + "\"");
@@ -121,12 +126,12 @@ public class JekyllManager {
 	}
 
 
-	private Optional<Draft> parseDraftTitle(String fileName) {
+	private Optional<Draft> parseDraftTitle(FileNode node) {
 		// check for match
-		Matcher matcher = DRAFT_TITLE_PATTERN.matcher(fileName);
+		Matcher matcher = DRAFT_TITLE_PATTERN.matcher(node.getPath());
 		if (!matcher.matches()) return Optional.absent();
 
-		return Optional.of(new Draft(matcher.group(1)));
+		return Optional.of(new Draft(matcher.group(1), node));
 	}
 
 }

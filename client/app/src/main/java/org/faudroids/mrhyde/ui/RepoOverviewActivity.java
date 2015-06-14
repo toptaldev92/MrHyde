@@ -64,8 +64,11 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	@InjectView(R.id.add_draft) private FloatingActionButton addDraftButton;
 	@InjectView(R.id.tint) private View tintView;
 
+	private Repository repository;
 	@Inject private JekyllManagerFactory jekyllManagerFactory;
 	private JekyllManager jekyllManager;
+
+	@Inject private ActivityIntentFactory intentFactory;
 
 
 	@Override
@@ -73,7 +76,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		super.onCreate(savedInstanceState);
 
 		// get arguments
-		final Repository repository = (Repository) this.getIntent().getSerializableExtra(EXTRA_REPOSITORY);
+		repository = (Repository) this.getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		jekyllManager = jekyllManagerFactory.createJekyllManager(repository);
 		setTitle(repository.getName());
 
@@ -192,14 +195,14 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	/**
 	 * List adapter for displaying {@link org.faudroids.mrhyde.jekyll.Post}s.
 	 */
-	private static class PostsListAdapter extends ArrayAdapter<Post> {
+	private class PostsListAdapter extends ArrayAdapter<Post> {
 
 		public PostsListAdapter(Context context) {
 			super(context, R.layout.item_overview_post);
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			Post post = getItem(position);
+			final Post post = getItem(position);
 
 			// create view
 			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -214,6 +217,14 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			TextView dateView = (TextView) view.findViewById(R.id.text_date);
 			dateView.setText(DATE_FORMAT.format(post.getDate()));
 
+			// set on click
+			view.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					startActivity(intentFactory.createTextEditorIntent(repository, post.getFileNode(), false));
+				}
+			});
+
 			return view;
 		}
 	}
@@ -222,14 +233,14 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	/**
 	 * List adapter for displaying {@link org.faudroids.mrhyde.jekyll.Draft}s.
 	 */
-	private static class DraftsListAdapter extends ArrayAdapter<Draft> {
+	private class DraftsListAdapter extends ArrayAdapter<Draft> {
 
 		public DraftsListAdapter(Context context) {
 			super(context, R.layout.item_overview_draft);
 		}
 
 		public View getView(int position, View convertView, ViewGroup parent) {
-			Draft draft =getItem(position);
+			final Draft draft = getItem(position);
 
 			// create view
 			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -239,6 +250,14 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			TextView titleView = (TextView) view.findViewById(R.id.text_title);
 			titleView.setText(draft.getTitle());
 			titleView.setTypeface(SANS_SERIF_LIGHT);
+
+			// set on click
+			view.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					startActivity(intentFactory.createTextEditorIntent(repository, draft.getFileNode(), false));
+				}
+			});
 
 			return view;
 		}
