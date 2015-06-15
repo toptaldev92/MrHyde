@@ -6,7 +6,8 @@
     android:background="@color/gray_light"
     >
 
-    <ScrollView
+    <org.faudroids.mrhyde.ui.utils.ObservableScrollView
+        android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/list_padding_bottom"
@@ -19,6 +20,50 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             >
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="150dp"
+                android:background="@android:color/white"
+                >
+
+                <ImageView
+                    android:id="@+id/image_overview_background"
+                    android:layout_width="match_parent"
+                    android:layout_height="100dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/overview_background_tiled"
+                    />
+
+                <ImageView
+                    android:id="@+id/image_repo_owner"
+                    android:layout_width="@dimen/overview_owner_icon_size_max"
+                    android:layout_height="@dimen/overview_owner_icon_size_max"
+                    android:src="@drawable/octocat"
+                    android:layout_marginLeft="@dimen/overview_owner_icon_margin_left"
+                    android:layout_marginTop="@dimen/overview_owner_icon_margin_top"
+                    android:background="@drawable/white_border"
+                    />
+
+                <TextView
+                    android:id="@+id/text_post_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10 posts - 5 drafts"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="100dp"
+                    android:padding="15dp"
+                    style="@style/TextSecondary"
+                    />
+
+            </RelativeLayout>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:src="@drawable/card_shadow"
+                />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -220,7 +265,7 @@
 
         </LinearLayout>
 
-    </ScrollView>
+    </org.faudroids.mrhyde.ui.utils.ObservableScrollView>
 
     <include layout="@layout/tint"/>
 

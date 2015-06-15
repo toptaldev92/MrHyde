@@ -41,6 +41,16 @@
 
     <string name="repos_last_update">Last pushed to on %1$s</string>
 
+    <plurals name="posts_count">
+        <item quantity="zero">no posts</item>
+        <item quantity="one">1 post</item>
+        <item quantity="other">%d posts</item>
+    </plurals>
+    <plurals name="drafts_count">
+        <item quantity="zero">no drafts</item>
+        <item quantity="one">1 draft</item>
+        <item quantity="other">%d drafts</item>
+    </plurals>
     <string name="posts">Posts</string>
     <string name="post">Post</string>
     <string name="new_post">New post</string>

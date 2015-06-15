@@ -10,6 +10,24 @@
         <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
     </style>
 
+    <style name="AppTheme.Overlay">
+        <item name="actionBarStyle">@style/ActionBarStyle</item>
+        <item name="windowActionBarOverlay">true</item>
+    </style>
+
+    <style name="ActionBarStyle" parent="Widget.AppCompat.ActionBar">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="background">@android:color/transparent</item>
+        <item name="windowActionBarOverlay">true</item>
+        <item name="titleTextStyle">@style/ActionBarStyle.TitleTextStyle</item>
+    </style>
+
+    <style name="ActionBarStyle.TitleTextStyle" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+
     <style name="DrawerTheme" parent="MaterialNavigationDrawerTheme.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>

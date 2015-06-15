@@ -27,6 +27,7 @@
             />
         <activity
             android:name=".ui.RepoOverviewActivity"
+            android:theme="@style/AppTheme.Overlay"
             />
         <activity
             android:name=".ui.DirActivity"

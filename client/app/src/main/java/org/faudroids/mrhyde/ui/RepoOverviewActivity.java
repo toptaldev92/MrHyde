@@ -3,17 +3,23 @@ package org.faudroids.mrhyde.ui;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
+import com.squareup.picasso.Picasso;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
@@ -22,6 +28,7 @@ import org.faudroids.mrhyde.jekyll.JekyllManager;
 import org.faudroids.mrhyde.jekyll.JekyllManagerFactory;
 import org.faudroids.mrhyde.jekyll.Post;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
+import org.faudroids.mrhyde.ui.utils.ObservableScrollView;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 import org.faudroids.mrhyde.utils.ErrorActionBuilder;
@@ -46,6 +53,11 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	private static final Typeface SANS_SERIF_LIGHT = Typeface.create("sans-serif-light", Typeface.NORMAL);
 
 	public static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
+
+	@InjectView(R.id.scroll_view) private ObservableScrollView scrollView;
+	@InjectView(R.id.image_overview_background) private ImageView overviewBackgroundImage;
+	@InjectView(R.id.image_repo_owner) private ImageView repoOwnerImage;
+	@InjectView(R.id.text_post_count) private TextView postDraftCountView;
 
 	@InjectView(R.id.header_posts) private View postsHeader;
 	@InjectView(R.id.list_posts) private ListView postsListView;
@@ -104,8 +116,17 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 					@Override
 					public void call(JekyllContent jekyllContent) {
 						hideSpinner();
+
+						// setup header
+						postDraftCountView.setText(
+								getResources().getQuantityString(R.plurals.posts_count, jekyllContent.posts.size(), jekyllContent.posts.size())
+								+ " - "
+								+ getResources().getQuantityString(R.plurals.drafts_count, jekyllContent.drafts.size(), jekyllContent.drafts.size()));
+
+						// setup cards
 						setupFirstThreeEntries(jekyllContent.posts, postsListAdapter, noPostsView);
 						setupFirstThreeEntries(jekyllContent.drafts, draftsListAdapter, noDraftsView);
+
 					}
 				}, new ErrorActionBuilder()
 						.add(new DefaultErrorAction(RepoOverviewActivity.this, "failed to load posts"))
@@ -168,8 +189,42 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				addButton.collapse();
 			}
 		});
-	}
 
+		// setup scroll partially hides top image
+		final Drawable actionBarDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
+		actionBarDrawable.setAlpha(0);
+		getSupportActionBar().setBackgroundDrawable(actionBarDrawable);
+		scrollView.setOnScrollListener(new ObservableScrollView.OnScrollListener() {
+			@Override
+			public void onScrollChanged(ScrollView scrollView, int l, int t, int oldL, int oldT) {
+				// show action bar color
+				final int headerHeight = overviewBackgroundImage.getHeight() - getSupportActionBar().getHeight();
+				final float ratio = (float) Math.min(Math.max(t, 0), headerHeight) / headerHeight;
+				final int newAlpha = (int) (ratio * 255);
+				actionBarDrawable.setAlpha(newAlpha);
+
+				// resize owner icon
+				RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) repoOwnerImage.getLayoutParams();
+				float minSize = getResources().getDimension(R.dimen.overview_owner_icon_size_min);
+				float maxSize = getResources().getDimension(R.dimen.overview_owner_icon_size_max);
+				float minLeftMargin = getResources().getDimension(R.dimen.overview_owner_icon_margin_left);
+				float minTopMargin = getResources().getDimension(R.dimen.overview_owner_icon_margin_top);
+				float size = (minSize + (maxSize - minSize) * (1 - ratio));
+				params.height = (int) size;
+				params.width = (int) size;
+				params.leftMargin = (int) (minLeftMargin + (maxSize - size) / 2); // keep left margin stable
+				params.topMargin = (int) (minTopMargin + (maxSize - size)); // moves icon down while resizing
+				repoOwnerImage.setLayoutParams(params);
+			}
+		});
+
+		// load owner image
+		Picasso.with(this)
+				.load(repository.getOwner().getAvatarUrl())
+				.resizeDimen(R.dimen.overview_owner_icon_size_max, R.dimen.overview_owner_icon_size_max)
+				.placeholder(R.drawable.octocat_black)
+				.into(repoOwnerImage);
+	}
 
 
 	private <T> void setupFirstThreeEntries(List<T> items, ArrayAdapter<T> listAdapter, View emptyView) {
