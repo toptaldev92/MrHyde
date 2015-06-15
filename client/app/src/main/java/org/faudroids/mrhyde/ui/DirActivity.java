@@ -199,10 +199,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 				return true;
 
 			case R.id.action_preview:
-				// get root node
-				DirNode rootNode = pathNodeAdapter.getSelectedNode();
-				while (rootNode.getParent() != null) rootNode = (DirNode) rootNode.getParent();
-				startActivity(intentFactory.createPreviewIntent(repository, rootNode));
+				startActivity(intentFactory.createPreviewIntent(repository));
 				return true;
 
 			case R.id.action_mark_repository:

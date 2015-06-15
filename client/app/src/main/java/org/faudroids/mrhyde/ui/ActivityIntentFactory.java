@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import org.eclipse.egit.github.core.Repository;
-import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.NodeUtils;
 
@@ -43,10 +42,9 @@ public class ActivityIntentFactory {
 	}
 
 
-	public Intent createPreviewIntent(Repository repository, DirNode rootNode) {
+	public Intent createPreviewIntent(Repository repository) {
 		Intent previewIntent = new Intent(context, PreviewActivity.class);
 		previewIntent.putExtra(PreviewActivity.EXTRA_REPO, repository);
-		previewIntent.putExtra(PreviewActivity.EXTRA_ROOT_NODE, rootNode);
 		return previewIntent;
 	}
 

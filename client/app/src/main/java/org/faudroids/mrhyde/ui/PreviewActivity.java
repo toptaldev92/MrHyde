@@ -14,7 +14,6 @@ import android.webkit.WebViewClient;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
-import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileManagerFactory;
 import org.faudroids.mrhyde.jekyll.PreviewManager;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
@@ -35,9 +34,7 @@ public class PreviewActivity extends AbstractActionBarActivity {
 
     private static final String STATE_URL = "STATE_URL";
 
-    static final String
-            EXTRA_REPO = "EXTRA_REPO",
-            EXTRA_ROOT_NODE = "EXTRA_ROOT_NODE";
+    static final String EXTRA_REPO = "EXTRA_REPO";
 
     @Inject private PreviewManager previewManager;
 	@Inject private FileManagerFactory fileManagerFactory;
@@ -53,8 +50,8 @@ public class PreviewActivity extends AbstractActionBarActivity {
 
         // load arguments
         Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPO);
-        DirNode rootNode = (DirNode) getIntent().getSerializableExtra(EXTRA_ROOT_NODE);
 
+		// setup preview view
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -78,7 +75,7 @@ public class PreviewActivity extends AbstractActionBarActivity {
         } else {
             showSpinner();
             compositeSubscription.add(previewManager
-					.loadPreview(fileManagerFactory.createFileManager(repository), rootNode)
+					.loadPreview(fileManagerFactory.createFileManager(repository))
 					.compose(new DefaultTransformer<String>())
 					.subscribe(new Action1<String>() {
 								   @Override

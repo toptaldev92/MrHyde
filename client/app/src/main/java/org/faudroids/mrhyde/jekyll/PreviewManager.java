@@ -2,7 +2,6 @@ package org.faudroids.mrhyde.jekyll;
 
 import com.google.inject.Inject;
 
-import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileManager;
 
 import rx.Observable;
@@ -24,9 +23,9 @@ public class PreviewManager {
 	/**
 	 * Triggers a new preview and returns the preview URL.
 	 */
-	public Observable<String> loadPreview(FileManager fileManager, DirNode rootNode) {
+	public Observable<String> loadPreview(FileManager fileManager) {
 		Timber.d("starting new preview");
-		return repoDetailsFactory.createRepoDetails(fileManager, rootNode)
+		return repoDetailsFactory.createRepoDetails(fileManager )
 				.flatMap(new Func1<RepoDetails, Observable<PreviewResult>>() {
 					@Override
 					public Observable<PreviewResult> call(RepoDetails repoDetails) {

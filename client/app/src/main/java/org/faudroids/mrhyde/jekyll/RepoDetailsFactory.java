@@ -19,6 +19,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 import rx.functions.Func1;
+import rx.functions.Func2;
 import timber.log.Timber;
 
 
@@ -42,12 +43,20 @@ public class RepoDetailsFactory {
 	}
 
 
-	public Observable<RepoDetails> createRepoDetails(final FileManager fileManager, final DirNode rootNode) {
-		return fileManager.getNonBinaryDiff()
-				.flatMap(new Func1<String, Observable<RepoDetails>>() {
+	public Observable<RepoDetails> createRepoDetails(final FileManager fileManager) {
+		return Observable.zip(
+				fileManager.getTree(),
+				fileManager.getNonBinaryDiff(),
+				new Func2<DirNode, String, PartialRepoDetails>() {
 					@Override
-					public Observable<RepoDetails> call(final String nonBinaryDiff) {
-						Timber.d("non binary diff is " + nonBinaryDiff);
+					public PartialRepoDetails call(final DirNode rootNode, String nonBinaryDiff) {
+						return new PartialRepoDetails(rootNode, nonBinaryDiff);
+					}
+				})
+				.flatMap(new Func1<PartialRepoDetails, Observable<RepoDetails>>() {
+					@Override
+					public Observable<RepoDetails> call(final PartialRepoDetails partialRepoDetails) {
+						Timber.d("non binary diff is " + partialRepoDetails.nonBinaryDiff);
 						return fileManager.getChangedBinaryFiles()
 								.flatMap(new Func1<Set<String>, Observable<RepoDetails>>() {
 									@Override
@@ -57,9 +66,11 @@ public class RepoDetailsFactory {
 													@Override
 													public Observable<FileData> call(String binaryFile) {
 														Timber.d("reading binary file " + binaryFile);
-														AbstractNode node = nodeUtils.getNodeByPath(rootNode, binaryFile);
-														if (node instanceof DirNode) return Observable.empty();
-														else return fileManager.readFile((FileNode) node);
+														AbstractNode node = nodeUtils.getNodeByPath(partialRepoDetails.rootNode, binaryFile);
+														if (node instanceof DirNode)
+															return Observable.empty();
+														else
+															return fileManager.readFile((FileNode) node);
 													}
 												})
 												.flatMap(new Func1<FileData, Observable<BinaryFile>>() {
@@ -82,7 +93,7 @@ public class RepoDetailsFactory {
 																+ fileManager.getRepository().getCloneUrl().replaceFirst("https://", "");
 														return Observable.just(new RepoDetails(
 																cloneUrl,
-																nonBinaryDiff,
+																partialRepoDetails.nonBinaryDiff,
 																binaryFiles,
 																clientSecret));
 													}
@@ -91,5 +102,18 @@ public class RepoDetailsFactory {
 								});
 					}
 				});
+	}
+
+
+	private static class PartialRepoDetails {
+
+		private final DirNode rootNode;
+		private final String nonBinaryDiff;
+
+		public PartialRepoDetails(DirNode rootNode, String nonBinaryDiff) {
+			this.rootNode = rootNode;
+			this.nonBinaryDiff = nonBinaryDiff;
+		}
+
 	}
 }
