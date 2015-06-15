@@ -64,10 +64,10 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	private PostsListAdapter postsListAdapter;
 	@InjectView(R.id.item_no_posts) private View noPostsView;
 
+	@InjectView(R.id.card_drafts) private View draftsCard;
 	@InjectView(R.id.header_drafts) private View draftsHeader;
 	@InjectView(R.id.list_drafts) private ListView draftsListView;
 	private DraftsListAdapter draftsListAdapter;
-	@InjectView(R.id.item_no_drafts) private View noDraftsView;
 
 	@InjectView(R.id.card_all_files) private View allFilesView;
 
@@ -124,8 +124,13 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 								+ getResources().getQuantityString(R.plurals.drafts_count, jekyllContent.drafts.size(), jekyllContent.drafts.size()));
 
 						// setup cards
-						setupFirstThreeEntries(jekyllContent.posts, postsListAdapter, noPostsView);
-						setupFirstThreeEntries(jekyllContent.drafts, draftsListAdapter, noDraftsView);
+						setupFirstThreeEntries(jekyllContent.posts, postsListAdapter);
+						setupFirstThreeEntries(jekyllContent.drafts, draftsListAdapter);
+
+						// setup empty views
+						if (!jekyllContent.posts.isEmpty()) noPostsView.setVisibility(View.GONE);
+						if (jekyllContent.drafts.isEmpty()) draftsCard.setVisibility(View.GONE);
+
 
 					}
 				}, new ErrorActionBuilder()
@@ -227,15 +232,9 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	}
 
 
-	private <T> void setupFirstThreeEntries(List<T> items, ArrayAdapter<T> listAdapter, View emptyView) {
-		// setup list
-		if (items.isEmpty()) {
-			emptyView.setVisibility(View.VISIBLE);
-
-		} else {
-			emptyView.setVisibility(View.GONE);
-
-			// get first 3 posts
+	private <T> void setupFirstThreeEntries(List<T> items, ArrayAdapter<T> listAdapter) {
+		// get first 3 posts
+		if (!items.isEmpty()) {
 			List<T> firstItems = new ArrayList<>();
 			for (int i = 0; i < 3 && i < items.size(); ++i) {
 				firstItems.add(items.get(i));
