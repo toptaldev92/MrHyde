@@ -6,6 +6,8 @@ import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.FileNode;
 import org.roboguice.shaded.goole.common.base.Optional;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -29,6 +31,8 @@ public class JekyllManager {
 	private static final Pattern
 			POST_TITLE_PATTERN = Pattern.compile("(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)(.*)\\..*"),
 			DRAFT_TITLE_PATTERN = Pattern.compile("(.*)\\..*");
+
+	private static final DateFormat POST_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	private final FileManager fileManager;
 
@@ -91,6 +95,37 @@ public class JekyllManager {
 						Collections.sort(drafts);
 
 						return Observable.just(drafts);
+					}
+				});
+	}
+
+
+	/**
+	 * Converts a jekyll post title to the corresponding jekyll filename.
+	 */
+	public String postTitleToFilename(String title) {
+		if (!title.isEmpty()) title = "-" + title;
+		return POST_DATE_FORMAT.format(Calendar.getInstance().getTime()) + title.replaceAll(" ", "-") + ".md";
+	}
+
+
+	/**
+	 * Creates and returns a new post file (locally).
+	 */
+	public Observable<Post> createNewPost(final String title) {
+		return fileManager.getTree()
+				.flatMap(new Func1<DirNode, Observable<Post>>() {
+					@Override
+					public Observable<Post> call(DirNode rootNode) {
+						// get + create posts dir
+						AbstractNode postDir = rootNode.getEntries().get(DIR_POSTS);
+						if (postDir == null) {
+							postDir = fileManager.createNewDir(rootNode, DIR_POSTS);
+						}
+
+						// create post file
+						FileNode postNode = fileManager.createNewFile((DirNode) postDir, postTitleToFilename(title));
+						return Observable.just(new Post(title, Calendar.getInstance().getTime(), postNode));
 					}
 				});
 	}

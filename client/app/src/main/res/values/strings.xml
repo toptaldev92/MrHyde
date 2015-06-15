@@ -63,6 +63,9 @@
     <string name="all_files">All files</string>
     <string name="view_all_files">View all files</string>
 
+    <string name="filename">Filename</string>
+    <string name="your_awesome_title">Your awesome title</string>
+
     <string name="file_new_title">File Name</string>
     <string name="file_new_message">NewFile</string>
     <string name="image_new_title">Image Name</string>
