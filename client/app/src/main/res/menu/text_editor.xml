@@ -5,12 +5,6 @@
       >
 
     <item
-        android:id="@+id/action_show_line_numbers"
-        android:title="@string/action_show_line_numbers"
-        android:checkable="true"
-        />
-
-    <item
         android:id="@+id/action_undo"
         android:title="@string/action_undo"
         android:icon="@drawable/ic_undo"
@@ -22,6 +16,27 @@
         android:title="@string/action_redo"
         android:icon="@drawable/ic_redo"
         app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:id="@+id/action_commit"
+        android:icon="@drawable/ic_commit"
+        android:title="@string/action_commit"
+        app:showAsAction="never"
+        />
+
+    <item
+        android:id="@+id/action_preview"
+        android:icon="@drawable/ic_preview"
+        android:title="@string/action_preview"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:id="@+id/action_show_line_numbers"
+        android:title="@string/action_show_line_numbers"
+        android:checkable="true"
+        app:showAsAction="never"
         />
 
 </menu>

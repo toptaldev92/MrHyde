@@ -3,6 +3,7 @@ package org.faudroids.mrhyde.ui;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
@@ -61,12 +62,16 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 			STATE_EDIT_MODE = "STATE_EDIT_MODE",
 			STATE_UNDO_REDO = "STATE_UNDO_REDO";
 
+	private static final int
+			REQUEST_COMMIT = 42;
+
 	private static final String
 			PREFS_NAME = TextEditorActivity.class.getSimpleName();
 
 	private static final String
 			KEY_SHOW_LINE_NUMBERS = "KEY_SHOW_LINE_NUMBERS";
 
+	@Inject private ActivityIntentFactory intentFactory;
 	@Inject private FileManagerFactory fileManagerFactory;
 	@Inject private InputMethodManager inputMethodManager;
 
@@ -77,6 +82,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	@InjectView(R.id.line_numbers) private TextView numLinesTextView;
 
 	@Inject private NodeUtils nodeUtils;
+	private Repository repository;
 	private FileManager fileManager;
 	private FileData fileData; // file currently being edited
 	private boolean showingLineNumbers;
@@ -87,7 +93,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		super.onCreate(savedInstanceState);
 		// load arguments
 		final boolean isNewFile = getIntent().getBooleanExtra(EXTRA_IS_NEW_FILE, false);
-		final Repository repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
+		repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		fileManager = fileManagerFactory.createFileManager(repository);
 
 		// hide line numbers by default
@@ -106,10 +112,12 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		// setup line numbers
 		editText.addTextChangedListener(new TextWatcher() {
 			@Override
-			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+			}
 
 			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+			}
 
 			@Override
 			public void afterTextChanged(Editable s) {
@@ -133,38 +141,13 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 					fileData = (FileData) savedInstanceState.getSerializable(STATE_FILE_DATA);
 					boolean startEditMode = savedInstanceState.getBoolean(STATE_EDIT_MODE);
 					String restoredText = savedInstanceState.getString(STATE_TEXT);
-					setupContent(startEditMode, restoredText);
+					showContent(startEditMode, restoredText);
 					undoRedoEditText.restoreInstanceState(savedInstanceState, STATE_UNDO_REDO);
 				}
 			});
 
 		} else {
-			showSpinner();
-			compositeSubscription.add(fileManager.getTree()
-					.flatMap(new Func1<DirNode, Observable<FileData>>() {
-						@Override
-						public Observable<FileData> call(DirNode rootNode) {
-							FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
-
-							if (!isNewFile) {
-								return fileManager.readFile(node);
-							} else {
-								return Observable.just(new FileData(node, new byte[0]));
-							}
-						}
-					})
-					.compose(new DefaultTransformer<FileData>())
-					.subscribe(new Action1<FileData>() {
-						@Override
-						public void call(FileData file) {
-							hideSpinner();
-							TextEditorActivity.this.fileData = file;
-							setupContent(isNewFile, null);
-						}
-					}, new ErrorActionBuilder()
-							.add(new DefaultErrorAction(this, "failed to get file content"))
-							.add(new HideSpinnerAction(this))
-							.build()));
+			loadContent(isNewFile);
 		}
 
 	}
@@ -235,8 +218,29 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 				}
 				return true;
 
+			case R.id.action_commit:
+				saveFile();
+				startActivityForResult(intentFactory.createCommitIntent(repository), REQUEST_COMMIT);
+				return true;
+
+			case R.id.action_preview:
+				saveFile();
+				startActivity(intentFactory.createPreviewIntent(repository));
+				return true;
+
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch (requestCode) {
+			case REQUEST_COMMIT:
+				if (resultCode != RESULT_OK) return;
+				if (isEditMode()) stopEditMode();
+				loadContent(false);
+		}
 	}
 
 
@@ -245,8 +249,8 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		if (isEditMode()) {
 			if (!isDirty()) {
 				returnResult();
-			} else {
 
+			} else {
 				new AlertDialog.Builder(this)
 						.setTitle(R.string.save_title)
 						.setMessage(R.string.save_message)
@@ -272,7 +276,37 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	}
 
 
-	private void setupContent(boolean startEditMode, String restoredText) {
+	private void loadContent(final boolean isNewFile) {
+		showSpinner();
+		compositeSubscription.add(fileManager.getTree()
+				.flatMap(new Func1<DirNode, Observable<FileData>>() {
+					@Override
+					public Observable<FileData> call(DirNode rootNode) {
+						FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
+
+						if (!isNewFile) {
+							return fileManager.readFile(node);
+						} else {
+							return Observable.just(new FileData(node, new byte[0]));
+						}
+					}
+				})
+				.compose(new DefaultTransformer<FileData>())
+				.subscribe(new Action1<FileData>() {
+					@Override
+					public void call(FileData file) {
+						hideSpinner();
+						TextEditorActivity.this.fileData = file;
+						showContent(isNewFile, null);
+					}
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(this, "failed to get file content"))
+						.add(new HideSpinnerAction(this))
+						.build()));
+	}
+
+
+	private void showContent(boolean startEditMode, String restoredText) {
 		setTitle(fileData.getFileNode().getPath());
 		try {
 			// set text
