@@ -195,9 +195,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 			case R.id.action_commit:
-				Intent commitIntent = new Intent(this, CommitActivity.class);
-				commitIntent.putExtra(CommitActivity.EXTRA_REPOSITORY, repository);
-				startActivityForResult(commitIntent, REQUEST_COMMIT);
+				startActivityForResult(intentFactory.createCommitIntent(repository), REQUEST_COMMIT);
 				return true;
 
 			case R.id.action_preview:

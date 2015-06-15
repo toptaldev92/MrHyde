@@ -51,6 +51,13 @@ public class ActivityIntentFactory {
 	}
 
 
+	public Intent createCommitIntent(Repository repository) {
+		Intent commitIntent = new Intent(context, CommitActivity.class);
+		commitIntent.putExtra(CommitActivity.EXTRA_REPOSITORY, repository);
+		return commitIntent;
+	}
+
+
 	private Bundle createFileExtras(Repository repository, FileNode fileNode) {
 		Bundle extras = new Bundle();
 		extras.putSerializable(ImageViewerActivity.EXTRA_REPOSITORY, repository);
