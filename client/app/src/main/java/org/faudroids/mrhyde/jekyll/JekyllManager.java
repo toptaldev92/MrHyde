@@ -131,6 +131,14 @@ public class JekyllManager {
 	}
 
 
+	/**
+	 * Removes all local changes and clears all caches..
+	 */
+	public void resetRepository() {
+		fileManager.resetRepository();
+	}
+
+
 	private Optional<Post> parsePost(FileNode node) {
 		String fileName = node.getPath();
 

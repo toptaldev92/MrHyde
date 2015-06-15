@@ -11,6 +11,9 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -110,42 +113,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		draftsListView.setAdapter(draftsListAdapter);
 
 		// load content
-		showSpinner();
-		compositeSubscription.add(Observable.zip(
-				jekyllManager.getAllPosts(),
-				jekyllManager.getAllDrafts(),
-				new Func2<List<Post>, List<Draft>, JekyllContent>() {
-					@Override
-					public JekyllContent call(List<Post> posts, List<Draft> drafts) {
-						return new JekyllContent(posts, drafts);
-					}
-				})
-				.compose(new DefaultTransformer<JekyllContent>())
-				.subscribe(new Action1<JekyllContent>() {
-					@Override
-					public void call(JekyllContent jekyllContent) {
-						hideSpinner();
-
-						// setup header
-						postDraftCountView.setText(getString(
-								R.string.post_darft_count,
-								getResources().getQuantityString(R.plurals.posts_count, jekyllContent.posts.size(), jekyllContent.posts.size()),
-								getResources().getQuantityString(R.plurals.drafts_count, jekyllContent.drafts.size(), jekyllContent.drafts.size())));
-
-						// setup cards
-						setupFirstThreeEntries(jekyllContent.posts, postsListAdapter);
-						setupFirstThreeEntries(jekyllContent.drafts, draftsListAdapter);
-
-						// setup empty views
-						if (!jekyllContent.posts.isEmpty()) noPostsView.setVisibility(View.GONE);
-						if (jekyllContent.drafts.isEmpty()) draftsCard.setVisibility(View.GONE);
-
-
-					}
-				}, new ErrorActionBuilder()
-						.add(new DefaultErrorAction(RepoOverviewActivity.this, "failed to load posts"))
-						.add(new HideSpinnerAction(RepoOverviewActivity.this))
-						.build()));
+		loadJekyllContent();
 
 		// setup posts clicks
 		postsHeader.setOnClickListener(new View.OnClickListener() {
@@ -261,6 +229,46 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	}
 
 
+	private void loadJekyllContent() {
+		showSpinner();
+		compositeSubscription.add(Observable.zip(
+				jekyllManager.getAllPosts(),
+				jekyllManager.getAllDrafts(),
+				new Func2<List<Post>, List<Draft>, JekyllContent>() {
+					@Override
+					public JekyllContent call(List<Post> posts, List<Draft> drafts) {
+						return new JekyllContent(posts, drafts);
+					}
+				})
+				.compose(new DefaultTransformer<JekyllContent>())
+				.subscribe(new Action1<JekyllContent>() {
+					@Override
+					public void call(JekyllContent jekyllContent) {
+						hideSpinner();
+
+						// setup header
+						postDraftCountView.setText(getString(
+								R.string.post_darft_count,
+								getResources().getQuantityString(R.plurals.posts_count, jekyllContent.posts.size(), jekyllContent.posts.size()),
+								getResources().getQuantityString(R.plurals.drafts_count, jekyllContent.drafts.size(), jekyllContent.drafts.size())));
+
+						// setup cards
+						setupFirstThreeEntries(jekyllContent.posts, postsListAdapter);
+						setupFirstThreeEntries(jekyllContent.drafts, draftsListAdapter);
+
+						// setup empty views
+						if (!jekyllContent.posts.isEmpty()) noPostsView.setVisibility(View.GONE);
+						if (jekyllContent.drafts.isEmpty()) draftsCard.setVisibility(View.GONE);
+
+
+					}
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(RepoOverviewActivity.this, "failed to load posts"))
+						.add(new HideSpinnerAction(RepoOverviewActivity.this))
+						.build()));
+	}
+
+
 	private <T> void setupFirstThreeEntries(List<T> items, ArrayAdapter<T> listAdapter) {
 		// get first 3 posts
 		if (!items.isEmpty()) {
@@ -323,6 +331,44 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				})
 				.setView(view)
 				.show();
+	}
+
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.repo_overview, menu);
+		return true;
+	}
+
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+			case R.id.action_commit:
+				startActivity(intentFactory.createCommitIntent(repository));
+				return true;
+
+			case R.id.action_preview:
+				startActivity(intentFactory.createPreviewIntent(repository));
+				return true;
+
+			case R.id.action_discard_changes:
+				new AlertDialog.Builder(this)
+						.setTitle(R.string.discard_changes_title)
+						.setMessage(R.string.discard_changes_message)
+						.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								jekyllManager.resetRepository();
+								loadJekyllContent();
+							}
+						})
+						.setNegativeButton(android.R.string.cancel, null)
+						.show();
+				return true;
+		}
+		return super.onOptionsItemSelected(item);
 	}
 
 
