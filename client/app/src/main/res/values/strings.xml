@@ -51,6 +51,7 @@
         <item quantity="one">1 draft</item>
         <item quantity="other">%d drafts</item>
     </plurals>
+    <string name="post_darft_count">%1$s &#8226; %2$s</string>
     <string name="posts">Posts</string>
     <string name="post">Post</string>
     <string name="new_post">New post</string>

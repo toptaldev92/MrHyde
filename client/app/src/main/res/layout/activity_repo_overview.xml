@@ -55,7 +55,7 @@
                     android:layout_below="@id/image_overview_background"
                     android:layout_marginLeft="100dp"
                     android:padding="15dp"
-                    android:text="10 posts - 5 drafts"
+                    android:text="10 posts &#8226; 5 drafts"
                     />
 
                 <ImageButton

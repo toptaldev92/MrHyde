@@ -122,10 +122,10 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 						hideSpinner();
 
 						// setup header
-						postDraftCountView.setText(
-								getResources().getQuantityString(R.plurals.posts_count, jekyllContent.posts.size(), jekyllContent.posts.size())
-								+ " - "
-								+ getResources().getQuantityString(R.plurals.drafts_count, jekyllContent.drafts.size(), jekyllContent.drafts.size()));
+						postDraftCountView.setText(getString(
+								R.string.post_darft_count,
+								getResources().getQuantityString(R.plurals.posts_count, jekyllContent.posts.size(), jekyllContent.posts.size()),
+								getResources().getQuantityString(R.plurals.drafts_count, jekyllContent.drafts.size(), jekyllContent.drafts.size())));
 
 						// setup cards
 						setupFirstThreeEntries(jekyllContent.posts, postsListAdapter);
