@@ -11,7 +11,8 @@
 
     <dimen name="overview_owner_icon_size_min">40dp</dimen>
     <dimen name="overview_owner_icon_size_max">80dp</dimen>
-    <dimen name="overview_owner_icon_margin_top">60dp</dimen>
+    <dimen name="overview_owner_icon_margin_top">65dp</dimen>
+    <dimen name="overview_owner_icon_margin_top_addition">8dp</dimen>
     <dimen name="overview_owner_icon_margin_left">15dp</dimen>
 
     <dimen name="list_horizontal_margin">0dp</dimen>

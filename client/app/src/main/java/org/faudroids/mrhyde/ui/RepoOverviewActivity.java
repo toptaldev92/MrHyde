@@ -192,11 +192,12 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				float maxSize = getResources().getDimension(R.dimen.overview_owner_icon_size_max);
 				float minLeftMargin = getResources().getDimension(R.dimen.overview_owner_icon_margin_left);
 				float minTopMargin = getResources().getDimension(R.dimen.overview_owner_icon_margin_top);
+				float topMarginAddition = getResources().getDimension(R.dimen.overview_owner_icon_margin_top_addition);
 				float size = (minSize + (maxSize - minSize) * (1 - ratio));
 				params.height = (int) size;
 				params.width = (int) size;
 				params.leftMargin = (int) (minLeftMargin + (maxSize - size) / 2); // keep left margin stable
-				params.topMargin = (int) (minTopMargin + (maxSize - size)); // moves icon down while resizing
+				params.topMargin = (int) (minTopMargin + (maxSize - size) + topMarginAddition * ratio); // moves icon down while resizing
 				repoOwnerImage.setLayoutParams(params);
 			}
 		});
