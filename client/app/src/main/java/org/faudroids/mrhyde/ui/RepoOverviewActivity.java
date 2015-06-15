@@ -246,6 +246,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 					public void call(JekyllContent jekyllContent) {
 						hideSpinner();
 						actionBarDrawable.setAlpha(0); // delay until spinner is hidden
+						invalidateOptionsMenu(); // re-enable options menu
 
 						// setup header
 						postDraftCountView.setText(getString(
@@ -340,6 +341,18 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.repo_overview, menu);
 		return true;
+	}
+
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		// hide menu during loading
+		if (isSpinnerVisible()) {
+			menu.findItem(R.id.action_commit).setVisible(false);
+			menu.findItem(R.id.action_preview).setVisible(false);
+			menu.findItem(R.id.action_discard_changes).setVisible(false);
+		}
+		return super.onPrepareOptionsMenu(menu);
 	}
 
 

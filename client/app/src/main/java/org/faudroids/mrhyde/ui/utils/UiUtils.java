@@ -40,6 +40,11 @@ public class UiUtils {
 	}
 
 
+	public boolean isSpinnerVisible(View spinnerContainerView) {
+		return spinnerContainerView.getVisibility() == View.VISIBLE;
+	}
+
+
 	/**
 	 * Creates a simple alert dialog with one {@link EditText} for getting user input.
 	 * @param titleResource Title of dialog.

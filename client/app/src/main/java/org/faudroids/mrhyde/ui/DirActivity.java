@@ -172,8 +172,8 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 			item.setTitle(getString(R.string.action_unmark_repository));
 		else item.setTitle(getString(R.string.action_mark_repository));
 
-		// check if content has been loaded, if not disable parts of the options menu
-		if (pathNodeAdapter.getSelectedNode() == null) {
+		// hide menu during loading
+		if (isSpinnerVisible()) {
 			menu.findItem(R.id.action_commit).setVisible(false);
 			menu.findItem(R.id.action_preview).setVisible(false);
 			menu.findItem(R.id.action_discard_changes).setVisible(false);
