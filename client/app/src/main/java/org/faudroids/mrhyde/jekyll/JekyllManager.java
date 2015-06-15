@@ -1,11 +1,16 @@
 package org.faudroids.mrhyde.jekyll;
 
+import android.content.Context;
+
+import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.AbstractNode;
 import org.faudroids.mrhyde.git.DirNode;
+import org.faudroids.mrhyde.git.FileData;
 import org.faudroids.mrhyde.git.FileManager;
 import org.faudroids.mrhyde.git.FileNode;
 import org.roboguice.shaded.goole.common.base.Optional;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -34,9 +39,11 @@ public class JekyllManager {
 
 	private static final DateFormat POST_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
+	private final Context context;
 	private final FileManager fileManager;
 
-	JekyllManager(FileManager fileManager) {
+	JekyllManager(Context context, FileManager fileManager) {
+		this.context = context;
 		this.fileManager = fileManager;
 	}
 
@@ -117,15 +124,25 @@ public class JekyllManager {
 				.flatMap(new Func1<DirNode, Observable<Post>>() {
 					@Override
 					public Observable<Post> call(DirNode rootNode) {
-						// get + create posts dir
-						AbstractNode postDir = rootNode.getEntries().get(DIR_POSTS);
-						if (postDir == null) {
-							postDir = fileManager.createNewDir(rootNode, DIR_POSTS);
-						}
+						try {
+							// get + create posts dir
+							AbstractNode postDir = rootNode.getEntries().get(DIR_POSTS);
+							if (postDir == null) {
+								postDir = fileManager.createNewDir(rootNode, DIR_POSTS);
+							}
 
-						// create post file
-						FileNode postNode = fileManager.createNewFile((DirNode) postDir, postTitleToFilename(title));
-						return Observable.just(new Post(title, Calendar.getInstance().getTime(), postNode));
+							// create post file
+							FileNode postNode = fileManager.createNewFile((DirNode) postDir, postTitleToFilename(title));
+
+							// setup default front matter
+							FileData data = new FileData(postNode, context.getString(R.string.default_front_matter, title).getBytes());
+							fileManager.writeFile(data);
+
+							return Observable.just(new Post(title, Calendar.getInstance().getTime(), postNode));
+
+						} catch (IOException ioe) {
+							return Observable.error(ioe);
+						}
 					}
 				});
 	}

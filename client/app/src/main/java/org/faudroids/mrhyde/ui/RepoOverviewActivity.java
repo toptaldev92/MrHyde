@@ -323,7 +323,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 								.subscribe(new Action1<Post>() {
 									@Override
 									public void call(Post post) {
-										Intent newPostIntent = intentFactory.createTextEditorIntent(repository, post.getFileNode(), true);
+										Intent newPostIntent = intentFactory.createTextEditorIntent(repository, post.getFileNode(), false);
 										startActivity(newPostIntent);
 									}
 								}, new ErrorActionBuilder()
