@@ -47,14 +47,29 @@
 
                 <TextView
                     android:id="@+id/text_post_count"
+                    style="@style/TextSecondary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="10 posts - 5 drafts"
                     android:layout_alignParentBottom="true"
                     android:layout_alignParentLeft="true"
+                    android:layout_below="@id/image_overview_background"
                     android:layout_marginLeft="100dp"
                     android:padding="15dp"
-                    style="@style/TextSecondary"
+                    android:text="10 posts - 5 drafts"
+                    />
+
+                <ImageButton
+                    android:id="@+id/button_favourite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/heart_selector"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingTop="15dp"
+                    android:paddingBottom="15dp"
                     />
 
             </RelativeLayout>

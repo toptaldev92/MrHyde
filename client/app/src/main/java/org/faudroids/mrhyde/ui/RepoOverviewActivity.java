@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -23,6 +24,7 @@ import com.squareup.picasso.Picasso;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.jekyll.Draft;
 import org.faudroids.mrhyde.jekyll.JekyllManager;
 import org.faudroids.mrhyde.jekyll.JekyllManagerFactory;
@@ -58,6 +60,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	@InjectView(R.id.image_overview_background) private ImageView overviewBackgroundImage;
 	@InjectView(R.id.image_repo_owner) private ImageView repoOwnerImage;
 	@InjectView(R.id.text_post_count) private TextView postDraftCountView;
+	@InjectView(R.id.button_favourite) private ImageButton favouriteButton;
 
 	@InjectView(R.id.header_posts) private View postsHeader;
 	@InjectView(R.id.list_posts) private ListView postsListView;
@@ -78,6 +81,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
 	private Repository repository;
 	@Inject private JekyllManagerFactory jekyllManagerFactory;
+	@Inject private RepositoryManager repositoryManager;
 	private JekyllManager jekyllManager;
 
 	@Inject private ActivityIntentFactory intentFactory;
@@ -229,6 +233,25 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				.resizeDimen(R.dimen.overview_owner_icon_size_max, R.dimen.overview_owner_icon_size_max)
 				.placeholder(R.drawable.octocat_black)
 				.into(repoOwnerImage);
+
+		// setup favourite button
+		if (repositoryManager.isRepositoryFavourite(repository)) {
+			favouriteButton.setSelected(true);
+		}
+		favouriteButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (favouriteButton.isSelected()) {
+					repositoryManager.unmarkRepositoryAsFavourite(repository);
+					favouriteButton.setSelected(false);
+					Toast.makeText(RepoOverviewActivity.this, getString(R.string.unmarked_toast), Toast.LENGTH_SHORT).show();
+				} else {
+					repositoryManager.markRepositoryAsFavourite(repository);
+					favouriteButton.setSelected(true);
+					Toast.makeText(RepoOverviewActivity.this, getString(R.string.marked_toast), Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
 	}
 
 
