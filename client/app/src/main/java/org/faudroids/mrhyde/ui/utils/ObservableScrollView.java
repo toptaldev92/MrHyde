@@ -30,6 +30,12 @@ public class ObservableScrollView extends ScrollView {
 		}
 	}
 
+	@Override
+	public boolean overScrollBy(int deltaX, int deltaY, int scrollX, int scrollY, int scrollRangeX, int scrollRangeY, int maxOverScrollX, int maxOverScrollY, boolean isTouchEvent) {
+		// disables over scroll
+		return super.overScrollBy(deltaX, deltaY, scrollX, scrollY, scrollRangeX, scrollRangeY, 0, 0, isTouchEvent);
+	}
+
 	public void setOnScrollListener(OnScrollListener listener) {
 		this.listener = listener;
 	}
