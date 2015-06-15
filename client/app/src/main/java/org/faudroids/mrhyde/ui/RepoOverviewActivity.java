@@ -69,6 +69,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	@InjectView(R.id.image_repo_owner) private ImageView repoOwnerImage;
 	@InjectView(R.id.text_post_count) private TextView postDraftCountView;
 	@InjectView(R.id.button_favourite) private ImageButton favouriteButton;
+	private Drawable actionBarDrawable;
 
 	@InjectView(R.id.header_posts) private View postsHeader;
 	@InjectView(R.id.list_posts) private ListView postsListView;
@@ -174,8 +175,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		});
 
 		// setup scroll partially hides top image
-		final Drawable actionBarDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
-		actionBarDrawable.setAlpha(0);
+		actionBarDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
 		getSupportActionBar().setBackgroundDrawable(actionBarDrawable);
 		scrollView.setOnScrollListener(new ObservableScrollView.OnScrollListener() {
 			@Override
@@ -245,6 +245,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 					@Override
 					public void call(JekyllContent jekyllContent) {
 						hideSpinner();
+						actionBarDrawable.setAlpha(0); // delay until spinner is hidden
 
 						// setup header
 						postDraftCountView.setText(getString(
