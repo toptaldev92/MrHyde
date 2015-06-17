@@ -4,16 +4,16 @@
       >
 
     <item
-        android:id="@+id/action_commit"
-        android:icon="@drawable/ic_commit"
-        android:title="@string/action_commit"
-        app:showAsAction="never"
-        />
-
-    <item
         android:id="@+id/action_preview"
         android:icon="@drawable/ic_preview"
         android:title="@string/action_preview"
+        app:showAsAction="ifRoom"
+        />
+
+    <item
+        android:id="@+id/action_commit"
+        android:icon="@drawable/ic_commit"
+        android:title="@string/action_commit"
         app:showAsAction="ifRoom"
         />
 
