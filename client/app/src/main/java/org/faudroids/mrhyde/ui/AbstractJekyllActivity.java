@@ -4,12 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 
 import com.getbase.floatingactionbutton.AddFloatingActionButton;
 
@@ -130,14 +128,6 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 	abstract class AbstractAdapter extends RecyclerView.Adapter<AbstractAdapter.AbstractViewHolder> {
 
 		private final List<T> itemsList = new ArrayList<>();
-
-		@Override
-		public AbstractViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-			View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_overview_post, parent, false);
-			return doOnCreateViewHolder(view);
-		}
-
-		protected abstract AbstractViewHolder doOnCreateViewHolder(View view);
 
 		@Override
 		public void onBindViewHolder(AbstractViewHolder holder, int position) {

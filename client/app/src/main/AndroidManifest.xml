@@ -33,6 +33,9 @@
             android:name=".ui.PostsActivity"
             />
         <activity
+            android:name=".ui.DraftsActivity"
+            />
+        <activity
             android:name=".ui.DirActivity"
             />
         <activity

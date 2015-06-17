@@ -32,7 +32,15 @@ public class ActivityIntentFactory {
 		extras.putSerializable(PostsActivity.EXTRA_REPOSITORY, repository);
 		intent.putExtras(extras);
 		return intent;
+	}
 
+
+	public Intent createDraftsIntent(Repository repository) {
+		Intent intent = new Intent(context, DraftsActivity.class);
+		Bundle extras = new Bundle();
+		extras.putSerializable(DraftsActivity.EXTRA_REPOSITORY, repository);
+		intent.putExtras(extras);
+		return intent;
 	}
 
 

@@ -1,6 +1,8 @@
 package org.faudroids.mrhyde.ui;
 
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.Post;
@@ -50,7 +52,8 @@ public class PostsActivity extends AbstractJekyllActivity<Post> {
 	public class PostsAdapter extends AbstractAdapter {
 
 		@Override
-		protected AbstractViewHolder doOnCreateViewHolder(View view) {
+		public AbstractViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+			View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_overview_post, parent, false);
 			return new PostViewHolder(view);
 		}
 

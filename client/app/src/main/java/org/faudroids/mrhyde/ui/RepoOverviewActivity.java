@@ -122,7 +122,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		draftsHeader.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(RepoOverviewActivity.this, "Dummy", Toast.LENGTH_SHORT).show();
+				startActivity(intentFactory.createDraftsIntent(repository));
 			}
 		});
 
@@ -159,6 +159,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			@Override
 			public void onClick(View v) {
 				addButton.collapse();
+				jekyllUiUtils.showNewDraftDialog();
 			}
 		});
 		tintView.setOnClickListener(new View.OnClickListener() {

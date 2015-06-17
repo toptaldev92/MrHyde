@@ -136,4 +136,9 @@ public class JekyllUiUtils {
 
 	}
 
+
+	public void showNewDraftDialog() {
+		// TODO
+	}
+
 }

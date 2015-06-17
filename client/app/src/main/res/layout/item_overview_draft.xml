@@ -6,5 +6,6 @@
     android:layout_height="wrap_content"
     android:padding="15dp"
     android:text="Some awesome title here"
+    android:background="@android:color/white"
     style="@style/TextLarge"
     />
