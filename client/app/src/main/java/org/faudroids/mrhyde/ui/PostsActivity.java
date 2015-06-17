@@ -11,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.getbase.floatingactionbutton.AddFloatingActionButton;
+
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.JekyllManager;
@@ -40,9 +42,12 @@ public final class PostsActivity extends AbstractActionBarActivity {
 
 	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
+
 	@InjectView(R.id.list) private RecyclerView recyclerView;
 	private PostsAdapter postsAdapter;
 	@Inject JekyllUiUtils jekyllUiUtils;
+
+	@InjectView(R.id.add) AddFloatingActionButton addButton;
 
 	private Repository repository;
 	@Inject private JekyllManagerFactory jekyllManagerFactory;
@@ -68,6 +73,14 @@ public final class PostsActivity extends AbstractActionBarActivity {
 		recyclerView.setLayoutManager(layoutManager);
 		recyclerView.setAdapter(postsAdapter);
 		recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
+
+		// setpu add
+		addButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				jekyllUiUtils.showNewPostDialog(jekyllManager, repository);
+			}
+		});
 
 		// load posts
 		loadPosts();
