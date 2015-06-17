@@ -4,7 +4,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -38,13 +37,13 @@ import org.faudroids.mrhyde.jekyll.JekyllManager;
 import org.faudroids.mrhyde.jekyll.JekyllManagerFactory;
 import org.faudroids.mrhyde.jekyll.Post;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
+import org.faudroids.mrhyde.ui.utils.JekyllUiUtils;
 import org.faudroids.mrhyde.ui.utils.ObservableScrollView;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
 import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -59,9 +58,6 @@ import rx.functions.Func2;
 @ContentView(R.layout.activity_repo_overview)
 public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
-	private static final DateFormat DATE_FORMAT = DateFormat.getDateInstance();
-	private static final Typeface SANS_SERIF_LIGHT = Typeface.create("sans-serif-light", Typeface.NORMAL);
-
 	public static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
 	@InjectView(R.id.scroll_view) private ObservableScrollView scrollView;
@@ -71,6 +67,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	@InjectView(R.id.button_favourite) private ImageButton favouriteButton;
 	private Drawable actionBarDrawable;
 
+	@Inject JekyllUiUtils jekyllUiUtils;
 	@InjectView(R.id.header_posts) private View postsHeader;
 	@InjectView(R.id.list_posts) private ListView postsListView;
 	private PostsListAdapter postsListAdapter;
@@ -120,7 +117,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		postsHeader.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				Toast.makeText(RepoOverviewActivity.this, "Dummy", Toast.LENGTH_SHORT).show();
+				startActivity(intentFactory.createPostsIntent(repository));
 			}
 		});
 
@@ -399,26 +396,10 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			final Post post = getItem(position);
 
-			// create view
+			// create and fill view
 			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View view = inflater.inflate(R.layout.item_overview_post, parent, false);
-
-			// set title
-			TextView titleView = (TextView) view.findViewById(R.id.text_title);
-			titleView.setText(post.getTitle());
-			titleView.setTypeface(SANS_SERIF_LIGHT);
-
-			// set date
-			TextView dateView = (TextView) view.findViewById(R.id.text_date);
-			dateView.setText(DATE_FORMAT.format(post.getDate()));
-
-			// set on click
-			view.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					startActivity(intentFactory.createTextEditorIntent(repository, post.getFileNode(), false));
-				}
-			});
+			jekyllUiUtils.setPostOverview(view, post, repository);
 
 			return view;
 		}
@@ -437,22 +418,10 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		public View getView(int position, View convertView, ViewGroup parent) {
 			final Draft draft = getItem(position);
 
-			// create view
+			// create and fill view
 			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			View view = inflater.inflate(R.layout.item_overview_draft, parent, false);
-
-			// set title
-			TextView titleView = (TextView) view.findViewById(R.id.text_title);
-			titleView.setText(draft.getTitle());
-			titleView.setTypeface(SANS_SERIF_LIGHT);
-
-			// set on click
-			view.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					startActivity(intentFactory.createTextEditorIntent(repository, draft.getFileNode(), false));
-				}
-			});
+			jekyllUiUtils.setDraftOverview(view, draft, repository);
 
 			return view;
 		}

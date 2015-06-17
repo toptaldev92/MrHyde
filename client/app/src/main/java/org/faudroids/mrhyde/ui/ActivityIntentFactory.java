@@ -26,6 +26,16 @@ public class ActivityIntentFactory {
 	}
 
 
+	public Intent createPostsIntent(Repository repository) {
+		Intent intent = new Intent(context, PostsActivity.class);
+		Bundle extras = new Bundle();
+		extras.putSerializable(PostsActivity.EXTRA_REPOSITORY, repository);
+		intent.putExtras(extras);
+		return intent;
+
+	}
+
+
 	public Intent createTextEditorIntent(Repository repository, FileNode fileNode, boolean isNewFile) {
 		Intent intent = new Intent(context, TextEditorActivity.class);
 		Bundle extras = createFileExtras(repository, fileNode);

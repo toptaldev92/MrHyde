@@ -30,6 +30,9 @@
             android:theme="@style/AppTheme.Overlay"
             />
         <activity
+            android:name=".ui.PostsActivity"
+            />
+        <activity
             android:name=".ui.DirActivity"
             />
         <activity
