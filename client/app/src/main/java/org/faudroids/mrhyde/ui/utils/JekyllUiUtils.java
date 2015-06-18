@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.jekyll.Draft;
 import org.faudroids.mrhyde.jekyll.JekyllManager;
 import org.faudroids.mrhyde.jekyll.Post;
@@ -27,6 +28,7 @@ import java.text.DateFormat;
 
 import javax.inject.Inject;
 
+import rx.Observable;
 import rx.functions.Action1;
 
 /**
@@ -84,18 +86,58 @@ public class JekyllUiUtils {
 
 
 	public void showNewPostDialog(final JekyllManager jekyllManager, final Repository repository) {
+		showNewJekyllContentDialog(new NewJekyllContentStrategy<Post>(R.string.new_post) {
+			@Override
+			public String formatTitle(String title) {
+				return jekyllManager.postTitleToFilename(title);
+			}
+
+			@Override
+			public FileNode getFileNode(Post item) {
+				return item.getFileNode();
+			}
+
+			@Override
+			public Observable<Post> createNewItem(String title) {
+				return jekyllManager.createNewPost(title);
+			}
+		}, repository);
+	}
+
+
+	public void showNewDraftDialog(final JekyllManager jekyllManager, Repository repository) {
+		showNewJekyllContentDialog(new NewJekyllContentStrategy<Draft>(R.string.new_draft) {
+			@Override
+			public String formatTitle(String title) {
+				return jekyllManager.draftTitleToFilename(title);
+			}
+
+			@Override
+			public FileNode getFileNode(Draft item) {
+				return item.getFileNode();
+			}
+
+			@Override
+			public Observable<Draft> createNewItem(String title) {
+				return jekyllManager.createNewDraft(title);
+			}
+		}, repository);
+	}
+
+
+	public <T> void showNewJekyllContentDialog(final NewJekyllContentStrategy<T> strategy, final Repository repository) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context)
-				.setTitle(R.string.new_post)
+				.setTitle(strategy.titleResource)
 				.setNegativeButton(android.R.string.cancel, null);
 
 		// create custom dialog view
 		LayoutInflater inflater = LayoutInflater.from(context);
-		View view = inflater.inflate(R.layout.dialog_new_post, null, false);
+		View view = inflater.inflate(R.layout.dialog_new_post_or_draft, null, false);
 
 		// update filename view when title changes
 		final EditText titleView = (EditText) view.findViewById(R.id.input);
 		final TextView fileNameView = (TextView) view.findViewById(R.id.text_filename);
-		fileNameView.setText(jekyllManager.postTitleToFilename(context.getString(R.string.your_awesome_title)));
+		fileNameView.setText(strategy.formatTitle(context.getString(R.string.your_awesome_title)));
 		titleView.addTextChangedListener(new TextWatcher() {
 			@Override
 			public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -106,8 +148,8 @@ public class JekyllUiUtils {
 			}
 
 			@Override
-			public void onTextChanged(CharSequence postTitle, int start, int before, int count) {
-				fileNameView.setText(jekyllManager.postTitleToFilename(postTitle.toString()));
+			public void onTextChanged(CharSequence draftTitle, int start, int before, int count) {
+				fileNameView.setText(strategy.formatTitle(draftTitle.toString()));
 			}
 		});
 
@@ -118,27 +160,36 @@ public class JekyllUiUtils {
 					public void onClick(DialogInterface dialog, int which) {
 						// open editor with new post file
 						// no need for a spinner because content has been downloaded previously
-						jekyllManager.createNewPost(titleView.getText().toString())
-								.compose(new DefaultTransformer<Post>())
-								.subscribe(new Action1<Post>() {
+						strategy.createNewItem(titleView.getText().toString())
+								.compose(new DefaultTransformer<T>())
+								.subscribe(new Action1<T>() {
 									@Override
-									public void call(Post post) {
-										Intent newPostIntent = intentFactory.createTextEditorIntent(repository, post.getFileNode(), false);
-										context.startActivity(newPostIntent);
+									public void call(T item) {
+										Intent newContentIntent = intentFactory.createTextEditorIntent(repository, strategy.getFileNode(item), false);
+										context.startActivity(newContentIntent);
 									}
 								}, new ErrorActionBuilder()
-										.add(new DefaultErrorAction(context, "failed to create post"))
+										.add(new DefaultErrorAction(context, "failed to create jekyll content"))
 										.build());
 					}
 				})
 				.setView(view)
 				.show();
-
 	}
 
 
-	public void showNewDraftDialog() {
-		// TODO
+	private static abstract class NewJekyllContentStrategy<T> {
+
+		private final int titleResource;
+
+		public NewJekyllContentStrategy(int titleResource) {
+			this.titleResource = titleResource;
+		}
+
+		public abstract String formatTitle(String title);
+		public abstract FileNode getFileNode(T item);
+		public abstract Observable<T> createNewItem(String title);
+
 	}
 
 }

@@ -112,7 +112,15 @@ public class JekyllManager {
 	 */
 	public String postTitleToFilename(String title) {
 		if (!title.isEmpty()) title = "-" + title;
-		return POST_DATE_FORMAT.format(Calendar.getInstance().getTime()) + title.replaceAll(" ", "-") + ".md";
+		return POST_DATE_FORMAT.format(Calendar.getInstance().getTime()) + draftTitleToFilename(title);
+	}
+
+
+	/**
+	 * Converts a jekyll draft title to the corresponding filename.
+	 */
+	public String draftTitleToFilename(String title) {
+		return title.replaceAll(" ", "-") + ".md";
 	}
 
 
@@ -125,19 +133,9 @@ public class JekyllManager {
 					@Override
 					public Observable<Post> call(DirNode rootNode) {
 						try {
-							// get + create posts dir
-							AbstractNode postDir = rootNode.getEntries().get(DIR_POSTS);
-							if (postDir == null) {
-								postDir = fileManager.createNewDir(rootNode, DIR_POSTS);
-							}
-
-							// create post file
-							FileNode postNode = fileManager.createNewFile((DirNode) postDir, postTitleToFilename(title));
-
-							// setup default front matter
-							FileData data = new FileData(postNode, context.getString(R.string.default_front_matter, title).getBytes());
-							fileManager.writeFile(data);
-
+							// create post file and setup front matter
+							FileNode postNode = fileManager.createNewFile(assertDir(rootNode, DIR_POSTS), postTitleToFilename(title));
+							setupDefaultFrontMatter(postNode, title);
 							return Observable.just(new Post(title, Calendar.getInstance().getTime(), postNode));
 
 						} catch (IOException ioe) {
@@ -146,6 +144,44 @@ public class JekyllManager {
 					}
 				});
 	}
+
+
+	/**
+	 * Creates and returns a new draft file (locally).
+	 */
+	public Observable<Draft> createNewDraft(final String title) {
+		return fileManager.getTree()
+				.flatMap(new Func1<DirNode, Observable<Draft>>() {
+					@Override
+					public Observable<Draft> call(DirNode rootNode) {
+						try {
+							// create draft file and setup front matter
+							FileNode draftNode = fileManager.createNewFile(assertDir(rootNode, DIR_DRAFTS), draftTitleToFilename(title));
+							setupDefaultFrontMatter(draftNode, title);
+							return Observable.just(new Draft(title, draftNode));
+
+						} catch (IOException ioe) {
+							return Observable.error(ioe);
+						}
+					}
+				});
+	}
+
+
+	private DirNode assertDir(DirNode rootNode, String dirName) {
+		AbstractNode dir = rootNode.getEntries().get(dirName);
+		if (dir == null) {
+			dir = fileManager.createNewDir(rootNode, dirName);
+		}
+		return (DirNode) dir;
+	}
+
+
+	private void setupDefaultFrontMatter(FileNode fileNode, String title) throws IOException {
+		FileData data = new FileData(fileNode, context.getString(R.string.default_front_matter, title).getBytes());
+		fileManager.writeFile(data);
+	}
+
 
 
 	/**

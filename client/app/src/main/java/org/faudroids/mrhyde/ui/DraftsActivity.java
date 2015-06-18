@@ -23,7 +23,7 @@ public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 
 	@Override
 	protected void onAddClicked() {
-		jekyllUiUtils.showNewDraftDialog();
+		jekyllUiUtils.showNewDraftDialog(jekyllManager, repository);
 	}
 
 	@Override

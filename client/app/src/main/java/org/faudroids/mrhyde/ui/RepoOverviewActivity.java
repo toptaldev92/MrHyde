@@ -159,7 +159,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			@Override
 			public void onClick(View v) {
 				addButton.collapse();
-				jekyllUiUtils.showNewDraftDialog();
+				jekyllUiUtils.showNewDraftDialog(jekyllManager, repository);
 			}
 		});
 		tintView.setOnClickListener(new View.OnClickListener() {
