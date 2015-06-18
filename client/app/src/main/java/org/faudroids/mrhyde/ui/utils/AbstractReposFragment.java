@@ -148,7 +148,7 @@ public abstract class AbstractReposFragment extends AbstractFragment {
 						.transform(new CircleTransformation())
 						.into(iconView);
 				titleView.setText(repo.getOwner().getLogin() + "/" + repo.getName());
-				subTitleView.setText(getString(R.string.repos_last_update, dateFormat.format(repo.getPushedAt())));
+				if (repo.getPushedAt() != null) subTitleView.setText(getString(R.string.repos_last_update, dateFormat.format(repo.getPushedAt())));
 				containerView.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
