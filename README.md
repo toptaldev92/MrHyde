@@ -19,7 +19,7 @@ Setting up the android client is fairly straight forward. The only things that's
 
 For getting a proper GitHub client id and secret you will have to [register your application](https://github.com/settings/applications/new) with GitHub.
 
-The `jekyllServerClientSecret` should match the one configured on the MrHyde server. See the server configuration section below for details.
+The `jekyllServerClientSecret` should match the one configured on the MrHyde server. This key is only required for the preview functionality and can also be left empty. See the server configuration section below for details.
 
 
 ## Server
