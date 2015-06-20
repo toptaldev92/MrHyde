@@ -290,7 +290,7 @@
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@android:color/white"
             fab:fab_colorPressed="@color/gray_light_2"
-            fab:fab_icon="@drawable/file"
+            fab:fab_icon="@drawable/post"
             fab:fab_size="mini"
             fab:fab_title="@string/post"
             />
@@ -301,7 +301,7 @@
             android:layout_height="wrap_content"
             fab:fab_colorNormal="@android:color/white"
             fab:fab_colorPressed="@color/gray_light_2"
-            fab:fab_icon="@drawable/file"
+            fab:fab_icon="@drawable/draft"
             fab:fab_size="mini"
             fab:fab_title="@string/draft"
             />
