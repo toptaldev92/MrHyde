@@ -6,6 +6,8 @@
     android:layout_height="wrap_content"
     android:padding="15dp"
     android:text="Some awesome title here"
-    android:background="@android:color/white"
+    android:background="@drawable/white_selector"
+    android:clickable="true"
+    android:focusable="true"
     style="@style/TextLarge"
     />

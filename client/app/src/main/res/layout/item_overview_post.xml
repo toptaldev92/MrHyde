@@ -5,7 +5,9 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="15dp"
-    android:background="@android:color/white"
+    android:background="@drawable/white_selector"
+    android:clickable="true"
+    android:focusable="true"
     >
 
     <TextView

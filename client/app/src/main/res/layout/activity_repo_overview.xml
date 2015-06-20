@@ -95,8 +95,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/card_vertical_margin"
                     android:layout_marginBottom="@dimen/card_vertical_margin_large"
-                    android:background="@drawable/item_selector"
-                    android:clickable="true"
                     >
 
                     <LinearLayout
@@ -167,8 +165,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/card_vertical_margin"
                     android:layout_marginBottom="@dimen/card_vertical_margin_large"
-                    android:background="@drawable/item_selector"
-                    android:clickable="true"
                     >
 
                     <LinearLayout

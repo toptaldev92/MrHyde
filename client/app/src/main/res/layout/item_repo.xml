@@ -7,8 +7,6 @@
     android:layout_marginLeft="@dimen/card_horizontal_margin"
     android:layout_marginTop="@dimen/card_vertical_margin"
     android:layout_marginBottom="@dimen/card_vertical_margin"
-    android:background="@drawable/item_selector"
-    android:clickable="true"
     >
 
     <RelativeLayout
@@ -16,6 +14,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="15dp"
+        android:background="@drawable/white_selector"
+        android:clickable="true"
+        android:focusable="true"
         >
 
         <ImageView
