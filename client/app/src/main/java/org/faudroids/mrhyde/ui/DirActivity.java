@@ -5,34 +5,23 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.getbase.floatingactionbutton.FloatingActionsMenu;
 
-import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.AbstractNode;
 import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileData;
-import org.faudroids.mrhyde.git.FileManager;
-import org.faudroids.mrhyde.git.FileManagerFactory;
 import org.faudroids.mrhyde.git.FileNode;
-import org.faudroids.mrhyde.git.FileUtils;
-import org.faudroids.mrhyde.git.NodeUtils;
 import org.faudroids.mrhyde.git.RepositoryManager;
-import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
-import org.faudroids.mrhyde.ui.utils.DividerItemDecoration;
 import org.faudroids.mrhyde.ui.utils.ImageUtils;
 import org.faudroids.mrhyde.ui.utils.UiUtils;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
@@ -41,10 +30,6 @@ import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import javax.inject.Inject;
 
@@ -54,21 +39,13 @@ import rx.functions.Action1;
 import timber.log.Timber;
 
 @ContentView(R.layout.activity_dir)
-public final class DirActivity extends AbstractActionBarActivity implements DirActionModeListener.ActionSelectionListener {
+public final class DirActivity extends AbstractDirActivity implements DirActionModeListener.ActionSelectionListener {
 
 	private static final int
 			REQUEST_COMMIT = 42,
 			REQUEST_EDIT_FILE = 43,
 			REQUEST_SELECT_PHOTO = 44,
 			REQUEST_SELECT_DIR = 45;
-
-	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
-
-	private static final String STATE_SELECTED_NODE = "STATE_SELECTED_NODE";
-
-	@InjectView(R.id.list) private RecyclerView recyclerView;
-	private PathNodeAdapter pathNodeAdapter;
-	private RecyclerView.LayoutManager layoutManager;
 
 	@InjectView(R.id.tint) private View tintView;
 	@InjectView(R.id.add) private FloatingActionsMenu addButton;
@@ -77,13 +54,8 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	@InjectView(R.id.add_folder) private FloatingActionButton addFolderButton;
 
 	@Inject private RepositoryManager repositoryManager;
-	@Inject private FileManagerFactory fileManagerFactory;
-	private Repository repository;
-	private FileManager fileManager;
-	@Inject private NodeUtils nodeUtils;
-	@Inject private FileUtils fileUtils;
-	@Inject private ImageUtils imageUtils;
 	@Inject private ActivityIntentFactory intentFactory;
+	@Inject private ImageUtils imageUtils;
 
 	private DirActionModeListener actionModeListener = null;
 
@@ -92,9 +64,6 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// get arguments
-		repository = (Repository) this.getIntent().getSerializableExtra(EXTRA_REPOSITORY);
-		fileManager = fileManagerFactory.createFileManager(repository);
 		setTitle(repository.getName());
 
 		// setup add buttons
@@ -139,24 +108,8 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 			}
 		});
 
-		// setup list
-		layoutManager = new LinearLayoutManager(this);
-		pathNodeAdapter = new PathNodeAdapter();
-		recyclerView.setLayoutManager(layoutManager);
-		recyclerView.setAdapter(pathNodeAdapter);
-		recyclerView.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL_LIST));
-
-		// get tree
-		updateTree(savedInstanceState);
-
 		// prepare action mode
 		actionModeListener = new DirActionModeListener(this, this, uiUtils);
-	}
-
-
-	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		pathNodeAdapter.onSaveInstanceState(outState);
 	}
 
 
@@ -182,15 +135,6 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 			menu.findItem(R.id.action_discard_changes).setVisible(false);
 		}
 		return super.onPrepareOptionsMenu(menu);
-	}
-
-
-	@Override
-	public void onBackPressed() {
-		// only go back when at the top dir
-		if (!pathNodeAdapter.onBackPressed()) {
-			super.onBackPressed();
-		}
 	}
 
 
@@ -404,54 +348,6 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	}
 
 
-	/**
-	 * Recreates the file tree
-	 */
-	private void updateTree(final Bundle savedInstanceState) {
-		showSpinner();
-		compositeSubscription.add(fileManager.getTree()
-				.compose(new DefaultTransformer<DirNode>())
-				.subscribe(new Action1<DirNode>() {
-					@Override
-					public void call(DirNode rootNode) {
-						hideSpinner();
-
-						// re-enable options menu
-						invalidateOptionsMenu();
-
-						// check for empty repository
-						if (rootNode == null) {
-							new AlertDialog.Builder(DirActivity.this)
-									.setTitle(R.string.error_empty_repo_title)
-									.setMessage(R.string.error_empty_repo_message)
-									.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-										@Override
-										public void onClick(DialogInterface dialog, int which) {
-											finish();
-										}
-									})
-									.setOnCancelListener(new DialogInterface.OnCancelListener() {
-										@Override
-										public void onCancel(DialogInterface dialog) {
-											finish();
-										}
-									})
-									.show();
-							return;
-						}
-
-						// update files list
-						pathNodeAdapter.setSelectedNode(rootNode);
-						if (savedInstanceState != null)
-							pathNodeAdapter.onRestoreInstanceState(savedInstanceState);
-					}
-				}, new ErrorActionBuilder()
-						.add(new DefaultErrorAction(this, "failed to get tree"))
-						.add(new HideSpinnerAction(this))
-						.build()));
-	}
-
-
 	private void startFileActivity(FileNode fileNode, boolean isNewFile) {
 		actionModeListener.stopActionMode();
 
@@ -470,97 +366,42 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	}
 
 
-	public class PathNodeAdapter extends RecyclerView.Adapter<PathNodeAdapter.PathNodeViewHolder> {
+	@Override
+	protected PathNodeAdapter createAdapter() {
+		return new LongClickPathNodeAdapter();
+	}
 
-		private final List<AbstractNode> nodeList = new ArrayList<>();
-		private DirNode selectedNode;
 
+	@Override
+	protected void onDirSelected(DirNode node) {
+		// nothing to do
+	}
+
+
+	@Override
+	protected void onFileSelected(FileNode node) {
+		startFileActivity(node, false);
+	}
+
+
+	public class LongClickPathNodeAdapter extends PathNodeAdapter {
 
 		@Override
-		public PathNodeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+		public LongClickPathNodeViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 			View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_file, parent, false);
-			return new PathNodeViewHolder(view);
+			return new LongClickPathNodeViewHolder(view);
 		}
 
+		public class LongClickPathNodeViewHolder extends PathNodeViewHolder {
 
-		@Override
-		public void onBindViewHolder(PathNodeViewHolder holder, int position) {
-			holder.setPathNode(nodeList.get(position));
-		}
-
-
-		@Override
-		public int getItemCount() {
-			return nodeList.size();
-		}
-
-
-		public boolean onBackPressed() {
-			// if no parent (or not loaded) let activity handle back press
-			if (selectedNode == null || selectedNode.getParent() == null) return false;
-			// otherwise navigate up
-			setSelectedNode((DirNode) selectedNode.getParent());
-			return true;
-		}
-
-
-		public void setSelectedNode(DirNode newSelectedNode) {
-			actionModeListener.stopActionMode();
-			if (newSelectedNode.getPath().equals("")) setTitle(repository.getName());
-			else setTitle(newSelectedNode.getPath());
-			selectedNode = newSelectedNode;
-			nodeList.clear();
-			nodeList.addAll(sortEntries(newSelectedNode.getEntries().values()));
-			notifyDataSetChanged();
-		}
-
-
-		public DirNode getSelectedNode() {
-			return selectedNode;
-		}
-
-
-		public void onSaveInstanceState(Bundle outState) {
-			nodeUtils.saveNode(STATE_SELECTED_NODE, outState, selectedNode);
-		}
-
-
-		public void onRestoreInstanceState(Bundle inState) {
-			AbstractNode restoredSelectedNode = nodeUtils.restoreNode(STATE_SELECTED_NODE, inState, selectedNode);
-			if (restoredSelectedNode == null) return;
-
-			setSelectedNode((DirNode) restoredSelectedNode);
-		}
-
-
-		private List<AbstractNode> sortEntries(Collection<AbstractNode> entries) {
-			List<AbstractNode> dirs = new ArrayList<>();
-			List<AbstractNode> files = new ArrayList<>();
-			for (AbstractNode node : entries) {
-				if (node instanceof DirNode) dirs.add(node);
-				else files.add(node);
-			}
-			Collections.sort(dirs);
-			Collections.sort(files);
-			dirs.addAll(files);
-			return dirs;
-		}
-
-
-		public class PathNodeViewHolder extends RecyclerView.ViewHolder {
-
-			private final View view;
-			private final TextView titleView;
-			private final ImageView iconView;
-
-			public PathNodeViewHolder(View view) {
+			public LongClickPathNodeViewHolder(View view) {
 				super(view);
-				this.view = view;
-				this.titleView = (TextView) view.findViewById(R.id.title);
-				this.iconView = (ImageView) view.findViewById(R.id.icon);
 			}
 
-			public void setPathNode(final AbstractNode pathNode) {
+			@Override
+			public void setViewForNode(final AbstractNode pathNode) {
+				super.setViewForNode(pathNode);
+
 				// check for action mode
 				if (actionModeListener.getSelectedNode() != null && actionModeListener.getSelectedNode().equals(pathNode)) {
 					view.setSelected(true);
@@ -568,29 +409,7 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 					view.setSelected(false);
 				}
 
-				// setup node content
-				titleView.setText(pathNode.getPath());
-				if (pathNode instanceof DirNode) {
-					iconView.setImageResource(R.drawable.folder);
-				} else if (fileUtils.isImage(pathNode.getPath())) {
-					iconView.setImageResource(R.drawable.image);
-				} else {
-					iconView.setImageResource(R.drawable.file);
-				}
-
-				view.setOnClickListener(new View.OnClickListener() {
-					@Override
-					public void onClick(View v) {
-						if (pathNode instanceof DirNode) {
-							// navigate down
-							setSelectedNode((DirNode) pathNode);
-						} else {
-							// open file
-							startFileActivity((FileNode) pathNode, false);
-						}
-					}
-				});
-
+				// setup long click
 				if (pathNode instanceof FileNode) {
 					view.setOnLongClickListener(new View.OnLongClickListener() {
 						@Override
