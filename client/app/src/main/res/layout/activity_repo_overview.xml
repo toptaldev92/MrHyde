@@ -142,6 +142,7 @@
                             android:layout_height="wrap_content"
                             android:divider="@color/gray_light_2"
                             android:dividerHeight="1dp"
+                            android:overScrollMode="never"
                             />
 
                         <TextView
@@ -212,6 +213,7 @@
                             android:layout_height="wrap_content"
                             android:divider="@color/gray_light_2"
                             android:dividerHeight="1dp"
+                            android:overScrollMode="never"
                             />
 
                     </LinearLayout>
