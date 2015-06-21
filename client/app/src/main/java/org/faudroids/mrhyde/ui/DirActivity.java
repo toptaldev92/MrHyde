@@ -572,8 +572,10 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 					view.setOnLongClickListener(new View.OnLongClickListener() {
 						@Override
 						public boolean onLongClick(View v) {
-							view.setSelected(true);
-							actionModeListener.startActionMode((FileNode) pathNode);
+							// only highlight item when selection was successful
+							if (actionModeListener.startActionMode((FileNode) pathNode)) {
+								view.setSelected(true);
+							}
 							return true;
 						}
 					});
