@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import com.getbase.floatingactionbutton.AddFloatingActionButton;
 
@@ -45,6 +46,7 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 	protected AbstractAdapter adapter;
 	@Inject protected JekyllUiUtils jekyllUiUtils;
 
+	@InjectView(R.id.empty) private TextView emptyView;
 	@InjectView(R.id.add) private AddFloatingActionButton addButton;
 
 	protected Repository repository;
@@ -63,6 +65,7 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 	protected abstract void onAddClicked();
 	protected abstract Observable<List<T>> doLoadItems();
 	protected abstract AbstractAdapter createAdapter();
+	protected abstract int getEmptyStringResource();
 
 
 	@Override
@@ -104,6 +107,12 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 					public void call(List<T> items) {
 						if (isSpinnerVisible()) hideSpinner();
 						adapter.setItems(items);
+						if (items.isEmpty()) {
+							emptyView.setText(getString(getEmptyStringResource()));
+							emptyView.setVisibility(View.VISIBLE);
+						} else {
+							emptyView.setVisibility(View.GONE);
+						}
 					}
 				}, new ErrorActionBuilder()
 						.add(new DefaultErrorAction(AbstractJekyllActivity.this, "failed to load content"))

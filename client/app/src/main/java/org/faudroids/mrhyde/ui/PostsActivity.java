@@ -33,6 +33,10 @@ public class PostsActivity extends AbstractJekyllActivity<Post> {
 		return new PostsAdapter();
 	}
 
+	@Override
+	protected int getEmptyStringResource() {
+		return R.string.no_posts;
+	}
 
 	public class PostsAdapter extends AbstractAdapter {
 

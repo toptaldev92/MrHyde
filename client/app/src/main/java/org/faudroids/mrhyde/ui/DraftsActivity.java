@@ -32,6 +32,11 @@ public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 		return new DraftsAdapter();
 	}
 
+	@Override
+	protected int getEmptyStringResource() {
+		return R.string.no_drafts;
+	}
+
 
 	public class DraftsAdapter extends AbstractAdapter {
 
