@@ -4,6 +4,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlActivated">@color/blue</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">@color/colorPrimaryDark</item>
         <item name="android:actionModeCloseDrawable">@drawable/ic_arrow_back</item>
@@ -32,6 +33,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlActivated">@color/blue</item>
         <item name="sectionStyle">@style/SectionTheme</item>
         <item name="singleAccount">true</item>
         <item name="learningPattern">false</item>

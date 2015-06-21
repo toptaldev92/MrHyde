@@ -46,10 +46,6 @@
                 android:focusable="false"
                 android:focusableInTouchMode="false"
                 android:clickable="true"
-                android:textCursorDrawable="@null"
-                android:textSelectHandle="@drawable/text_select_handle_middle"
-                android:textSelectHandleLeft="@drawable/text_select_handle_left_mtrl_alpha"
-                android:textSelectHandleRight="@drawable/text_select_handle_right_mtrl_alpha"
                 android:text="Hello world hello world\nThis is some serious content"
                 />
 
