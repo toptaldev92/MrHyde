@@ -34,8 +34,8 @@ public class JekyllManager {
 			DIR_DRAFTS = "_drafts";
 
 	private static final Pattern
-			POST_TITLE_PATTERN = Pattern.compile("(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)(.*)\\..*"),
-			DRAFT_TITLE_PATTERN = Pattern.compile("(.*)\\..*");
+			POST_TITLE_PATTERN = Pattern.compile("(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)(.+)\\..+"),
+			DRAFT_TITLE_PATTERN = Pattern.compile("(.+)\\..+");
 
 	private static final DateFormat POST_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
