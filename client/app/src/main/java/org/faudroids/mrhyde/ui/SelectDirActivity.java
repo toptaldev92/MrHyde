@@ -281,13 +281,15 @@ public final class SelectDirActivity extends AbstractActionBarActivity {
 			public void setPathNode(final AbstractNode pathNode) {
 				// setup node content
 				titleView.setText(pathNode.getPath());
-				if (pathNode instanceof DirNode) {
-					iconView.setImageResource(R.drawable.folder);
-				} else if (fileUtils.isImage(pathNode.getPath())) {
-					iconView.setImageResource(R.drawable.image);
-				} else {
-					iconView.setImageResource(R.drawable.file);
-				}
+
+				int imageResource = R.drawable.folder;
+				if ((pathNode instanceof FileNode) && fileUtils.isImage(pathNode.getPath())) imageResource = R.drawable.image;
+				else if (pathNode instanceof FileNode) imageResource = R.drawable.file;
+				float alpha = (pathNode instanceof DirNode) ? 1f : 0.3f;
+
+				iconView.setImageResource(imageResource);
+				iconView.setAlpha(alpha);
+				titleView.setAlpha(alpha);
 
 				view.setOnClickListener(new View.OnClickListener() {
 					@Override
