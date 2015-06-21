@@ -6,14 +6,10 @@ import android.view.ViewGroup;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.Post;
-import org.faudroids.mrhyde.utils.DefaultErrorAction;
-import org.faudroids.mrhyde.utils.DefaultTransformer;
-import org.faudroids.mrhyde.utils.ErrorActionBuilder;
-import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.util.List;
 
-import rx.functions.Action1;
+import rx.Observable;
 
 public class PostsActivity extends AbstractJekyllActivity<Post> {
 
@@ -28,19 +24,8 @@ public class PostsActivity extends AbstractJekyllActivity<Post> {
 	}
 
 	@Override
-	protected void loadItems() {
-		compositeSubscription.add(jekyllManager.getAllPosts()
-				.compose(new DefaultTransformer<List<Post>>())
-				.subscribe(new Action1<List<Post>>() {
-					@Override
-					public void call(List<Post> posts) {
-						if (isSpinnerVisible()) hideSpinner();
-						adapter.setItems(posts);
-					}
-				}, new ErrorActionBuilder()
-						.add(new DefaultErrorAction(PostsActivity.this, "failed to load posts"))
-						.add(new HideSpinnerAction(PostsActivity.this))
-						.build()));
+	protected Observable<List<Post>> doLoadItems() {
+		return jekyllManager.getAllPosts();
 	}
 
 	@Override

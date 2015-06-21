@@ -18,6 +18,10 @@ import org.faudroids.mrhyde.jekyll.JekyllManagerFactory;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
 import org.faudroids.mrhyde.ui.utils.DividerItemDecoration;
 import org.faudroids.mrhyde.ui.utils.JekyllUiUtils;
+import org.faudroids.mrhyde.utils.DefaultErrorAction;
+import org.faudroids.mrhyde.utils.DefaultTransformer;
+import org.faudroids.mrhyde.utils.ErrorActionBuilder;
+import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +30,8 @@ import javax.inject.Inject;
 
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
+import rx.Observable;
+import rx.functions.Action1;
 
 @ContentView(R.layout.activity_posts_or_drafts)
 abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
@@ -37,9 +43,9 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 
 	@InjectView(R.id.list) private RecyclerView recyclerView;
 	protected AbstractAdapter adapter;
-	@Inject JekyllUiUtils jekyllUiUtils;
+	@Inject protected JekyllUiUtils jekyllUiUtils;
 
-	@InjectView(R.id.add) AddFloatingActionButton addButton;
+	@InjectView(R.id.add) private AddFloatingActionButton addButton;
 
 	protected Repository repository;
 	@Inject private JekyllManagerFactory jekyllManagerFactory;
@@ -55,7 +61,7 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 
 
 	protected abstract void onAddClicked();
-	protected abstract void loadItems();
+	protected abstract Observable<List<T>> doLoadItems();
 	protected abstract AbstractAdapter createAdapter();
 
 
@@ -87,6 +93,22 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 
 		// load posts
 		loadItems();
+	}
+
+
+	private void loadItems() {
+		compositeSubscription.add(doLoadItems()
+				.compose(new DefaultTransformer<List<T>>())
+				.subscribe(new Action1<List<T>>() {
+					@Override
+					public void call(List<T> items) {
+						if (isSpinnerVisible()) hideSpinner();
+						adapter.setItems(items);
+					}
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(AbstractJekyllActivity.this, "failed to load content"))
+						.add(new HideSpinnerAction(AbstractJekyllActivity.this))
+						.build()));
 	}
 
 

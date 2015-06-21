@@ -6,14 +6,10 @@ import android.view.ViewGroup;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.Draft;
-import org.faudroids.mrhyde.utils.DefaultErrorAction;
-import org.faudroids.mrhyde.utils.DefaultTransformer;
-import org.faudroids.mrhyde.utils.ErrorActionBuilder;
-import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.util.List;
 
-import rx.functions.Action1;
+import rx.Observable;
 
 public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 
@@ -27,19 +23,8 @@ public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 	}
 
 	@Override
-	protected void loadItems() {
-		compositeSubscription.add(jekyllManager.getAllDrafts()
-				.compose(new DefaultTransformer<List<Draft>>())
-				.subscribe(new Action1<List<Draft>>() {
-					@Override
-					public void call(List<Draft> drafts) {
-						if (isSpinnerVisible()) hideSpinner();
-						adapter.setItems(drafts);
-					}
-				}, new ErrorActionBuilder()
-						.add(new DefaultErrorAction(DraftsActivity.this, "failed to load drafts"))
-						.add(new HideSpinnerAction(DraftsActivity.this))
-						.build()));
+	protected Observable<List<Draft>> doLoadItems() {
+		return jekyllManager.getAllDrafts();
 	}
 
 	@Override
