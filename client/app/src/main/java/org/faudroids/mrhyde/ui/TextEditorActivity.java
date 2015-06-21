@@ -54,6 +54,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 
 	static final String
 			EXTRA_REPOSITORY = "EXTRA_REPOSITORY",
+			EXTRA_FILE_NODE = "EXTRA_FILE_NODE",
 			EXTRA_IS_NEW_FILE = "EXTRA_IS_NEW_FILE";
 
 	private static final String
@@ -282,7 +283,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 				.flatMap(new Func1<DirNode, Observable<FileData>>() {
 					@Override
 					public Observable<FileData> call(DirNode rootNode) {
-						FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
+						FileNode node = (FileNode) nodeUtils.restoreNode(EXTRA_FILE_NODE, getIntent(), rootNode);
 
 						if (!isNewFile) {
 							return fileManager.readFile(node);

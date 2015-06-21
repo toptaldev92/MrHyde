@@ -1,6 +1,7 @@
 package org.faudroids.mrhyde.git;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import javax.inject.Inject;
@@ -9,16 +10,25 @@ import timber.log.Timber;
 
 public class NodeUtils {
 
-	private static final String STATE_NODE = NodeUtils.class.getName() + ".NODE";
-
 	@Inject
 	NodeUtils() { }
 
 
 	/**
+	 * @see #saveNode(String, Bundle, AbstractNode)
+	 */
+	public void saveNode(String key, Intent intent, AbstractNode node) {
+		Bundle extras = intent.getExtras();
+		if (extras == null) extras = new Bundle();
+		intent.putExtras(extras);
+		saveNode(key, extras, node);
+	}
+
+
+	/**
 	 * Stores a node in the supplied bundle to be retrieved later.
 	 */
-	public void saveInstanceState(Bundle outState, AbstractNode node) {
+	public void saveNode(String key, Bundle outState, AbstractNode node) {
 		if (node == null) return;
 
 		AbstractNode iter = node;
@@ -31,15 +41,23 @@ public class NodeUtils {
 			iter = iter.getParent();
 		}
 
-		outState.putString(STATE_NODE, selectedPath);
+		outState.putString(key, selectedPath);
+	}
+
+
+	/**
+	 * @see #restoreNode(String, Bundle, DirNode)
+	 */
+	public AbstractNode restoreNode(String key, Intent intent, DirNode rootNode) {
+		return restoreNode(key, intent.getExtras(), rootNode);
 	}
 
 
 	/**
 	 * Retrieves a previously stored node from bundle, relative to passed in root node.
 	 */
-	public AbstractNode restoreInstanceState(Bundle inState, DirNode rootNode) {
-		String selectedPath = inState.getString(STATE_NODE);
+	public AbstractNode restoreNode(String key, Bundle inState, DirNode rootNode) {
+		String selectedPath = inState.getString(key);
 		if (selectedPath == null) return null;
 		return getNodeByPath(rootNode, selectedPath);
 	}

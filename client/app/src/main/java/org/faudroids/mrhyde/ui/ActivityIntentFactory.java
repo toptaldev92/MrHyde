@@ -46,7 +46,9 @@ public class ActivityIntentFactory {
 
 	public Intent createTextEditorIntent(Repository repository, FileNode fileNode, boolean isNewFile) {
 		Intent intent = new Intent(context, TextEditorActivity.class);
-		Bundle extras = createFileExtras(repository, fileNode);
+		Bundle extras = createFileExtras(
+				TextEditorActivity.EXTRA_REPOSITORY, repository,
+				TextEditorActivity.EXTRA_FILE_NODE, fileNode);
 		extras.putBoolean(TextEditorActivity.EXTRA_IS_NEW_FILE, isNewFile);
 		intent.putExtras(extras);
 		return intent;
@@ -55,7 +57,9 @@ public class ActivityIntentFactory {
 
 	public Intent createImageViewerIntent(Repository repository, FileNode fileNode) {
 		Intent intent = new Intent(context, ImageViewerActivity.class);
-		intent.putExtras(createFileExtras(repository, fileNode));
+		intent.putExtras(createFileExtras(
+				ImageViewerActivity.EXTRA_REPOSITORY, repository,
+				ImageViewerActivity.EXTRA_FILE_NODE, fileNode));
 		return intent;
 	}
 
@@ -74,10 +78,15 @@ public class ActivityIntentFactory {
 	}
 
 
-	private Bundle createFileExtras(Repository repository, FileNode fileNode) {
+	private Bundle createFileExtras(
+			String repositoryKey,
+			Repository repository,
+			String fileNodeKey,
+			FileNode fileNode) {
+
 		Bundle extras = new Bundle();
-		extras.putSerializable(ImageViewerActivity.EXTRA_REPOSITORY, repository);
-		nodeUtils.saveInstanceState(extras, fileNode);
+		extras.putSerializable(repositoryKey, repository);
+		nodeUtils.saveNode(fileNodeKey, extras, fileNode);
 		return extras;
 	}
 

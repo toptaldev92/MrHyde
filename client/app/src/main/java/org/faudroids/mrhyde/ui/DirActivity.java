@@ -63,6 +63,8 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
+	private static final String STATE_SELECTED_NODE = "STATE_SELECTED_NODE";
+
 	@InjectView(R.id.list) private RecyclerView recyclerView;
 	private PathNodeAdapter pathNodeAdapter;
 	private RecyclerView.LayoutManager layoutManager;
@@ -498,12 +500,12 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 
 
 		public void onSaveInstanceState(Bundle outState) {
-			nodeUtils.saveInstanceState(outState, selectedNode);
+			nodeUtils.saveNode(STATE_SELECTED_NODE, outState, selectedNode);
 		}
 
 
 		public void onRestoreInstanceState(Bundle inState) {
-			AbstractNode restoredSelectedNode = nodeUtils.restoreInstanceState(inState, selectedNode);
+			AbstractNode restoredSelectedNode = nodeUtils.restoreNode(STATE_SELECTED_NODE, inState, selectedNode);
 			if (restoredSelectedNode == null) return;
 
 			setSelectedNode((DirNode) restoredSelectedNode);

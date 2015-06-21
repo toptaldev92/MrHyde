@@ -31,7 +31,9 @@ import rx.functions.Func1;
 @ContentView(R.layout.activity_image_viewer)
 public final class ImageViewerActivity extends AbstractActionBarActivity {
 
-	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
+	static final String
+			EXTRA_REPOSITORY = "EXTRA_REPOSITORY",
+			EXTRA_FILE_NODE = "EXTRA_FILE_NODE";
 
 	private static final String STATE_CONTENT = "STATE_CONTENT";
 
@@ -62,7 +64,7 @@ public final class ImageViewerActivity extends AbstractActionBarActivity {
 					.flatMap(new Func1<DirNode, Observable<FileData>>() {
 						@Override
 						public Observable<FileData> call(DirNode rootNode) {
-							FileNode node = (FileNode) nodeUtils.restoreInstanceState(getIntent().getExtras(), rootNode);
+							FileNode node = (FileNode) nodeUtils.restoreNode(EXTRA_FILE_NODE, getIntent(), rootNode);
 							return fileManager.readFile(node);
 						}
 					})
