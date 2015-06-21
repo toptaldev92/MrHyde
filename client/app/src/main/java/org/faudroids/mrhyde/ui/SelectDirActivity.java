@@ -32,9 +32,6 @@ public final class SelectDirActivity extends AbstractDirActivity {
 		// hide action bar
 		getSupportActionBar().hide();
 
-		// make dialog fill screen
-		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-
 		// setup buttons
 		backView.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -100,6 +97,12 @@ public final class SelectDirActivity extends AbstractDirActivity {
 			@Override
 			public void setViewForNode(final AbstractNode pathNode) {
 				super.setViewForNode(pathNode);
+
+				// remove left + right margin due to dialog container
+				ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+				params.leftMargin = 0;
+				params.rightMargin = 0;
+				view.setLayoutParams(params);
 
 				// reduce alpha for files
 				float alpha = (pathNode instanceof DirNode) ? 1f : 0.3f;
