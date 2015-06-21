@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.Post;
+import org.faudroids.mrhyde.ui.utils.JekyllUiUtils;
 
 import java.util.List;
 
@@ -19,8 +20,8 @@ public class PostsActivity extends AbstractJekyllActivity<Post> {
 
 
 	@Override
-	protected void onAddClicked() {
-		jekyllUiUtils.showNewPostDialog(jekyllManager, repository);
+	protected void onAddClicked(JekyllUiUtils.OnContentCreatedListener<Post> contentListener) {
+		jekyllUiUtils.showNewPostDialog(jekyllManager, repository, contentListener);
 	}
 
 	@Override

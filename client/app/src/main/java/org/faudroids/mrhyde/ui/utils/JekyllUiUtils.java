@@ -36,6 +36,13 @@ import rx.functions.Action1;
  */
 public class JekyllUiUtils {
 
+	public interface OnContentCreatedListener<T> {
+
+		void onContentCreated(T content);
+
+	}
+
+
 	private static final Typeface SANS_SERIF_LIGHT = Typeface.create("sans-serif-light", Typeface.NORMAL);
 	private static final DateFormat DATE_FORMAT = DateFormat.getDateInstance();
 
@@ -85,8 +92,8 @@ public class JekyllUiUtils {
 	}
 
 
-	public void showNewPostDialog(final JekyllManager jekyllManager, final Repository repository) {
-		showNewJekyllContentDialog(new NewJekyllContentStrategy<Post>(R.string.new_post) {
+	public void showNewPostDialog(final JekyllManager jekyllManager, final Repository repository, final OnContentCreatedListener<Post> postListener) {
+		showNewJekyllContentDialog(new NewJekyllContentStrategy<Post>(R.string.new_post, postListener) {
 			@Override
 			public String formatTitle(String title) {
 				return jekyllManager.postTitleToFilename(title);
@@ -105,8 +112,8 @@ public class JekyllUiUtils {
 	}
 
 
-	public void showNewDraftDialog(final JekyllManager jekyllManager, Repository repository) {
-		showNewJekyllContentDialog(new NewJekyllContentStrategy<Draft>(R.string.new_draft) {
+	public void showNewDraftDialog(final JekyllManager jekyllManager, Repository repository, OnContentCreatedListener<Draft> draftListener) {
+		showNewJekyllContentDialog(new NewJekyllContentStrategy<Draft>(R.string.new_draft, draftListener) {
 			@Override
 			public String formatTitle(String title) {
 				return jekyllManager.draftTitleToFilename(title);
@@ -125,7 +132,7 @@ public class JekyllUiUtils {
 	}
 
 
-	public <T> void showNewJekyllContentDialog(final NewJekyllContentStrategy<T> strategy, final Repository repository) {
+	private <T> void showNewJekyllContentDialog(final NewJekyllContentStrategy<T> strategy, final Repository repository) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context)
 				.setTitle(strategy.titleResource)
 				.setNegativeButton(android.R.string.cancel, null);
@@ -165,6 +172,7 @@ public class JekyllUiUtils {
 								.subscribe(new Action1<T>() {
 									@Override
 									public void call(T item) {
+										if (strategy.contentListener != null) strategy.contentListener.onContentCreated(item);
 										Intent newContentIntent = intentFactory.createTextEditorIntent(repository, strategy.getFileNode(item), false);
 										context.startActivity(newContentIntent);
 									}
@@ -181,9 +189,11 @@ public class JekyllUiUtils {
 	private static abstract class NewJekyllContentStrategy<T> {
 
 		private final int titleResource;
+		private final OnContentCreatedListener<T> contentListener;
 
-		public NewJekyllContentStrategy(int titleResource) {
+		public NewJekyllContentStrategy(int titleResource, OnContentCreatedListener<T> contentListener) {
 			this.titleResource = titleResource;
+			this.contentListener = contentListener;
 		}
 
 		public abstract String formatTitle(String title);

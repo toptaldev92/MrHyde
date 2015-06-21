@@ -42,6 +42,7 @@ import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -152,14 +153,31 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			@Override
 			public void onClick(View v) {
 				addButton.collapse();
-				jekyllUiUtils.showNewPostDialog(jekyllManager, repository);
+				jekyllUiUtils.showNewPostDialog(jekyllManager, repository, new JekyllUiUtils.OnContentCreatedListener<Post>() {
+					@Override
+					public void onContentCreated(Post post) {
+						List<Post> posts = getAllItemsFromAdapter(postsListAdapter);
+						posts.add(post);
+						Collections.sort(posts);
+						setupFirstThreeEntries(posts, postsListAdapter);
+					}
+				});
 			}
 		});
 		addDraftButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				addButton.collapse();
-				jekyllUiUtils.showNewDraftDialog(jekyllManager, repository);
+				jekyllUiUtils.showNewDraftDialog(jekyllManager, repository, new JekyllUiUtils.OnContentCreatedListener<Draft>() {
+					@Override
+					public void onContentCreated(Draft draft) {
+						List<Draft> drafts = getAllItemsFromAdapter(draftsListAdapter);
+						drafts.add(draft);
+						Collections.sort(drafts);
+						if (draftsCard.getVisibility() == View.GONE) draftsCard.setVisibility(View.VISIBLE);
+						setupFirstThreeEntries(drafts, draftsListAdapter);
+					}
+				});
 			}
 		});
 		tintView.setOnClickListener(new View.OnClickListener() {
@@ -258,7 +276,6 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 						if (!jekyllContent.posts.isEmpty()) noPostsView.setVisibility(View.GONE);
 						if (jekyllContent.drafts.isEmpty()) draftsCard.setVisibility(View.GONE);
 
-
 					}
 				}, new ErrorActionBuilder()
 						.add(new DefaultErrorAction(RepoOverviewActivity.this, "failed to load posts"))
@@ -328,6 +345,15 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+
+	private <T> List<T> getAllItemsFromAdapter(ArrayAdapter<T> adapter) {
+		List<T> items = new ArrayList<>();
+		for (int i = 0; i < adapter.getCount(); ++i) {
+			items.add(adapter.getItem(i));
+		}
+		return items;
 	}
 
 

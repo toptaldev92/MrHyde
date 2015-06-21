@@ -6,6 +6,7 @@ import android.view.ViewGroup;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.Draft;
+import org.faudroids.mrhyde.ui.utils.JekyllUiUtils;
 
 import java.util.List;
 
@@ -18,8 +19,8 @@ public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 	}
 
 	@Override
-	protected void onAddClicked() {
-		jekyllUiUtils.showNewDraftDialog(jekyllManager, repository);
+	protected void onAddClicked(JekyllUiUtils.OnContentCreatedListener<Draft> contentListener) {
+		jekyllUiUtils.showNewDraftDialog(jekyllManager, repository, contentListener);
 	}
 
 	@Override

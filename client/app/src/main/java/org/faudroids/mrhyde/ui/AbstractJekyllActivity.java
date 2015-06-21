@@ -25,6 +25,7 @@ import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -35,7 +36,7 @@ import rx.Observable;
 import rx.functions.Action1;
 
 @ContentView(R.layout.activity_posts_or_drafts)
-abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
+abstract class AbstractJekyllActivity<T extends Comparable<T>> extends AbstractActionBarActivity {
 
 	private static final int REQUEST_COMMIT = 42;
 
@@ -62,7 +63,7 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 	}
 
 
-	protected abstract void onAddClicked();
+	protected abstract void onAddClicked(JekyllUiUtils.OnContentCreatedListener<T> contentListener);
 	protected abstract Observable<List<T>> doLoadItems();
 	protected abstract AbstractAdapter createAdapter();
 	protected abstract int getEmptyStringResource();
@@ -90,7 +91,12 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 		addButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				onAddClicked();
+				onAddClicked(new JekyllUiUtils.OnContentCreatedListener<T>() {
+					@Override
+					public void onContentCreated(T newItem) {
+						adapter.addItem(newItem);
+					}
+				});
 			}
 		});
 
@@ -173,6 +179,12 @@ abstract class AbstractJekyllActivity<T> extends AbstractActionBarActivity {
 		public void setItems(List<T> itemsList) {
 			this.itemsList.clear();
 			this.itemsList.addAll(itemsList);
+			notifyDataSetChanged();
+		}
+
+		public void addItem(T item) {
+			itemsList.add(item);
+			Collections.sort(itemsList);
 			notifyDataSetChanged();
 		}
 
