@@ -13,6 +13,7 @@ import org.faudroids.mrhyde.git.FileNode;
 
 import roboguice.inject.ContentView;
 import roboguice.inject.InjectView;
+import timber.log.Timber;
 
 @ContentView(R.layout.dialog_select_dir)
 public final class SelectDirActivity extends AbstractDirActivity {
@@ -30,7 +31,7 @@ public final class SelectDirActivity extends AbstractDirActivity {
 
 		// hide action bar
 		getSupportActionBar().hide();
-		
+
 		// make dialog fill screen
 		getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
@@ -51,8 +52,11 @@ public final class SelectDirActivity extends AbstractDirActivity {
 			@Override
 			public void onClick(View v) {
 				// return result
-				Intent resultIntent = new Intent();
+				for (String key : getIntent().getExtras().keySet()) Timber.d("found key " + key);
+				Intent resultIntent = new Intent(getIntent());
+				for (String key : resultIntent.getExtras().keySet()) Timber.d("found key " + key);
 				nodeUtils.saveNode(EXTRA_SELECTED_DIR, resultIntent, pathNodeAdapter.getSelectedNode());
+				for (String key : getIntent().getExtras().keySet()) Timber.d("found key " + key);
 				setResult(RESULT_OK, resultIntent);
 				finish();
 			}

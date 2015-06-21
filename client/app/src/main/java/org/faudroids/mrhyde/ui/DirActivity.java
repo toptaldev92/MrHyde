@@ -41,6 +41,8 @@ import timber.log.Timber;
 @ContentView(R.layout.activity_dir)
 public final class DirActivity extends AbstractDirActivity implements DirActionModeListener.ActionSelectionListener {
 
+	private static final String EXTRA_NODE_TO_MOVE = "EXTRA_NODE_TO_MOVE"; // marks which file should be moved
+
 	private static final int
 			REQUEST_COMMIT = 42,
 			REQUEST_EDIT_FILE = 43,
@@ -232,9 +234,27 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 				DirNode rootNode = pathNodeAdapter.getSelectedNode();
 				while (rootNode.getParent() != null) rootNode = (DirNode) rootNode.getParent();
 
-				// get selected dir
-				DirNode selectedDir = (DirNode) nodeUtils.restoreNode(SelectDirActivity.EXTRA_SELECTED_DIR, data, rootNode);
-				Timber.d("selected " + selectedDir.getPath());
+				// get selected dir and file
+				final DirNode selectedDir = (DirNode) nodeUtils.restoreNode(SelectDirActivity.EXTRA_SELECTED_DIR, data, rootNode);
+				final FileNode selectedFile = (FileNode) nodeUtils.restoreNode(EXTRA_NODE_TO_MOVE, data, rootNode);
+
+				// confirm overwriting files
+				if (selectedDir.getEntries().containsKey(selectedFile.getPath())) {
+					new AlertDialog.Builder(this)
+							.setTitle(getString(R.string.overwrite_file_title))
+							.setMessage(getString(R.string.overwrite_file_message, selectedFile.getPath()))
+							.setPositiveButton(getString(R.string.overwrite_confirm), new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									moveFile(selectedFile, selectedDir);
+								}
+							})
+							.setNegativeButton(android.R.string.cancel, null)
+							.show();
+				} else {
+					moveFile(selectedFile, selectedDir);
+				}
+
 				break;
 		}
 	}
@@ -296,7 +316,27 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 	public void onMoveTo(FileNode fileNode) {
 		Intent intent = new Intent(this, SelectDirActivity.class);
 		intent.putExtra(SelectDirActivity.EXTRA_REPOSITORY, repository);
+		nodeUtils.saveNode(EXTRA_NODE_TO_MOVE, intent, fileNode);
+		for (String key : intent.getExtras().keySet()) Timber.d("found key " + key);
 		startActivityForResult(intent, REQUEST_SELECT_DIR);
+	}
+
+
+	private void moveFile(FileNode fileNodeToMove, DirNode targetDirNode) {
+		showSpinner();
+		compositeSubscription.add(fileManager.moveFile(fileNodeToMove, targetDirNode)
+				.compose(new DefaultTransformer<Void>())
+				.subscribe(new Action1<Void>() {
+					@Override
+					public void call(Void aVoid) {
+						hideSpinner();
+						Toast.makeText(DirActivity.this, getString(R.string.file_moved), Toast.LENGTH_SHORT).show();
+						refreshTree();
+					}
+				}, new ErrorActionBuilder()
+						.add(new DefaultErrorAction(DirActivity.this, "failed to move file"))
+						.add(new HideSpinnerAction(DirActivity.this))
+						.build()));
 	}
 
 

@@ -39,6 +39,10 @@
 
     <string name="select_destination_folder">Select destination folder</string>
     <string name="move">Move</string>
+    <string name="file_moved">File moved</string>
+    <string name="overwrite_file_title">Overwrite file</string>
+    <string name="overwrite_file_message">"Overwrite existing file %1$s?"</string>
+    <string name="overwrite_confirm">Overwrite</string>
 
     <string name="nothing_to_undo">Nothing to undo</string>
     <string name="nothing_to_redo">Nothing to redo</string>
