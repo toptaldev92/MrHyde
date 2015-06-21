@@ -7,8 +7,13 @@
         <item name="colorControlActivated">@color/blue</item>
         <item name="android:windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">@color/colorPrimaryDark</item>
-        <item name="android:actionModeCloseDrawable">@drawable/ic_arrow_back</item>
+        <item name="android:actionModeCloseDrawable">@drawable/abc_ic_ab_back_mtrl_am_alpha</item>
+        <item name="android:actionOverflowButtonStyle">@style/ActionOverflowStyle</item>
         <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
+    </style>
+
+    <style name="ActionOverflowStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
+        <item name="android:src">@drawable/abc_ic_menu_moreoverflow_mtrl_alpha</item>
     </style>
 
     <style name="AppTheme.Overlay">
