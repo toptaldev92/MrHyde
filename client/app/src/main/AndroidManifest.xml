@@ -39,6 +39,10 @@
             android:name=".ui.DirActivity"
             />
         <activity
+            android:name=".ui.SelectDirActivity"
+            android:theme="@style/AppDialogTheme"
+            />
+        <activity
             android:name=".ui.TextEditorActivity"
             />
         <activity

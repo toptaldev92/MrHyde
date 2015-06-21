@@ -2,13 +2,14 @@ package org.faudroids.mrhyde.ui.utils;
 
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+
+import org.faudroids.mrhyde.R;
 
 /*
  * Copyright (C) 2014 The Android Open Source Project
@@ -24,25 +25,20 @@ import android.view.View;
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * Class has been modified to use a custom drawable and show horizontal dividers
+ * which have a full screen width.
  */
 public class DividerItemDecoration extends RecyclerView.ItemDecoration {
 
-	private static final int[] ATTRS = new int[]{
-			android.R.attr.listDivider
-	};
-
-	public static final int HORIZONTAL_LIST = LinearLayoutManager.HORIZONTAL;
-
-	public static final int VERTICAL_LIST = LinearLayoutManager.VERTICAL;
-
-	private Drawable mDivider;
+	public static final int
+			HORIZONTAL_LIST = LinearLayoutManager.HORIZONTAL,
+			VERTICAL_LIST = LinearLayoutManager.VERTICAL; private Drawable mDivider;
 
 	private int mOrientation;
 
 	public DividerItemDecoration(Context context, int orientation) {
-		final TypedArray a = context.obtainStyledAttributes(ATTRS);
-		mDivider = a.getDrawable(0);
-		a.recycle();
+		mDivider = context.getResources().getDrawable(R.drawable.list_divider);
 		setOrientation(orientation);
 	}
 

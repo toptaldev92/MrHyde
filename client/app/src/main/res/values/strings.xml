@@ -26,6 +26,7 @@
     <string name="action_edit">Edit</string>
     <string name="action_delete">Delete</string>
     <string name="action_rename">Rename</string>
+    <string name="action_move">Move to …</string>
     <string name="action_commit">Commit</string>
     <string name="action_preview">Preview</string>
     <string name="action_mark_repository">Mark repo as favourite</string>
@@ -35,6 +36,9 @@
     <string name="action_show_line_numbers">Line numbers</string>
     <string name="action_undo">Undo</string>
     <string name="action_redo">Redo</string>
+
+    <string name="select_destination_folder">Select destination folder</string>
+    <string name="move">Move</string>
 
     <string name="nothing_to_undo">Nothing to undo</string>
     <string name="nothing_to_redo">Nothing to redo</string>

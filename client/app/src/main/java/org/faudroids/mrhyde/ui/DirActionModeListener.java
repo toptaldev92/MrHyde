@@ -82,6 +82,10 @@ class DirActionModeListener implements ActionMode.Callback {
 				}).show();
 				return true;
 
+			case R.id.action_move:
+				selectionListener.onMoveTo(selectedNode);
+				stopActionMode();
+				return true;
 		}
 		return false;
 	}
@@ -100,6 +104,7 @@ class DirActionModeListener implements ActionMode.Callback {
 		void onDelete(FileNode fileNode);
 		void onEdit(FileNode fileNode);
 		void onRename(FileNode fileNode, String newFileName);
+		void onMoveTo(FileNode fileNode);
 		void onStopActionMode();
 
 	}

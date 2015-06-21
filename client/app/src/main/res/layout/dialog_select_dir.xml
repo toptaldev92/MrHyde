@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/gray_light"
+    android:animateLayoutChanges="true"
+    >
+
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        >
+
+        <ImageView
+            android:id="@+id/back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"
+            android:background="?android:attr/selectableItemBackground"
+            android:padding="15dp"
+            android:clickable="true"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="15dp"
+            android:text="@string/select_destination_folder"
+            android:textColor="@android:color/white"
+            android:layout_gravity="center_vertical"
+            style="@style/TextLarge"
+            />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:id="@+id/actions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="horizontal"
+        android:background="@color/gray_light"
+        >
+
+        <TextView
+            android:id="@+id/confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:padding="15dp"
+            android:text="@string/move"
+            android:textColor="@color/gray_dark"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            style="@style/Text"
+            />
+
+        <TextView
+            android:id="@+id/cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toLeftOf="@id/confirm"
+            android:padding="15dp"
+            android:text="@android:string/cancel"
+            android:textColor="@color/gray_dark"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            style="@style/Text"
+            />
+
+    </RelativeLayout>
+
+    <View
+        android:id="@+id/actions_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_above="@id/actions"
+        android:background="@color/gray"
+        />
+
+    <org.faudroids.mrhyde.ui.utils.UnscrollableRecyclerView
+        android:id="@+id/list"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:layout_below="@id/header"
+        android:layout_above="@id/actions_divider"
+        android:paddingBottom="@dimen/list_padding_bottom"
+        android:paddingTop="@dimen/list_padding_top"
+        android:clipToPadding="false"
+        />
+
+    <include layout="@layout/spinner"/>
+
+</RelativeLayout>
+

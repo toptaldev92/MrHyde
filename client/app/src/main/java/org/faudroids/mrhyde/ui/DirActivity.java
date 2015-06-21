@@ -59,7 +59,8 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 	private static final int
 			REQUEST_COMMIT = 42,
 			REQUEST_EDIT_FILE = 43,
-			REQUEST_SELECT_PHOTO = 44;
+			REQUEST_SELECT_PHOTO = 44,
+			REQUEST_SELECT_DIR = 45;
 
 	static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
@@ -279,6 +280,18 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 						})
 						.show();
 				break;
+
+			case REQUEST_SELECT_DIR:
+				if (resultCode != RESULT_OK) return;
+
+				// get root note
+				DirNode rootNode = pathNodeAdapter.getSelectedNode();
+				while (rootNode.getParent() != null) rootNode = (DirNode) rootNode.getParent();
+
+				// get selected dir
+				DirNode selectedDir = (DirNode) nodeUtils.restoreNode(SelectDirActivity.EXTRA_SELECTED_DIR, data, rootNode);
+				Timber.d("selected " + selectedDir.getPath());
+				break;
 		}
 	}
 
@@ -332,6 +345,14 @@ public final class DirActivity extends AbstractActionBarActivity implements DirA
 						.add(new DefaultErrorAction(this, "failed to rename file"))
 						.add(new HideSpinnerAction(this))
 						.build()));
+	}
+
+
+	@Override
+	public void onMoveTo(FileNode fileNode) {
+		Intent intent = new Intent(this, SelectDirActivity.class);
+		intent.putExtra(SelectDirActivity.EXTRA_REPOSITORY, repository);
+		startActivityForResult(intent, REQUEST_SELECT_DIR);
 	}
 
 

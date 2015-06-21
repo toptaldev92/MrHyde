@@ -12,6 +12,12 @@
         <item name="android:checkboxStyle">@style/CheckBoxStyle</item>
     </style>
 
+    <style name="AppDialogTheme" parent="Theme.AppCompat.Light.Dialog">
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
     <style name="ActionOverflowStyle" parent="@style/Widget.AppCompat.ActionButton.Overflow">
         <item name="android:src">@drawable/abc_ic_menu_moreoverflow_mtrl_alpha</item>
     </style>

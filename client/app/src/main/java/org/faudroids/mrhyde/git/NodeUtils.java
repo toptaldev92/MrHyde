@@ -20,8 +20,8 @@ public class NodeUtils {
 	public void saveNode(String key, Intent intent, AbstractNode node) {
 		Bundle extras = intent.getExtras();
 		if (extras == null) extras = new Bundle();
-		intent.putExtras(extras);
 		saveNode(key, extras, node);
+		intent.putExtras(extras);
 	}
 
 
