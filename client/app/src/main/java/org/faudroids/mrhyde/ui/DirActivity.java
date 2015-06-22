@@ -21,7 +21,6 @@ import org.faudroids.mrhyde.git.AbstractNode;
 import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileData;
 import org.faudroids.mrhyde.git.FileNode;
-import org.faudroids.mrhyde.git.RepositoryManager;
 import org.faudroids.mrhyde.ui.utils.ImageUtils;
 import org.faudroids.mrhyde.ui.utils.UiUtils;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
@@ -55,7 +54,6 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 	@InjectView(R.id.add_image) private FloatingActionButton addImageButton;
 	@InjectView(R.id.add_folder) private FloatingActionButton addFolderButton;
 
-	@Inject private RepositoryManager repositoryManager;
 	@Inject private ActivityIntentFactory intentFactory;
 	@Inject private ImageUtils imageUtils;
 
@@ -125,12 +123,6 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 
 	@Override
 	public boolean onPrepareOptionsMenu(Menu menu) {
-		MenuItem item = menu.findItem(R.id.action_mark_repository);
-		if (repositoryManager.isRepositoryFavourite(repository))
-			item.setTitle(getString(R.string.action_unmark_repository));
-		else item.setTitle(getString(R.string.action_mark_repository));
-
-		// hide menu during loading
 		if (isSpinnerVisible()) {
 			menu.findItem(R.id.action_commit).setVisible(false);
 			menu.findItem(R.id.action_preview).setVisible(false);
@@ -149,16 +141,6 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 
 			case R.id.action_preview:
 				startActivity(intentFactory.createPreviewIntent(repository));
-				return true;
-
-			case R.id.action_mark_repository:
-				if (repositoryManager.isRepositoryFavourite(repository)) {
-					repositoryManager.unmarkRepositoryAsFavourite(repository);
-					Toast.makeText(this, getString(R.string.unmarked_toast), Toast.LENGTH_SHORT).show();
-				} else {
-					repositoryManager.markRepositoryAsFavourite(repository);
-					Toast.makeText(this, getString(R.string.marked_toast), Toast.LENGTH_SHORT).show();
-				}
 				return true;
 
 			case R.id.action_discard_changes:

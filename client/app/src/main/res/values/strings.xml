@@ -29,8 +29,6 @@
     <string name="action_move">Move to …</string>
     <string name="action_commit">Commit</string>
     <string name="action_preview">Preview</string>
-    <string name="action_mark_repository">Mark repo as favourite</string>
-    <string name="action_unmark_repository">Unmark repo as favourite</string>
     <string name="action_discard_changes">Discard changes</string>
     <string name="action_close">Close</string>
     <string name="action_show_line_numbers">Line numbers</string>
