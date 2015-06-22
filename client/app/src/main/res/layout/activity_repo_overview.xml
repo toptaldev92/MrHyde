@@ -310,6 +310,11 @@
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 
-    <include layout="@layout/spinner"/>
+    <include
+        android:layout_marginTop="?android:attr/actionBarSize"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        layout="@layout/spinner"
+        />
 
 </RelativeLayout>

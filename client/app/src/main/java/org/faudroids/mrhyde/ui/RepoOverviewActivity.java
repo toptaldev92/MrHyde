@@ -202,14 +202,6 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			}
 		});
 
-		// delay first action bar update until after onCreate (image seizges are unknown otherwise)
-		overviewBackgroundImage.post(new Runnable() {
-			@Override
-			public void run() {
-				onScrollChanged();
-			}
-		});
-
 		// setup favourite button
 		if (repositoryManager.isRepositoryFavourite(repository)) {
 			favouriteButton.setSelected(true);
@@ -264,6 +256,9 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 						else noPostsView.setVisibility(View.VISIBLE);
 						if (jekyllContent.drafts.isEmpty()) draftsCard.setVisibility(View.GONE);
 						else draftsCard.setVisibility(View.VISIBLE);
+
+						// refresh action bar backgroud drawable
+						onScrollChanged();
 
 					}
 				}, new ErrorActionBuilder()
