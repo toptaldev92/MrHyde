@@ -32,6 +32,8 @@
         android:layout_width="match_parent"
         android:paddingBottom="@dimen/list_padding_bottom"
         android:paddingTop="@dimen/list_padding_top"
+        android:paddingLeft="@dimen/list_horizontal_margin"
+        android:paddingRight="@dimen/list_horizontal_margin"
         android:clipToPadding="false"
         />
 
