@@ -187,40 +187,30 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			}
 		});
 
-		// setup scroll partially hides top image
-		actionBarDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
-		getSupportActionBar().setBackgroundDrawable(actionBarDrawable);
-		scrollView.setOnScrollListener(new ObservableScrollView.OnScrollListener() {
-			@Override
-			public void onScrollChanged(ScrollView scrollView, int l, int t, int oldL, int oldT) {
-				// show action bar color
-				final int headerHeight = overviewBackgroundImage.getHeight() - getSupportActionBar().getHeight();
-				final float ratio = (float) Math.min(Math.max(t, 0), headerHeight) / headerHeight;
-				final int newAlpha = (int) (ratio * 255);
-				actionBarDrawable.setAlpha(newAlpha);
-
-				// resize owner icon
-				RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) repoOwnerImage.getLayoutParams();
-				float minSize = getResources().getDimension(R.dimen.overview_owner_icon_size_min);
-				float maxSize = getResources().getDimension(R.dimen.overview_owner_icon_size_max);
-				float minLeftMargin = getResources().getDimension(R.dimen.overview_owner_icon_margin_left);
-				float minTopMargin = getResources().getDimension(R.dimen.overview_owner_icon_margin_top);
-				float topMarginAddition = getResources().getDimension(R.dimen.overview_owner_icon_margin_top_addition);
-				float size = (minSize + (maxSize - minSize) * (1 - ratio));
-				params.height = (int) size;
-				params.width = (int) size;
-				params.leftMargin = (int) (minLeftMargin + (maxSize - size) / 2); // keep left margin stable
-				params.topMargin = (int) (minTopMargin + (maxSize - size) + topMarginAddition * ratio); // moves icon down while resizing
-				repoOwnerImage.setLayoutParams(params);
-			}
-		});
-
 		// load owner image
 		Picasso.with(this)
 				.load(repository.getOwner().getAvatarUrl())
 				.resizeDimen(R.dimen.overview_owner_icon_size_max, R.dimen.overview_owner_icon_size_max)
 				.placeholder(R.drawable.octocat_black)
 				.into(repoOwnerImage);
+
+		// setup scroll partially hides top image
+		actionBarDrawable = new ColorDrawable(getResources().getColor(R.color.colorPrimary));
+		getSupportActionBar().setBackgroundDrawable(actionBarDrawable);
+		scrollView.setOnScrollListener(new ObservableScrollView.OnScrollListener() {
+			@Override
+			public void onScrollChanged(ScrollView scrollView, int l, int t, int oldL, int oldT) {
+				RepoOverviewActivity.this.onScrollChanged();
+			}
+		});
+
+		// delay first action bar update until after onCreate (image seizges are unknown otherwise)
+		overviewBackgroundImage.post(new Runnable() {
+			@Override
+			public void run() {
+				onScrollChanged();
+			}
+		});
 
 		// setup favourite button
 		if (repositoryManager.isRepositoryFavourite(repository)) {
@@ -281,6 +271,31 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 						.add(new DefaultErrorAction(RepoOverviewActivity.this, "failed to load posts"))
 						.add(new HideSpinnerAction(RepoOverviewActivity.this))
 						.build()));
+	}
+
+
+	// updates action bar and repo image during scroll
+	private void onScrollChanged() {
+		// show action bar color
+		final int headerHeight = overviewBackgroundImage.getHeight() - getSupportActionBar().getHeight();
+		final float ratio = (float) Math.min(Math.max(scrollView.getScrollY(), 0), headerHeight) / headerHeight;
+
+		final int newAlpha = (int) (ratio * 255);
+		actionBarDrawable.setAlpha(newAlpha);
+
+		// resize owner icon
+		RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) repoOwnerImage.getLayoutParams();
+		float minSize = getResources().getDimension(R.dimen.overview_owner_icon_size_min);
+		float maxSize = getResources().getDimension(R.dimen.overview_owner_icon_size_max);
+		float minLeftMargin = getResources().getDimension(R.dimen.overview_owner_icon_margin_left);
+		float minTopMargin = getResources().getDimension(R.dimen.overview_owner_icon_margin_top);
+		float topMarginAddition = getResources().getDimension(R.dimen.overview_owner_icon_margin_top_addition);
+		float size = (minSize + (maxSize - minSize) * (1 - ratio));
+		params.height = (int) size;
+		params.width = (int) size;
+		params.leftMargin = (int) (minLeftMargin + (maxSize - size) / 2); // keep left margin stable
+		params.topMargin = (int) (minTopMargin + (maxSize - size) + topMarginAddition * ratio); // moves icon down while resizing
+		repoOwnerImage.setLayoutParams(params);
 	}
 
 
