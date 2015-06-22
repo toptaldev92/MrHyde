@@ -22,7 +22,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/favourites_empty"
-        style="@style/TextLarge"
+        android:textStyle="italic"
+        style="@style/TextSecondary"
         />
     
     <com.getbase.floatingactionbutton.AddFloatingActionButton
