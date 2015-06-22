@@ -3,25 +3,26 @@ package org.faudroids.mrhyde.ui;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.Draft;
 import org.faudroids.mrhyde.jekyll.Post;
 import org.faudroids.mrhyde.ui.utils.JekyllUiUtils;
-import org.faudroids.mrhyde.utils.DefaultErrorAction;
-import org.faudroids.mrhyde.utils.DefaultTransformer;
-import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 
 import java.util.List;
 
 import rx.Observable;
-import rx.functions.Action1;
 
 public class PostsActivity extends AbstractJekyllActivity<Post> {
 
 	public PostsActivity() {
-		super(R.string.posts, R.string.no_posts, R.string.action_unpublish_post);
+		super(
+				R.string.posts,
+				R.string.no_posts,
+				R.string.action_unpublish_post,
+				R.string.post_unpublished,
+				R.string.unpublish_post_title,
+				R.string.unpublish_post_message);
 	}
 
 	@Override
@@ -40,18 +41,13 @@ public class PostsActivity extends AbstractJekyllActivity<Post> {
 	}
 
 	@Override
-	public void onMove(final Post post) {
-		jekyllManager.unpublishPost(post)
-				.compose(new DefaultTransformer<Draft>())
-				.subscribe(new Action1<Draft>() {
-					@Override
-					public void call(Draft draft) {
-						adapter.removeItem(post);
-						Toast.makeText(PostsActivity.this, getString(R.string.post_unpublished), Toast.LENGTH_SHORT).show();
-					}
-				}, new ErrorActionBuilder()
-						.add(new DefaultErrorAction(PostsActivity.this, "failed to unpublish post"))
-						.build());
+	protected Observable<Draft> createMoveObservable(Post post) {
+		return jekyllManager.unpublishPost(post);
+	}
+
+	@Override
+	protected String getMovedFilenameForItem(Post post) {
+		return "_drafts/" + jekyllManager.draftTitleToFilename(post.getTitle());
 	}
 
 	public class PostsAdapter extends AbstractAdapter {

@@ -47,7 +47,11 @@
     <string name="overwrite_confirm">Overwrite</string>
 
     <string name="draft_published">Moved draft to posts</string>
+    <string name="publish_draft_title">Publish draft?</string>
+    <string name="publish_draft_message">Do you want to move this draft to %1$s?</string>
     <string name="post_unpublished">Moved post to drafts</string>
+    <string name="unpublish_post_title">Unpublish post?</string>
+    <string name="unpublish_post_message">Do you want to move this post to %1$s?</string>
 
     <string name="nothing_to_undo">Nothing to undo</string>
     <string name="nothing_to_redo">Nothing to redo</string>

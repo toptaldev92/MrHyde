@@ -3,25 +3,26 @@ package org.faudroids.mrhyde.ui;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.jekyll.Draft;
 import org.faudroids.mrhyde.jekyll.Post;
 import org.faudroids.mrhyde.ui.utils.JekyllUiUtils;
-import org.faudroids.mrhyde.utils.DefaultErrorAction;
-import org.faudroids.mrhyde.utils.DefaultTransformer;
-import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 
 import java.util.List;
 
 import rx.Observable;
-import rx.functions.Action1;
 
 public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 
 	public DraftsActivity() {
-		super(R.string.drafts, R.string.no_drafts, R.string.action_publish_draft);
+		super(
+				R.string.drafts,
+				R.string.no_drafts,
+				R.string.action_publish_draft,
+				R.string.draft_published,
+				R.string.publish_draft_title,
+				R.string.publish_draft_message);
 	}
 
 	@Override
@@ -40,18 +41,13 @@ public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 	}
 
 	@Override
-	public void onMove(final Draft draft) {
-		jekyllManager.publishDraft(draft)
-				.compose(new DefaultTransformer<Post>())
-				.subscribe(new Action1<Post>() {
-					@Override
-					public void call(Post post) {
-						adapter.removeItem(draft);
-						Toast.makeText(DraftsActivity.this, getString(R.string.draft_published), Toast.LENGTH_SHORT).show();
-					}
-				}, new ErrorActionBuilder()
-						.add(new DefaultErrorAction(DraftsActivity.this, "failed to publish draft"))
-						.build());
+	protected Observable<Post> createMoveObservable(Draft draft) {
+		return jekyllManager.publishDraft(draft);
+	}
+
+	@Override
+	protected String getMovedFilenameForItem(Draft draft) {
+		return "_posts/" + jekyllManager.postTitleToFilename(draft.getTitle());
 	}
 
 	public class DraftsAdapter extends AbstractAdapter {

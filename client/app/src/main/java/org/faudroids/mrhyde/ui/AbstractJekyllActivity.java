@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.getbase.floatingactionbutton.AddFloatingActionButton;
 
@@ -63,20 +64,37 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 
 	private JekyllActionModeListener<T> actionModeListener;
 
-	private final int titleStringResource;
-	private final int emptyStringResource;
-	private final int moveActionStringResource;
+	private final int
+			titleStringResource,
+			emptyStringResource,
+			moveActionStringResource,
+			movedConfirmationStringResource,
+			moveTitleStringResource,
+			moveMessageStringResource;
 
-	AbstractJekyllActivity(int titleStringResource, int emptyStringResource, int moveActionStringResource) {
+
+	AbstractJekyllActivity(
+			int titleStringResource,
+			int emptyStringResource,
+			int moveActionStringResource,
+			int movedConfirmationStringResource,
+			int moveTitleStringResource,
+			int moveMessageStringResource) {
+
 		this.titleStringResource = titleStringResource;
 		this.emptyStringResource = emptyStringResource;
 		this.moveActionStringResource = moveActionStringResource;
+		this.movedConfirmationStringResource = movedConfirmationStringResource;
+		this.moveTitleStringResource = moveTitleStringResource;
+		this.moveMessageStringResource = moveMessageStringResource;
 	}
 
 
 	protected abstract void onAddClicked(JekyllUiUtils.OnContentCreatedListener<T> contentListener);
 	protected abstract Observable<List<T>> doLoadItems();
 	protected abstract AbstractAdapter createAdapter();
+	protected abstract Observable<?> createMoveObservable(T item);
+	protected abstract String getMovedFilenameForItem(T item); // what the item would be called if it were move to the other folder
 
 
 	@Override
@@ -207,6 +225,32 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 	@Override
 	public void onEdit(T item) {
 		startActivity(intentFactory.createTextEditorIntent(repository, item.getFileNode(), false));
+	}
+
+
+	@Override
+	public void onMove(final T item) {
+		new AlertDialog.Builder(this)
+				.setTitle(moveTitleStringResource)
+				.setMessage(getString(moveMessageStringResource, getMovedFilenameForItem(item)))
+				.setPositiveButton(R.string.move, new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						createMoveObservable(item)
+								.compose(new DefaultTransformer<>())
+								.subscribe(new Action1<Object>() {
+									@Override
+									public void call(Object o) {
+										adapter.removeItem(item);
+										Toast.makeText(AbstractJekyllActivity.this, getString(movedConfirmationStringResource), Toast.LENGTH_SHORT).show();
+									}
+								}, new ErrorActionBuilder()
+										.add(new DefaultErrorAction(AbstractJekyllActivity.this, "failed to move content"))
+										.build());
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, null)
+				.show();
 	}
 
 
