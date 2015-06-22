@@ -43,7 +43,6 @@ import org.faudroids.mrhyde.utils.ErrorActionBuilder;
 import org.faudroids.mrhyde.utils.HideSpinnerAction;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -162,10 +161,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				jekyllUiUtils.showNewPostDialog(jekyllManager, repository, new JekyllUiUtils.OnContentCreatedListener<Post>() {
 					@Override
 					public void onContentCreated(Post post) {
-						List<Post> posts = getAllItemsFromAdapter(postsListAdapter);
-						posts.add(post);
-						Collections.sort(posts);
-						setupFirstThreeEntries(posts, postsListAdapter);
+						loadJekyllContent();
 					}
 				});
 			}
@@ -177,11 +173,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				jekyllUiUtils.showNewDraftDialog(jekyllManager, repository, new JekyllUiUtils.OnContentCreatedListener<Draft>() {
 					@Override
 					public void onContentCreated(Draft draft) {
-						List<Draft> drafts = getAllItemsFromAdapter(draftsListAdapter);
-						drafts.add(draft);
-						Collections.sort(drafts);
-						if (draftsCard.getVisibility() == View.GONE) draftsCard.setVisibility(View.VISIBLE);
-						setupFirstThreeEntries(drafts, draftsListAdapter);
+						loadJekyllContent();
 					}
 				});
 			}
