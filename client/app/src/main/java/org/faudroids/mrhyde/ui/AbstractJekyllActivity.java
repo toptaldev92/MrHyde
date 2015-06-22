@@ -64,9 +64,11 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 	private JekyllActionModeListener<T> actionModeListener;
 
 	private final int titleStringResource;
+	private final int moveActionStringResource;
 
-	AbstractJekyllActivity(int titleStringResource) {
+	AbstractJekyllActivity(int titleStringResource, int moveActionStringResource) {
 		this.titleStringResource = titleStringResource;
+		this.moveActionStringResource = moveActionStringResource;
 	}
 
 
@@ -109,7 +111,7 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 		});
 
 		// prepare action mode
-		actionModeListener = new JekyllActionModeListener<>(this, this);
+		actionModeListener = new JekyllActionModeListener<>(this, this, moveActionStringResource);
 
 		// load posts
 		loadItems();
@@ -236,6 +238,11 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 		public void addItem(T item) {
 			itemsList.add(item);
 			Collections.sort(itemsList);
+			notifyDataSetChanged();
+		}
+
+		public void removeItem(T item) {
+			itemsList.remove(item);
 			notifyDataSetChanged();
 		}
 

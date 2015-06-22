@@ -176,18 +176,33 @@ public final class FileManager {
 
 
 	/**
-	 * Writes the contents of a file to a new location and deletes the old file.
+	 * {@link #moveFile(FileNode, DirNode, String)}
 	 */
-	public Observable<Void> moveFile(final FileNode oldFileNode, DirNode parentNode) {
-		final FileNode newFileNode = createNewFile(parentNode, oldFileNode.getPath());
+	public Observable<FileNode> moveFile(final FileNode oldFileNode, DirNode parentNode) {
+		return moveFile(oldFileNode, parentNode, oldFileNode.getPath());
+	}
+
+
+	/**
+	 * Writes the contents of a file to a new location and deletes the old file.
+	 * @return the newly created file.
+	 */
+	public Observable<FileNode> moveFile(final FileNode oldFileNode, DirNode parentNode, String newFileName) {
+		final FileNode newFileNode = createNewFile(parentNode, newFileName);
 		return readFile(oldFileNode)
-				.flatMap(new Func1<FileData, Observable<Void>>() {
+				.flatMap(new Func1<FileData, Observable<FileNode>>() {
 					@Override
-					public Observable<Void> call(FileData oldData) {
+					public Observable<FileNode> call(FileData oldData) {
 						FileData newData = new FileData(newFileNode, oldData.getData());
 						try {
 							writeFile(newData);
-							return deleteFile(oldFileNode);
+							return deleteFile(oldFileNode)
+									.flatMap(new Func1<Void, Observable<FileNode>>() {
+										@Override
+										public Observable<FileNode> call(Void aVoid) {
+											return Observable.just(newFileNode);
+										}
+									});
 						} catch (IOException e) {
 							return Observable.error(e);
 						}

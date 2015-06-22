@@ -325,10 +325,10 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 	private void moveFile(FileNode fileNodeToMove, DirNode targetDirNode) {
 		showSpinner();
 		compositeSubscription.add(fileManager.moveFile(fileNodeToMove, targetDirNode)
-				.compose(new DefaultTransformer<Void>())
-				.subscribe(new Action1<Void>() {
+				.compose(new DefaultTransformer<FileNode>())
+				.subscribe(new Action1<FileNode>() {
 					@Override
-					public void call(Void aVoid) {
+					public void call(FileNode newFileNode) {
 						hideSpinner();
 						Toast.makeText(DirActivity.this, getString(R.string.file_moved), Toast.LENGTH_SHORT).show();
 						refreshTree();

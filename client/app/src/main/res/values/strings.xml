@@ -36,6 +36,8 @@
     <string name="action_show_line_numbers">Line numbers</string>
     <string name="action_undo">Undo</string>
     <string name="action_redo">Redo</string>
+    <string name="action_publish_draft">Publish draft</string>
+    <string name="action_unpublish_post">Unpublish post</string>
 
     <string name="select_destination_folder">Select destination folder</string>
     <string name="move">Move</string>
@@ -43,6 +45,9 @@
     <string name="overwrite_file_title">Overwrite file</string>
     <string name="overwrite_file_message">"Overwrite existing file %1$s?"</string>
     <string name="overwrite_confirm">Overwrite</string>
+
+    <string name="draft_published">Moved draft to posts</string>
+    <string name="post_unpublished">Moved post to drafts</string>
 
     <string name="nothing_to_undo">Nothing to undo</string>
     <string name="nothing_to_redo">Nothing to redo</string>

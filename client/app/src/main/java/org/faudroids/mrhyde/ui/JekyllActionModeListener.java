@@ -15,11 +15,13 @@ class JekyllActionModeListener<T> implements ActionMode.Callback {
 
 	private T selectedItem = null;
 	private ActionMode actionMode;
+	private final int moveActionStringResource;
 
 
-	public JekyllActionModeListener(Activity activity, ActionSelectionListener<T> selectionListener) {
+	public JekyllActionModeListener(Activity activity, ActionSelectionListener<T> selectionListener, int moveActionStringResource) {
 		this.activity = activity;
 		this.selectionListener = selectionListener;
+		this.moveActionStringResource = moveActionStringResource;
 	}
 
 
@@ -51,7 +53,8 @@ class JekyllActionModeListener<T> implements ActionMode.Callback {
 
 	@Override
 	public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
-		return false;
+		menu.findItem(R.id.action_move).setTitle(moveActionStringResource);
+		return true;
 	}
 
 
@@ -65,6 +68,11 @@ class JekyllActionModeListener<T> implements ActionMode.Callback {
 
 			case R.id.action_delete:
 				selectionListener.onDelete(selectedItem);
+				stopActionMode();
+				return true;
+
+			case R.id.action_move:
+				selectionListener.onMove(selectedItem);
 				stopActionMode();
 				return true;
 		}
@@ -84,6 +92,7 @@ class JekyllActionModeListener<T> implements ActionMode.Callback {
 
 		void onDelete(T item);
 		void onEdit(T item);
+		void onMove(T item);
 		void onStopActionMode();
 
 	}

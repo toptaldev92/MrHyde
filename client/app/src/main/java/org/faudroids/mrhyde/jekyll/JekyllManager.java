@@ -176,6 +176,59 @@ public class JekyllManager {
 	}
 
 
+	/**
+	 * Publishes a previously created draft to the _posts folder.
+	 * @return the newly created post.
+	 */
+	public Observable<Post> publishDraft(final Draft draft) {
+		final String postTitle = postTitleToFilename(draft.getTitle());
+		return fileManager.getTree()
+				// move draft
+				.flatMap(new Func1<DirNode, Observable<FileNode>>() {
+					@Override
+					public Observable<FileNode> call(DirNode rootDir) {
+						DirNode postsDir = assertDir(rootDir, DIR_POSTS);
+						return fileManager.moveFile(draft.getFileNode(), postsDir, postTitle);
+					}
+				})
+				// create post object
+				.flatMap(new Func1<FileNode, Observable<Post>>() {
+					@Override
+					public Observable<Post> call(FileNode newNode) {
+						return Observable.just(new Post(
+								postTitle,
+								Calendar.getInstance().getTime(),
+								newNode));
+					}
+				});
+	}
+
+
+	/**
+	 * Moves a previously created post to the _drafts folder.
+	 * @return the newly created draft.
+	 */
+	public Observable<Draft> unpublishPost(final Post post) {
+		final String draftTitle = draftTitleToFilename(post.getTitle());
+		return fileManager.getTree()
+				// move draft
+				.flatMap(new Func1<DirNode, Observable<FileNode>>() {
+					@Override
+					public Observable<FileNode> call(DirNode rootDir) {
+						DirNode draftsDir = assertDir(rootDir, DIR_DRAFTS);
+						return fileManager.moveFile(post.getFileNode(), draftsDir, draftTitle);
+					}
+				})
+				// create draft object
+				.flatMap(new Func1<FileNode, Observable<Draft>>() {
+					@Override
+					public Observable<Draft> call(FileNode newNode) {
+						return Observable.just(new Draft(draftTitle, newNode));
+					}
+				});
+	}
+
+
 	private DirNode assertDir(DirNode rootNode, String dirName) {
 		AbstractNode dir = rootNode.getEntries().get(dirName);
 		if (dir == null) {
