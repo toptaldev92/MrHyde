@@ -30,6 +30,8 @@
         fab:fab_addButtonColorNormal="@color/red"
         fab:fab_addButtonColorPressed="@color/red_dark"
         fab:fab_addButtonPlusIconColor="@android:color/white"
+        fab:fab_labelsPosition="left"
+        fab:fab_labelStyle="@style/AddButtonLabelStyle"
        >
 
         <com.getbase.floatingactionbutton.FloatingActionButton
@@ -40,6 +42,7 @@
             fab:fab_colorNormal="@android:color/white"
             fab:fab_colorPressed="@color/gray_light_2"
             fab:fab_icon="@drawable/file"
+            fab:fab_title="@string/text"
             />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
@@ -50,6 +53,7 @@
             fab:fab_colorNormal="@android:color/white"
             fab:fab_colorPressed="@color/gray_light_2"
             fab:fab_icon="@drawable/image"
+            fab:fab_title="@string/image"
             />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
@@ -60,6 +64,7 @@
             fab:fab_colorNormal="@android:color/white"
             fab:fab_colorPressed="@color/gray_light_2"
             fab:fab_icon="@drawable/folder"
+            fab:fab_title="@string/folder"
             />
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
