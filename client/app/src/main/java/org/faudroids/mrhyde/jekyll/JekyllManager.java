@@ -168,6 +168,14 @@ public class JekyllManager {
 	}
 
 
+	/**
+	 * Deletes one {@link AbstractJekyllContent} from the local files system.
+	 */
+	public <T extends AbstractJekyllContent> Observable<Void> deleteContent(T content) {
+		return fileManager.deleteFile(content.getFileNode());
+	}
+
+
 	private DirNode assertDir(DirNode rootNode, String dirName) {
 		AbstractNode dir = rootNode.getEntries().get(dirName);
 		if (dir == null) {

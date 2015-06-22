@@ -1,5 +1,7 @@
 package org.faudroids.mrhyde.ui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,7 +39,9 @@ import rx.Observable;
 import rx.functions.Action1;
 
 @ContentView(R.layout.activity_posts_or_drafts)
-abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparable<T>> extends AbstractActionBarActivity {
+abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparable<T>>
+		extends AbstractActionBarActivity
+		implements JekyllActionModeListener.ActionSelectionListener<T>  {
 
 	private static final int REQUEST_COMMIT = 42;
 
@@ -56,6 +60,8 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 	protected JekyllManager jekyllManager;
 
 	@Inject private ActivityIntentFactory intentFactory;
+
+	private JekyllActionModeListener<T> actionModeListener;
 
 	private final int titleStringResource;
 
@@ -92,6 +98,7 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 		addButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				actionModeListener.stopActionMode();
 				onAddClicked(new JekyllUiUtils.OnContentCreatedListener<T>() {
 					@Override
 					public void onContentCreated(T newItem) {
@@ -100,6 +107,9 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 				});
 			}
 		});
+
+		// prepare action mode
+		actionModeListener = new JekyllActionModeListener<>(this, this);
 
 		// load posts
 		loadItems();
@@ -163,6 +173,46 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 	}
 
 
+	@Override
+	public void onDelete(final T item) {
+		new AlertDialog.Builder(this)
+				.setTitle(R.string.delete_title)
+				.setMessage(getString(R.string.delete_message, item.getFileNode().getPath()))
+				.setPositiveButton(getString(R.string.action_delete), new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						showSpinner();
+						compositeSubscription.add(jekyllManager.deleteContent(item)
+								.compose(new DefaultTransformer<Void>())
+								.subscribe(new Action1<Void>() {
+									@Override
+									public void call(Void aVoid) {
+										hideSpinner();
+										loadItems();
+									}
+								}, new ErrorActionBuilder()
+										.add(new DefaultErrorAction(AbstractJekyllActivity.this, "failed to delete file"))
+										.add(new HideSpinnerAction(AbstractJekyllActivity.this))
+										.build()));
+					}
+				})
+				.setNegativeButton(android.R.string.cancel, null)
+				.show();
+	}
+
+
+	@Override
+	public void onEdit(T item) {
+		startActivity(intentFactory.createTextEditorIntent(repository, item.getFileNode(), false));
+	}
+
+
+	@Override
+	public void onStopActionMode() {
+		adapter.notifyDataSetChanged();
+	}
+
+
 	abstract class AbstractAdapter extends RecyclerView.Adapter<AbstractAdapter.AbstractViewHolder> {
 
 		private final List<T> itemsList = new ArrayList<>();
@@ -204,9 +254,28 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 				view.setOnClickListener(new View.OnClickListener() {
 					@Override
 					public void onClick(View v) {
+						actionModeListener.stopActionMode();
 						startActivity(intentFactory.createTextEditorIntent(repository, item.getFileNode(), false));
 					}
 				});
+
+				// set long click starts action mode
+				view.setOnLongClickListener(new View.OnLongClickListener() {
+					@Override
+					public boolean onLongClick(View v) {
+						if (actionModeListener.startActionMode(item)) {
+							v.setSelected(true);
+						}
+						return true;
+					}
+				});
+
+				// check if item is selected
+				if (item.equals(actionModeListener.getSelectedItem())) {
+					view.setSelected(true);
+				} else {
+					view.setSelected(false);
+				}
 
 				doSetItem(item);
 			}
