@@ -61,14 +61,6 @@ public class JekyllUiUtils {
 		TextView titleView = (TextView) view.findViewById(R.id.text_title);
 		titleView.setText(draft.getTitle());
 		titleView.setTypeface(SANS_SERIF_LIGHT);
-
-		// set on click
-		view.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				context.startActivity(intentFactory.createTextEditorIntent(repository, draft.getFileNode(), false));
-			}
-		});
 	}
 
 
@@ -81,14 +73,6 @@ public class JekyllUiUtils {
 		// set date
 		TextView dateView = (TextView) view.findViewById(R.id.text_date);
 		dateView.setText(DATE_FORMAT.format(post.getDate()));
-
-		// set on click
-		view.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				context.startActivity(intentFactory.createTextEditorIntent(repository, post.getFileNode(), false));
-			}
-		});
 	}
 
 

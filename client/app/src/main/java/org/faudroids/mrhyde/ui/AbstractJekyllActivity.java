@@ -14,6 +14,7 @@ import com.getbase.floatingactionbutton.AddFloatingActionButton;
 
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
+import org.faudroids.mrhyde.jekyll.AbstractJekyllContent;
 import org.faudroids.mrhyde.jekyll.JekyllManager;
 import org.faudroids.mrhyde.jekyll.JekyllManagerFactory;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
@@ -36,7 +37,7 @@ import rx.Observable;
 import rx.functions.Action1;
 
 @ContentView(R.layout.activity_posts_or_drafts)
-abstract class AbstractJekyllActivity<T extends Comparable<T>> extends AbstractActionBarActivity {
+abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparable<T>> extends AbstractActionBarActivity {
 
 	private static final int REQUEST_COMMIT = 42;
 
@@ -198,7 +199,19 @@ abstract class AbstractJekyllActivity<T extends Comparable<T>> extends AbstractA
 				this.view = view;
 			}
 
-			protected abstract void setItem(T item);
+			public void setItem(final T item) {
+				// set on click
+				view.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						startActivity(intentFactory.createTextEditorIntent(repository, item.getFileNode(), false));
+					}
+				});
+
+				doSetItem(item);
+			}
+
+			protected abstract void doSetItem(T item);
 		}
 	}
 

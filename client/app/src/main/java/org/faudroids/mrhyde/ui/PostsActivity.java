@@ -54,7 +54,7 @@ public class PostsActivity extends AbstractJekyllActivity<Post> {
 			}
 
 			@Override
-			protected void setItem(Post item) {
+			protected void doSetItem(Post item) {
 				jekyllUiUtils.setPostOverview(view, item, repository);
 			}
 

@@ -8,44 +8,36 @@ import java.util.Date;
 /**
  * One Jekyll post. Can be compared to other posts via the creation date.
  */
-public class Post implements Comparable<Post> {
+public class Post extends AbstractJekyllContent implements Comparable<Post> {
 
-	private final String title;
 	private final Date date;
-	private final FileNode fileNode;
 
 	public Post(String title, Date date, FileNode fileNode) {
-		this.title = title;
+		super(title, fileNode);
 		this.date = date;
-		this.fileNode = fileNode;
 	}
 
-	public String getTitle() {
-		return title;
-	}
 
 	public Date getDate() {
 		return date;
 	}
 
-	public FileNode getFileNode() {
-		return fileNode;
-	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
+		if (!super.equals(o)) return false;
 		Post post = (Post) o;
-		return Objects.equal(title, post.title) &&
-				Objects.equal(date, post.date) &&
-				Objects.equal(fileNode, post.fileNode);
+		return Objects.equal(date, post.date);
 	}
+
 
 	@Override
 	public int hashCode() {
-		return Objects.hashCode(title, date, fileNode);
+		return Objects.hashCode(super.hashCode(), date);
 	}
+
 
 	@Override
 	public int compareTo(Post another) {
