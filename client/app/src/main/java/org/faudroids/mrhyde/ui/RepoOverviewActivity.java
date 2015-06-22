@@ -59,6 +59,10 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
 	public static final String EXTRA_REPOSITORY = "EXTRA_REPOSITORY";
 
+	private static final int
+			REQUEST_SHOW_LIST = 42,
+			REQUEST_SHOW_ALL_FILES = 43;
+
 	@InjectView(R.id.scroll_view) private ObservableScrollView scrollView;
 	@InjectView(R.id.image_overview_background) private ImageView overviewBackgroundImage;
 	@InjectView(R.id.image_repo_owner) private ImageView repoOwnerImage;
@@ -110,13 +114,14 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		draftsListView.setAdapter(draftsListAdapter);
 
 		// load content
+		showSpinner();
 		loadJekyllContent();
 
 		// setup posts clicks
 		postsHeader.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(intentFactory.createPostsIntent(repository));
+				startActivityForResult(intentFactory.createPostsIntent(repository), REQUEST_SHOW_LIST);
 			}
 		});
 
@@ -124,7 +129,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 		draftsHeader.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				startActivity(intentFactory.createDraftsIntent(repository));
+				startActivityForResult(intentFactory.createDraftsIntent(repository), REQUEST_SHOW_LIST);
 			}
 		});
 
@@ -134,7 +139,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 			public void onClick(View v) {
 				Intent intent = new Intent(RepoOverviewActivity.this, DirActivity.class);
 				intent.putExtra(DirActivity.EXTRA_REPOSITORY, repository);
-				startActivity(intent);
+				startActivityForResult(intent, REQUEST_SHOW_ALL_FILES);
 			}
 		});
 
@@ -235,7 +240,6 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
 
 	private void loadJekyllContent() {
-		showSpinner();
 		compositeSubscription.add(Observable.zip(
 				jekyllManager.getAllPosts(),
 				jekyllManager.getAllDrafts(),
@@ -249,7 +253,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 				.subscribe(new Action1<JekyllContent>() {
 					@Override
 					public void call(JekyllContent jekyllContent) {
-						hideSpinner();
+						if (isSpinnerVisible()) hideSpinner();
 						actionBarDrawable.setAlpha(0); // delay until spinner is hidden
 						invalidateOptionsMenu(); // re-enable options menu
 
@@ -265,7 +269,9 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
 						// setup empty views
 						if (!jekyllContent.posts.isEmpty()) noPostsView.setVisibility(View.GONE);
+						else noPostsView.setVisibility(View.VISIBLE);
 						if (jekyllContent.drafts.isEmpty()) draftsCard.setVisibility(View.GONE);
+						else draftsCard.setVisibility(View.VISIBLE);
 
 					}
 				}, new ErrorActionBuilder()
@@ -302,14 +308,24 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 
 	private <T> void setupFirstThreeEntries(List<T> items, ArrayAdapter<T> listAdapter) {
 		// get first 3 posts
-		if (!items.isEmpty()) {
-			List<T> firstItems = new ArrayList<>();
-			for (int i = 0; i < 3 && i < items.size(); ++i) {
-				firstItems.add(items.get(i));
-			}
-			listAdapter.clear();
-			listAdapter.addAll(firstItems);
-			listAdapter.notifyDataSetChanged();
+		List<T> firstItems = new ArrayList<>();
+		for (int i = 0; i < 3 && i < items.size(); ++i) {
+			firstItems.add(items.get(i));
+		}
+		listAdapter.clear();
+		listAdapter.addAll(firstItems);
+		listAdapter.notifyDataSetChanged();
+	}
+
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		switch(requestCode) {
+			// update posts / drafts list (might have changed)
+			case REQUEST_SHOW_LIST:
+			case REQUEST_SHOW_ALL_FILES:
+				loadJekyllContent();
+				break;
 		}
 	}
 
@@ -353,6 +369,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 							@Override
 							public void onClick(DialogInterface dialog, int which) {
 								jekyllManager.resetRepository();
+								showSpinner();
 								loadJekyllContent();
 							}
 						})
@@ -396,7 +413,7 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 					startActivity(intentFactory.createTextEditorIntent(repository, item.getFileNode(), false));
 				}
 			});
-			
+
 			doGetView(view, item);
 			return view;
 		}
