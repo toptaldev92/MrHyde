@@ -121,7 +121,7 @@ public final class GitManager {
 
 
 	/**
-	 * Returns all files that have been changed (including empty dirs), regardless if they are new or not.
+	 * Returns all files that have been changed (not including empty dirs), regardless if they are new or not.
 	 * This does not include deleted files.
 	 */
 	public Observable<Set<String>> getChangedFiles() {
@@ -132,6 +132,12 @@ public final class GitManager {
 				allFiles.addAll(status.getUntracked());
 				allFiles.addAll(status.getUntrackedFolders());
 				allFiles.removeAll(status.getMissing());
+				Iterator<String> filesIterator = allFiles.iterator();
+				while (filesIterator.hasNext()) {
+					if (new File(rootDir, filesIterator.next()).isDirectory()) {
+						filesIterator.remove();
+					}
+				}
 				return Observable.just(allFiles);
 			}
 		});

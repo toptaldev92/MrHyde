@@ -321,20 +321,14 @@ public final class FileManager {
 					public Observable<SavedBlob> call(final String filePath) {
 						final Blob blob = new Blob();
 						File file = new File(rootDir, filePath);
-						if (file.isDirectory()) {
-							Timber.d("ignoring dir " + filePath + " for blob creation");
-							return Observable.empty();
-
-						} else {
-							blob.setContent(new String(Base64.encode(readFile(file), Base64.DEFAULT))).setEncoding(Blob.ENCODING_BASE64);
-							return gitHubApiWrapper.createBlob(repository, blob)
-									.flatMap(new Func1<String, Observable<SavedBlob>>() {
-										@Override
-										public Observable<SavedBlob> call(String blobSha) {
-											return Observable.just(new SavedBlob(filePath, blobSha, blob));
-										}
-									});
-						}
+						blob.setContent(new String(Base64.encode(readFile(file), Base64.DEFAULT))).setEncoding(Blob.ENCODING_BASE64);
+						return gitHubApiWrapper.createBlob(repository, blob)
+								.flatMap(new Func1<String, Observable<SavedBlob>>() {
+									 @Override
+									 public Observable<SavedBlob> call(String blobSha) {
+										return Observable.just(new SavedBlob(filePath, blobSha, blob));
+								}
+							});
 					}
 				})
 				// wait for all blobs
@@ -479,8 +473,6 @@ public final class FileManager {
 						Set<String> binaryFiles = new HashSet<>();
 						for (String changedFile : changedFiles) {
 							try {
-								File file = new File(rootDir, changedFile);
-								if (file.isDirectory()) continue;
 								if (fileUtils.isBinary(new File(rootDir, changedFile))) {
 									binaryFiles.add(changedFile);
 								}
