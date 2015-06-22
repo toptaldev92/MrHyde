@@ -1,5 +1,6 @@
 package org.faudroids.mrhyde.ui;
 
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,9 +12,17 @@ import org.faudroids.mrhyde.ui.utils.JekyllUiUtils;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
+import roboguice.inject.InjectView;
 import rx.Observable;
 
 public class DraftsActivity extends AbstractJekyllActivity<Draft> {
+
+	private static final String HELP_PUBLISH_DRAFTS = "HELP_PUBLISH_DRAFTS";
+
+	@Inject private HelpManager helpManager;
+	@InjectView(R.id.card_help) private View helpView;
 
 	public DraftsActivity() {
 		super(
@@ -23,6 +32,16 @@ public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 				R.string.draft_published,
 				R.string.publish_draft_title,
 				R.string.publish_draft_message);
+	}
+
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		// setup help for publishing drafts
+		if (helpManager.shouldDisplayHelp(HELP_PUBLISH_DRAFTS)) {
+			helpManager.setupHelpView(HELP_PUBLISH_DRAFTS, helpView, R.string.help_publish_draft_title, R.string.help_publish_draft_message);
+		}
 	}
 
 	@Override

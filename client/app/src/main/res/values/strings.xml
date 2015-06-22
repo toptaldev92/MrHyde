@@ -186,4 +186,8 @@
     <string name="error_network_message">Failed to perform request due to a problem with the internet connection</string>
     <string name="error_empty_repo_title">Empty repository</string>
     <string name="error_empty_repo_message">It seems that this repository is empty. Unfortunately we currently do not support empty repository, sorry.</string>
+
+    <string name="help_got_it">Got it!</string>
+    <string name="help_publish_draft_title">Publishing drafts</string>
+    <string name="help_publish_draft_message">To move a draft to the post folder long click on it.</string>
 </resources>

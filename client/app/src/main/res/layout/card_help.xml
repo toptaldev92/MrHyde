@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/card_help"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginRight="@dimen/card_horizontal_margin"
+    android:layout_marginLeft="@dimen/card_horizontal_margin"
+    android:layout_marginTop="15dp"
+    android:layout_marginBottom="15dp"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/blue"
+        android:orientation="vertical"
+        android:paddingLeft="15dp"
+        android:paddingTop="15dp"
+        >
+
+        <TextView
+            android:id="@+id/text_help_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Some title"
+            android:textColor="@android:color/white"
+            android:layout_marginRight="15dp"
+            style="@style/TextLarge"
+            />
+
+        <TextView
+            android:id="@+id/text_help_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:layout_marginRight="15dp"
+            android:text="And then therer is this message which goes below the title!"
+            android:textColor="@android:color/white"
+            style="@style/Text"
+            />
+
+        <TextView
+            android:id="@+id/text_help_ok"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right"
+            android:padding="15dp"
+            android:text="@string/help_got_it"
+            android:textColor="@android:color/white"
+            android:textAllCaps="true"
+            android:textStyle="bold"
+            android:background="?android:attr/selectableItemBackground"
+            android:clickable="true"
+            style="@style/Text"
+            />
+
+    </LinearLayout>
+
+</android.support.v7.widget.CardView>
