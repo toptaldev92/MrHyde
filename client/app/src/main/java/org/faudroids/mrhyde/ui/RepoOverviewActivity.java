@@ -29,6 +29,7 @@ import com.squareup.picasso.Picasso;
 import org.eclipse.egit.github.core.Repository;
 import org.faudroids.mrhyde.R;
 import org.faudroids.mrhyde.git.RepositoryManager;
+import org.faudroids.mrhyde.jekyll.AbstractJekyllContent;
 import org.faudroids.mrhyde.jekyll.Draft;
 import org.faudroids.mrhyde.jekyll.JekyllManager;
 import org.faudroids.mrhyde.jekyll.JekyllManagerFactory;
@@ -372,24 +373,50 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	}
 
 
+	private abstract class AbstractListAdapter<T extends AbstractJekyllContent> extends ArrayAdapter<T> {
+
+		private final int viewResource;
+
+		public AbstractListAdapter(Context context, int viewResource) {
+			super(context, viewResource);
+			this.viewResource = viewResource;
+		}
+
+
+		public View getView(int position, View convertView, ViewGroup parent) {
+			// get item + view
+			final T item = getItem(position);
+			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+			View view = inflater.inflate(viewResource, parent, false);
+
+			// setup click to edit
+			view.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					startActivity(intentFactory.createTextEditorIntent(repository, item.getFileNode(), false));
+				}
+			});
+			
+			doGetView(view, item);
+			return view;
+		}
+
+		protected abstract void doGetView(View view, T item);
+	}
+
+
 	/**
 	 * List adapter for displaying {@link org.faudroids.mrhyde.jekyll.Post}s.
 	 */
-	private class PostsListAdapter extends ArrayAdapter<Post> {
+	private class PostsListAdapter extends AbstractListAdapter<Post> {
 
 		public PostsListAdapter(Context context) {
 			super(context, R.layout.item_overview_post);
 		}
 
-		public View getView(int position, View convertView, ViewGroup parent) {
-			final Post post = getItem(position);
-
-			// create and fill view
-			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View view = inflater.inflate(R.layout.item_overview_post, parent, false);
+		@Override
+		protected void doGetView(View view, Post post) {
 			jekyllUiUtils.setPostOverview(view, post, repository);
-
-			return view;
 		}
 	}
 
@@ -397,21 +424,15 @@ public final class RepoOverviewActivity extends AbstractActionBarActivity {
 	/**
 	 * List adapter for displaying {@link org.faudroids.mrhyde.jekyll.Draft}s.
 	 */
-	private class DraftsListAdapter extends ArrayAdapter<Draft> {
+	private class DraftsListAdapter extends AbstractListAdapter<Draft> {
 
 		public DraftsListAdapter(Context context) {
 			super(context, R.layout.item_overview_draft);
 		}
 
-		public View getView(int position, View convertView, ViewGroup parent) {
-			final Draft draft = getItem(position);
-
-			// create and fill view
-			LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View view = inflater.inflate(R.layout.item_overview_draft, parent, false);
+		@Override
+		protected void doGetView(View view, Draft draft) {
 			jekyllUiUtils.setDraftOverview(view, draft, repository);
-
-			return view;
 		}
 	}
 
