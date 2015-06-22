@@ -64,10 +64,12 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 	private JekyllActionModeListener<T> actionModeListener;
 
 	private final int titleStringResource;
+	private final int emptyStringResource;
 	private final int moveActionStringResource;
 
-	AbstractJekyllActivity(int titleStringResource, int moveActionStringResource) {
+	AbstractJekyllActivity(int titleStringResource, int emptyStringResource, int moveActionStringResource) {
 		this.titleStringResource = titleStringResource;
+		this.emptyStringResource = emptyStringResource;
 		this.moveActionStringResource = moveActionStringResource;
 	}
 
@@ -75,7 +77,6 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 	protected abstract void onAddClicked(JekyllUiUtils.OnContentCreatedListener<T> contentListener);
 	protected abstract Observable<List<T>> doLoadItems();
 	protected abstract AbstractAdapter createAdapter();
-	protected abstract int getEmptyStringResource();
 
 
 	@Override
@@ -127,7 +128,7 @@ abstract class AbstractJekyllActivity<T extends AbstractJekyllContent & Comparab
 						if (isSpinnerVisible()) hideSpinner();
 						adapter.setItems(items);
 						if (items.isEmpty()) {
-							emptyView.setText(getString(getEmptyStringResource()));
+							emptyView.setText(getString(emptyStringResource));
 							emptyView.setVisibility(View.VISIBLE);
 						} else {
 							emptyView.setVisibility(View.GONE);

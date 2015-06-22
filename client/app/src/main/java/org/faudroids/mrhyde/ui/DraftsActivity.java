@@ -21,7 +21,7 @@ import rx.functions.Action1;
 public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 
 	public DraftsActivity() {
-		super(R.string.drafts, R.string.action_publish_draft);
+		super(R.string.drafts, R.string.no_drafts, R.string.action_publish_draft);
 	}
 
 	@Override
@@ -37,11 +37,6 @@ public class DraftsActivity extends AbstractJekyllActivity<Draft> {
 	@Override
 	protected AbstractAdapter createAdapter() {
 		return new DraftsAdapter();
-	}
-
-	@Override
-	protected int getEmptyStringResource() {
-		return R.string.no_drafts;
 	}
 
 	@Override

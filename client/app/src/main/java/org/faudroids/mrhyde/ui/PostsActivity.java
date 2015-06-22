@@ -21,7 +21,7 @@ import rx.functions.Action1;
 public class PostsActivity extends AbstractJekyllActivity<Post> {
 
 	public PostsActivity() {
-		super(R.string.posts, R.string.action_unpublish_post);
+		super(R.string.posts, R.string.no_posts, R.string.action_unpublish_post);
 	}
 
 	@Override
@@ -37,11 +37,6 @@ public class PostsActivity extends AbstractJekyllActivity<Post> {
 	@Override
 	protected AbstractAdapter createAdapter() {
 		return new PostsAdapter();
-	}
-
-	@Override
-	protected int getEmptyStringResource() {
-		return R.string.no_posts;
 	}
 
 	@Override
