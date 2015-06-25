@@ -52,7 +52,7 @@ class RepositoryManager:
     def cm(self):
         return self.__cm
 
-    def init_repository(self, url, diff, static_files):
+    def init_repository(self, url, diff, static_files, draft=True):
         try:
             database = dbhandler.DbHandler(self.cm().get_db_file())
             id = self.utils().generateId(self.cm().get_hash_size())
@@ -65,7 +65,7 @@ class RepositoryManager:
             database.insertData('repo', id, repo_path, deploy_path, url, int(time()), 1)
             shutil.copytree(OWN_PATH + '/redirector/', deploy_path)
 
-            t = threading.Thread(target=self.init_repository_async, args=(id, deploy_path, repo_path, url, diff, static_files))
+            t = threading.Thread(target=self.init_repository_async, args=(id, deploy_path, repo_path, url, diff, static_files, draft))
             t.daemon = True
             t.start()
 
@@ -74,7 +74,7 @@ class RepositoryManager:
             logger.error(exception.__str__())
             raise
 
-    def init_repository_async(self, id, deploy_path, repo_path, url, diff, static_files):
+    def init_repository_async(self, id, deploy_path, repo_path, url, diff, static_files, draft=True):
         if not isdir(self.__base_dir):
             makedirs(self.__base_dir, 0o755, True)
         try:
@@ -82,7 +82,7 @@ class RepositoryManager:
             if diff is not None and diff is not '':
                 self.apply_diff(id, repo_path, diff)
             logger.info('Repository cloned to ' + repo_path + '.')
-            self.jm().build(repo_path, deploy_path)
+            self.jm().build(repo_path, deploy_path, draft)
             self.fm().dispatch_static_files(deploy_path, static_files)
 
         except OSError as exception:
@@ -133,14 +133,14 @@ class RepositoryManager:
             raise
 
     # TODO update repos async
-    def update_repository(self, id, diff):
+    def update_repository(self, id, diff, draft=True):
         try:
             database = dbhandler.DbHandler(self.cm().get_db_file())
             repo_path = database.list('repo', 'path', "id='%s'" % id)[0]
             deploy_path = database.list('repo', 'deploy_path', "id='%s'" % id)[0]
             diff_file = self.fm().create_diff_file(id, diff)
             self.apply_diff(id, repo_path, diff_file)
-            build_successful = self.jm().build(repo_path, deploy_path)
+            build_successful = self.jm().build(repo_path, deploy_path, draft)
             if build_successful:
                 return (id, ''.join(['https://', id, '.', self.__base_url]))
             else:

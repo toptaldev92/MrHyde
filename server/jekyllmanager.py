@@ -13,8 +13,10 @@ class JekyllManager:
     def __init__(self):
         self.__regex = re.compile("Error.*\.")
 
-    def build(self, build_path, deploy_path):
+    def build(self, build_path, deploy_path, draft=True):
         cmd = ['jekyll', 'build', '--source', build_path, '--destination', deploy_path, '--config', build_path+'/_config.yml,'+OWN_DIR+'/keep_files.yml']
+        if draft:
+            cmd.append('--drafts')
         with open(deploy_path+'/input.txt', 'w') as outfile:
             status_code = subprocess.call(cmd, stdout=outfile, stderr=outfile)
         with open(deploy_path+'/statuscode.txt', 'w') as outfile:

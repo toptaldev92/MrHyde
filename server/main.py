@@ -78,10 +78,11 @@ def create_repository():
             diff = request.json.get('gitDiff')
             client_secret = request.json.get('clientSecret')
             payload = request.json.get('staticFiles')
+            draft = request.json.get('draft', default=True)
             if client_secret not in cm.get_client_secret():
                 abort(400, 'Bad request')
             try:
-                (repo_id, repo_url) = rm.init_repository(url, diff, payload)
+                (repo_id, repo_url) = rm.init_repository(url, diff, payload, draft=draft)
             except SQLError:
                 abort(500, 'Internal error. Sorry for that!')
             expires = utils.get_expiration_date(repo_id)
@@ -162,9 +163,10 @@ def update_repository(id):
         if request.content_type.startswith('application/json'):
             diff = request.json.get('gitDiff')
             client_secret = request.json.get('clientSecret')
+            draft = request.json.get('draft', default=True)
             if client_secret not in cm.get_client_secret():
                 abort(400, 'Bad request')
-            repo_url = rm.update_repository(id, diff)
+            repo_url = rm.update_repository(id, diff, draft)
             expires = utils.get_expiration_date(id)
             return json.dumps({'previewUrl': repo_url, 'previewExpirationDate': expires, 'previewId': id})
         else:
