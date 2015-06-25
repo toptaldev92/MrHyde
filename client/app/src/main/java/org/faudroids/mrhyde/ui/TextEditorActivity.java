@@ -29,6 +29,7 @@ import org.faudroids.mrhyde.git.FileManagerFactory;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.NodeUtils;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
+import org.faudroids.mrhyde.ui.utils.SyntaxHighlighter;
 import org.faudroids.mrhyde.ui.utils.UndoRedoEditText;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
@@ -77,6 +78,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 	@Inject private InputMethodManager inputMethodManager;
 
 	@InjectView(R.id.content) private EditText editText;
+	private SyntaxHighlighter highlighter;
 	private UndoRedoEditText undoRedoEditText;
 
 	@InjectView(R.id.edit) private FloatingActionButton editButton;
@@ -96,6 +98,7 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		final boolean isNewFile = getIntent().getBooleanExtra(EXTRA_IS_NEW_FILE, false);
 		repository = (Repository) getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		fileManager = fileManagerFactory.createFileManager(repository);
+		this.highlighter = new SyntaxHighlighter(editText);
 
 		// hide line numbers by default
 		showingLineNumbers = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(KEY_SHOW_LINE_NUMBERS, false);
@@ -111,20 +114,20 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 		});
 
 		// setup line numbers
-		editText.addTextChangedListener(new TextWatcher() {
-			@Override
-			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-			}
-
-			@Override
-			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-			}
-
-			@Override
-			public void afterTextChanged(Editable s) {
-				updateLineNumbers();
-			}
-		});
+//		editText.addTextChangedListener(new TextWatcher() {
+//			@Override
+//			public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//			}
+//
+//			@Override
+//			public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+//			}
+//
+//			@Override
+//			public void afterTextChanged(Editable s) {
+//				updateLineNumbers();
+//			}
+//		});
 
 		// setup edit button
 		editButton.setOnClickListener(new View.OnClickListener() {
