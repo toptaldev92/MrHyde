@@ -129,7 +129,7 @@
         This app was developed as part of the Android Challenge: one app every month for one year
         (think of it as a New Year\'s resolution). MrHyde is our project for April.&lt;br/&gt;
         &lt;br/&gt;
-        If you want to know more be sure to check out our &lt;a href=&quot;http://faudroids.org&quot;&gt;website&lt;/a&gt;.
+        If you want to know more, be sure to check out our &lt;a href=&quot;http://faudroids.org&quot;&gt;website&lt;/a&gt;.
         This app is &lt;b&gt;open source&lt;/b&gt; and you can find everything on &lt;a href=&quot;https://github.com/FauDroids/MrHyde&quot;&gt;GitHub&lt;/a&gt;.&lt;br/&gt;
         &lt;br/&gt;
         We would love to hear from you! Send us an &lt;a href=&quot;mailto:ideas@faudroids.org&quot;&gt;email&lt;/a&gt; and let us know what you think!&lt;br/&gt;
@@ -145,7 +145,7 @@
     </string>
     <string name="credits">Credits</string>
     <string name="credits_msg">
-        This app is being powered by a number of small and large &lt;b&gt;open source projects&lt;/b&gt;
+        This app is being powered by a number of small and large &lt;b&gt;open source projects&lt;/b&gt;,
         which all together have made this project happen. We couldn\'t have done this without them.
         To those fellow developers out there spending their part time creating those libraries:
         you guys are awesome, keep on rocking!&lt;br&gt;
