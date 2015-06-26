@@ -12,12 +12,12 @@ public class TagFactory {
     private final HashMap<String, Tag> knownTags = new HashMap<>();
 
     public TagFactory() {
-        this.knownTags.put("*", new FontStyleTag(Typeface.ITALIC));
-        this.knownTags.put("_", new FontStyleTag(Typeface.ITALIC));
-        this.knownTags.put("**", new FontStyleTag(Typeface.BOLD));
-        this.knownTags.put("__", new FontStyleTag(Typeface.BOLD));
-        this.knownTags.put("***", new FontStyleTag(Typeface.BOLD_ITALIC));
-        this.knownTags.put("___", new FontStyleTag(Typeface.BOLD_ITALIC));
+        this.knownTags.put("*", new FontStyleTag(Typeface.ITALIC, "*"));
+        this.knownTags.put("_", new FontStyleTag(Typeface.ITALIC, "_"));
+        this.knownTags.put("**", new FontStyleTag(Typeface.BOLD, "**"));
+        this.knownTags.put("__", new FontStyleTag(Typeface.BOLD, "__"));
+        this.knownTags.put("***", new FontStyleTag(Typeface.BOLD_ITALIC, "***"));
+        this.knownTags.put("___", new FontStyleTag(Typeface.BOLD_ITALIC, "___"));
     }
 
     public HashMap<String, Tag> getKnownTags() {

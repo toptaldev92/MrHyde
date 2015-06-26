@@ -6,8 +6,8 @@ public class FontStyleTag extends Tag {
 
     private final int style;
 
-    public FontStyleTag(int style) {
-        super();
+    public FontStyleTag(int style, String tag) {
+        super(tag);
         this.style = style;
         this.span = new StyleSpan(this.style);
     }

@@ -2,6 +2,8 @@ package org.faudroids.mrhyde.ui.utils;
 
 import android.text.style.CharacterStyle;
 
+import java.util.ArrayList;
+
 public class Tag {
     private int openingStart = 0;
     private int openingEnd = 0;
@@ -9,12 +11,25 @@ public class Tag {
     private int closingEnd = 0;
 
     CharacterStyle span;
+    final String tag;
 
-    public Tag() {
+    private boolean topLevel = true;
+    private ArrayList<Tag> nestedTags = new ArrayList<>();
+
+    public Tag(String tag) {
+        this.tag= tag;
     }
 
     public CharacterStyle getSpan() {
         return this.span;
+    }
+
+    public String getTag() {
+        return this.tag;
+    }
+
+    public Character getTagChar() {
+        return this.tag.charAt(0);
     }
 
     public void openTag(int openingStart, int openingEnd) {
@@ -36,6 +51,38 @@ public class Tag {
                 (closingEnd - closingStart);
     }
 
+    public void isTopLevel(boolean topLevel) {
+        this.topLevel = topLevel;
+    }
+
+    public void addNestedTag(Tag tag) {
+        this.nestedTags.add(tag);
+    }
+
+    public void removeNestedTag(Tag tag) {
+        this.nestedTags.remove(tag);
+    }
+
+    public ArrayList<Tag> getNestedTags() {
+        if(!this.nestedTags.isEmpty()) {
+            return this.nestedTags;
+        } else {
+            return null;
+        }
+    }
+
+    public Tag getLastNestedElement() {
+        if(!this.nestedTags.isEmpty()) {
+            return this.nestedTags.get(this.nestedTags.size()-1);
+        } else {
+            return null;
+        }
+    }
+
+    public boolean isTopLevel() {
+        return this.topLevel;
+    }
+
     public int getOpeningStart() {
         return this.openingStart;
     }
@@ -50,5 +97,13 @@ public class Tag {
 
     public int getClosingEnd() {
         return this.closingEnd;
+    }
+
+    public boolean equals(Tag other) {
+        if(this.tag.equals(other.getTag())) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
