@@ -250,7 +250,7 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 
 				// get root note
 				DirNode rootNode = pathNodeAdapter.getSelectedNode();
-				while (rootNode.getParent() != null) rootNode = (DirNode) rootNode.getParent();
+				while (rootNode.getParent() != null) rootNode = rootNode.getParent();
 
 				// get selected dir and file
 				final DirNode selectedDir = (DirNode) nodeUtils.restoreNode(SelectDirActivity.EXTRA_SELECTED_DIR, data, rootNode);

@@ -156,7 +156,7 @@ public final class FileManager {
 				.flatMap(new Func1<FileData, Observable<FileNode>>() {
 					@Override
 					public Observable<FileNode> call(FileData data) {
-						final FileNode newFileNode = createNewFile((DirNode) oldFileNode.getParent(), newFileName);
+						final FileNode newFileNode = createNewFile(oldFileNode.getParent(), newFileName);
 						FileData newData = new FileData(newFileNode, data.getData());
 						try {
 							writeFile(newData);
@@ -287,7 +287,7 @@ public final class FileManager {
 					@Override
 					public Observable<Void> call(FileData fileContent) {
 						// remove from tree
-						DirNode parentNode = (DirNode) node.getParent();
+						DirNode parentNode = node.getParent();
 						parentNode.getEntries().remove(node.getPath());
 
 						// delete files

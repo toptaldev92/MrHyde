@@ -9,7 +9,7 @@ public final class DirNode extends AbstractNode {
 
 	private final Map<String, AbstractNode> entries = new HashMap<>();
 
-	DirNode(AbstractNode parent, String path, TreeEntry treeEntry) {
+	DirNode(DirNode parent, String path, TreeEntry treeEntry) {
 		super(parent, path, treeEntry);
 	}
 

@@ -7,18 +7,18 @@ import java.io.Serializable;
 
 public abstract class AbstractNode implements Comparable<AbstractNode>, Serializable {
 
-	private final AbstractNode parent;
+	private final DirNode parent;
 	private final String path;
 	private final TreeEntry treeEntry;
 
-	AbstractNode(AbstractNode parent, String path, TreeEntry treeEntry) {
+	AbstractNode(DirNode parent, String path, TreeEntry treeEntry) {
 		this.parent = parent;
 		this.path = path;
 		this.treeEntry = treeEntry;
 	}
 
 
-	public AbstractNode getParent() {
+	public DirNode getParent() {
 		return parent;
 	}
 
