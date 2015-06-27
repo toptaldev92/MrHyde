@@ -229,6 +229,22 @@ public class JekyllManager {
 	}
 
 
+	/**
+	 * Returns true if the passed in dir is the Jekyll posts dir.
+	 */
+	public boolean isPostsDir(DirNode node) {
+		return node.getPath().equals(DIR_POSTS);
+	}
+
+
+	/**
+	 * Returns true if the passed in dir is the Jekyll drafts dir.
+	 */
+	public boolean isDraftsDir(DirNode node) {
+		return node.getPath().equals(DIR_DRAFTS);
+	}
+
+
 	private DirNode assertDir(DirNode rootNode, String dirName) {
 		AbstractNode dir = rootNode.getEntries().get(dirName);
 		if (dir == null) {

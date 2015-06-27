@@ -32,7 +32,31 @@
         fab:fab_addButtonPlusIconColor="@android:color/white"
         fab:fab_labelsPosition="left"
         fab:fab_labelStyle="@style/AddButtonLabelStyle"
-       >
+        >
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            fab:fab_colorNormal="@android:color/white"
+            fab:fab_colorPressed="@color/gray_light_2"
+            fab:fab_icon="@drawable/post"
+            fab:fab_size="mini"
+            fab:fab_title="@string/post"
+            />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_draft"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            fab:fab_colorNormal="@android:color/white"
+            fab:fab_colorPressed="@color/gray_light_2"
+            fab:fab_icon="@drawable/draft"
+            fab:fab_size="mini"
+            fab:fab_title="@string/draft"
+            />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
             android:id="@+id/add_file"

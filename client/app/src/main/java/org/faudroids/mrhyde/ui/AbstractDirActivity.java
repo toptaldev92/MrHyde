@@ -189,6 +189,7 @@ abstract class AbstractDirActivity extends AbstractActionBarActivity {
 			nodeList.clear();
 			nodeList.addAll(sortEntries(newSelectedNode.getEntries().values()));
 			notifyDataSetChanged();
+			onDirSelected(newSelectedNode);
 		}
 
 
@@ -253,7 +254,6 @@ abstract class AbstractDirActivity extends AbstractActionBarActivity {
 						if (pathNode instanceof DirNode) {
 							// navigate "down"
 							pathNodeAdapter.setSelectedNode((DirNode) pathNode);
-							onDirSelected((DirNode) pathNode);
 						} else {
 							onFileSelected((FileNode) pathNode);
 						}

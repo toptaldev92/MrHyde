@@ -21,7 +21,12 @@ import org.faudroids.mrhyde.git.AbstractNode;
 import org.faudroids.mrhyde.git.DirNode;
 import org.faudroids.mrhyde.git.FileData;
 import org.faudroids.mrhyde.git.FileNode;
+import org.faudroids.mrhyde.jekyll.Draft;
+import org.faudroids.mrhyde.jekyll.JekyllManager;
+import org.faudroids.mrhyde.jekyll.JekyllManagerFactory;
+import org.faudroids.mrhyde.jekyll.Post;
 import org.faudroids.mrhyde.ui.utils.ImageUtils;
+import org.faudroids.mrhyde.ui.utils.JekyllUiUtils;
 import org.faudroids.mrhyde.ui.utils.UiUtils;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
 import org.faudroids.mrhyde.utils.DefaultTransformer;
@@ -53,9 +58,15 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 	@InjectView(R.id.add_file) private FloatingActionButton addFileButton;
 	@InjectView(R.id.add_image) private FloatingActionButton addImageButton;
 	@InjectView(R.id.add_folder) private FloatingActionButton addFolderButton;
+	@InjectView(R.id.add_post) private FloatingActionButton addPostButton;
+	@InjectView(R.id.add_draft) private FloatingActionButton addDraftButton;
 
 	@Inject private ActivityIntentFactory intentFactory;
 	@Inject private ImageUtils imageUtils;
+
+	@Inject private JekyllManagerFactory jekyllManagerFactory;
+	private JekyllManager jekyllManager;
+	@Inject private JekyllUiUtils jekyllUiUtils;
 
 	private DirActionModeListener actionModeListener = null;
 
@@ -64,6 +75,7 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		jekyllManager = jekyllManagerFactory.createJekyllManager(repository);
 		setTitle(repository.getName());
 
 		// setup add buttons
@@ -99,6 +111,30 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 			public void onClick(View v) {
 				addButton.collapse();
 				addDirectory();
+			}
+		});
+		addPostButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addButton.collapse();
+				jekyllUiUtils.showNewPostDialog(jekyllManager, repository, new JekyllUiUtils.OnContentCreatedListener<Post>() {
+					@Override
+					public void onContentCreated(Post content) {
+						refreshTree();
+					}
+				});
+			}
+		});
+		addDraftButton.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				addButton.collapse();
+				jekyllUiUtils.showNewDraftDialog(jekyllManager, repository, new JekyllUiUtils.OnContentCreatedListener<Draft>() {
+					@Override
+					public void onContentCreated(Draft content) {
+						refreshTree();
+					}
+				});
 			}
 		});
 		tintView.setOnClickListener(new View.OnClickListener() {
@@ -396,13 +432,27 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 
 	@Override
 	protected void onDirSelected(DirNode node) {
-		// nothing to do
+		// show / hide posts add button
+		if (jekyllManager.isPostsDir(node)) addPostButton.setVisibility(View.VISIBLE);
+		else addPostButton.setVisibility(View.GONE);
+
+		// show / hide drafts add button
+		if (jekyllManager.isDraftsDir(node)) addDraftButton.setVisibility(View.VISIBLE);
+		else addDraftButton.setVisibility(View.GONE);
 	}
 
 
 	@Override
 	protected void onFileSelected(FileNode node) {
 		startFileActivity(node, false);
+	}
+
+
+	@Override
+	public void onBackPressed() {
+		// hide open add buttons
+		if (addButton.isExpanded()) addButton.collapse();
+		else super.onBackPressed();
 	}
 
 
