@@ -20,6 +20,8 @@ import org.faudroids.mrhyde.git.FileManagerFactory;
 import org.faudroids.mrhyde.git.FileNode;
 import org.faudroids.mrhyde.git.FileUtils;
 import org.faudroids.mrhyde.git.NodeUtils;
+import org.faudroids.mrhyde.jekyll.JekyllManager;
+import org.faudroids.mrhyde.jekyll.JekyllManagerFactory;
 import org.faudroids.mrhyde.ui.utils.AbstractActionBarActivity;
 import org.faudroids.mrhyde.ui.utils.DividerItemDecoration;
 import org.faudroids.mrhyde.utils.DefaultErrorAction;
@@ -55,6 +57,9 @@ abstract class AbstractDirActivity extends AbstractActionBarActivity {
 	@Inject protected NodeUtils nodeUtils;
 	@Inject protected FileUtils fileUtils;
 
+	@Inject private JekyllManagerFactory jekyllManagerFactory;
+	protected JekyllManager jekyllManager;
+
 
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
@@ -63,6 +68,7 @@ abstract class AbstractDirActivity extends AbstractActionBarActivity {
 		// get arguments
 		repository = (Repository) this.getIntent().getSerializableExtra(EXTRA_REPOSITORY);
 		fileManager = fileManagerFactory.createFileManager(repository);
+		jekyllManager = jekyllManagerFactory.createJekyllManager(repository);
 
 		// setup list
 		RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
@@ -243,8 +249,18 @@ abstract class AbstractDirActivity extends AbstractActionBarActivity {
 				titleView.setText(pathNode.getPath());
 
 				int imageResource = R.drawable.folder;
-				if ((pathNode instanceof FileNode) && fileUtils.isImage(pathNode.getPath())) imageResource = R.drawable.image;
-				else if (pathNode instanceof FileNode) imageResource = R.drawable.file;
+				if (pathNode instanceof FileNode) {
+					FileNode fileNode = (FileNode) pathNode;
+					if (fileUtils.isImage(pathNode.getPath())) {
+						imageResource = R.drawable.image;
+					} else if (jekyllManager.isPostsDir(pathNode.getParent()) && jekyllManager.parsePost(fileNode).isPresent()) {
+						imageResource = R.drawable.post;
+					} else if (jekyllManager.isDraftsDir(pathNode.getParent()) && jekyllManager.parseDraft(fileNode).isPresent()) {
+						imageResource = R.drawable.draft;
+					} else {
+						imageResource = R.drawable.file;
+					}
+				}
 
 				iconView.setImageResource(imageResource);
 

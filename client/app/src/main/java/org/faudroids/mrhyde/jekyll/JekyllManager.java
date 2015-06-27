@@ -94,7 +94,7 @@ public class JekyllManager {
 						DirNode draftsDir = (DirNode) dirNode.getEntries().get(DIR_DRAFTS);
 						for (AbstractNode draftNode: draftsDir.getEntries().values()) {
 							if (!(draftNode instanceof FileNode)) continue;
-							Optional<Draft> draft = parseDraftTitle((FileNode) draftNode);
+							Optional<Draft> draft = parseDraft((FileNode) draftNode);
 							if (draft.isPresent()) drafts.add(draft.get());
 						}
 
@@ -269,7 +269,10 @@ public class JekyllManager {
 	}
 
 
-	private Optional<Post> parsePost(FileNode node) {
+	/**
+	 * Tries reading one particular file as a post.
+	 */
+	public Optional<Post> parsePost(FileNode node) {
 		String fileName = node.getPath();
 
 		// check for match
@@ -296,7 +299,10 @@ public class JekyllManager {
 	}
 
 
-	private Optional<Draft> parseDraftTitle(FileNode node) {
+	/**
+	 * Tries reading one particular file as a draft.
+	 */
+	public Optional<Draft> parseDraft(FileNode node) {
 		// check for match
 		Matcher matcher = DRAFT_TITLE_PATTERN.matcher(node.getPath());
 		if (!matcher.matches()) return Optional.absent();

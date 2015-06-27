@@ -64,8 +64,6 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 	@Inject private ActivityIntentFactory intentFactory;
 	@Inject private ImageUtils imageUtils;
 
-	@Inject private JekyllManagerFactory jekyllManagerFactory;
-	private JekyllManager jekyllManager;
 	@Inject private JekyllUiUtils jekyllUiUtils;
 
 	private DirActionModeListener actionModeListener = null;
@@ -74,8 +72,6 @@ public final class DirActivity extends AbstractDirActivity implements DirActionM
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		jekyllManager = jekyllManagerFactory.createJekyllManager(repository);
 		setTitle(repository.getName());
 
 		// setup add buttons
