@@ -9,6 +9,7 @@ public class Tag {
     private int openingEnd = 0;
     private int closingStart = 0;
     private int closingEnd = 0;
+    private boolean isClosed = false;
 
     CharacterStyle span;
     final String tag;
@@ -17,7 +18,7 @@ public class Tag {
     private ArrayList<Tag> nestedTags = new ArrayList<>();
 
     public Tag(String tag) {
-        this.tag= tag;
+        this.tag = tag;
     }
 
     public CharacterStyle getSpan() {
@@ -40,15 +41,15 @@ public class Tag {
     public void closeTag(int closingStart, int closingEnd) {
         this.closingStart = closingStart;
         this.closingEnd = closingEnd;
+        isClosed = true;
     }
 
     public int getSpanRange() {
-        return this.openingEnd - this.closingStart;
+        return this.openingStart - this.closingEnd;
     }
 
     public boolean isClosed() {
-        return this.closingEnd != 0 && this.closingStart != 0 && (openingEnd - openingStart) ==
-                (closingEnd - closingStart);
+        return isClosed;
     }
 
     public void isTopLevel(boolean topLevel) {

@@ -13,7 +13,8 @@ public class SyntaxHighlighter implements TextWatcher {
 
     private final EditText editor;
     private final ArrayList<Tag> deleteTags = new ArrayList<>();
-    private final ArrayList<Tag> topLevelTags = new ArrayList<>();
+    private final ArrayList<Tag> newTags = new ArrayList<>();
+    private final ArrayList<Tag> activeTags = new ArrayList<>();
     private final TagFactory tagFactory = new TagFactory();
 
     private final ArrayList<Character> validTagElements = new ArrayList<>();
@@ -22,10 +23,9 @@ public class SyntaxHighlighter implements TextWatcher {
     private int tagLength = 0;
     private boolean readingFlag = false;
 
-    private int nestedTags = 0;
     private Tag topLevelTag = null;
 
-    private enum TAG_STATE { OPENING, CLOSING, NESTED_OPENING, NESTED_CLOSING, READING};
+    private enum TAG_STATE { OPENING, CLOSING, NESTED_OPENING, NESTED_CLOSING };
     private TAG_STATE tagState = TAG_STATE.OPENING;
     private TAG_STATE lastState = TAG_STATE.CLOSING;
 
@@ -70,6 +70,21 @@ public class SyntaxHighlighter implements TextWatcher {
 
         for(Tag tag : this.deleteTags) {
             msg.removeSpan(tag.getSpan());
+        }
+
+        for(Tag tag : this.newTags) {
+            msg.setSpan(tag.getSpan(), tag.getOpeningStart(), tag.getClosingEnd(), ((FontStyleTag)
+                    tag).getFontStyle());
+            if (tag.getNestedTags() != null) {
+                for (Tag t : tag.getNestedTags()) {
+                    msg.setSpan(t.getSpan(), t.getOpeningStart(), t.getClosingEnd(), ((FontStyleTag)
+                            t).getFontStyle());
+                    activeTags.add(t);
+                    tag.removeNestedTag(t);
+                }
+                activeTags.add(tag);
+                newTags.remove(tag);
+            }
         }
     }
 
@@ -166,13 +181,15 @@ public class SyntaxHighlighter implements TextWatcher {
                 }
                 break;
             case CLOSING:
-                if((lastState != TAG_STATE.NESTED_CLOSING) && (lastState != TAG_STATE.OPENING)) {
-                    Timber.d("Closing state error!");
-                    return;
-                }
                 if(actualTag.equals(this.topLevelTag.getTag())) {
+                    Tag last = topLevelTag.getLastNestedElement();
+                    if(last != null && !last.isClosed()) {
+                        Timber.d("Closed trailing nested tag!");
+                        topLevelTag.getLastNestedElement().closeTag(tagStartIndex, tagEndIndex);
+                    }
                     Timber.d("Closing top level tag");
                     this.topLevelTag.closeTag(this.tagStartIndex, this.tagEndIndex);
+                    this.newTags.add(topLevelTag);
                     this.lastState = this.tagState;
                     this.tagState = TAG_STATE.OPENING;
                 }
