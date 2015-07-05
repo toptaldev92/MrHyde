@@ -38,15 +38,16 @@ public class SyntaxHighlighter implements TextWatcher {
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-        if(count > 0) {
-            int end = start + count;
+        Editable msg = this.editor.getEditableText();
+        if(count > 0 && after < count) {
 
-//            for(Tag tag : topLevelTags) {
-//                if((tag.getClosingEnd() < start) || (tag.getOpeningEnd() < start)) {
-//                    deleteTags.add(tag);
-//                    topLevelTags.remove(tag);
-//                }
-//            }
+            for(Tag tag : this.activeTags) {
+                if((tag.getClosingEnd() > start) || (tag.getOpeningEnd() > start)) {
+                    msg.removeSpan(tag.getSpan());
+                    deleteTags.add(tag);
+                    this.activeTags.remove(tag);
+                }
+            }
         }
     }
 
@@ -75,6 +76,8 @@ public class SyntaxHighlighter implements TextWatcher {
         for(Tag tag : this.newTags) {
             msg.setSpan(tag.getSpan(), tag.getOpeningStart(), tag.getClosingEnd(), ((FontStyleTag)
                     tag).getFontStyle());
+            activeTags.add(tag);
+            newTags.remove(tag);
             if (tag.getNestedTags() != null) {
                 for (Tag t : tag.getNestedTags()) {
                     msg.setSpan(t.getSpan(), t.getOpeningStart(), t.getClosingEnd(), ((FontStyleTag)
@@ -82,8 +85,6 @@ public class SyntaxHighlighter implements TextWatcher {
                     activeTags.add(t);
                     tag.removeNestedTag(t);
                 }
-                activeTags.add(tag);
-                newTags.remove(tag);
             }
         }
     }
