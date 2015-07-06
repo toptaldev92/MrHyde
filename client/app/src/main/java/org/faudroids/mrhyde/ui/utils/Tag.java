@@ -13,6 +13,7 @@ public class Tag {
 
     CharacterStyle span;
     final String tag;
+    private Character previousChar;
 
     private boolean topLevel = true;
     private ArrayList<Tag> nestedTags = new ArrayList<>();
@@ -33,6 +34,14 @@ public class Tag {
         return this.tag.charAt(0);
     }
 
+    public void setPreviousChar(Character previousChar) {
+        this.previousChar = previousChar;
+    }
+
+    public Character getPreviousChar() {
+        return this.previousChar;
+    }
+
     public void openTag(int openingStart, int openingEnd) {
         this.openingStart = openingStart;
         this.openingEnd = openingEnd;
@@ -48,12 +57,20 @@ public class Tag {
         return this.openingStart - this.closingEnd;
     }
 
+    public void isClosed(boolean isClosed) {
+        this.isClosed = isClosed;
+    }
+
     public boolean isClosed() {
         return isClosed;
     }
 
     public void isTopLevel(boolean topLevel) {
         this.topLevel = topLevel;
+    }
+
+    public boolean isTopLevel() {
+        return this.topLevel;
     }
 
     public void addNestedTag(Tag tag) {
@@ -78,10 +95,6 @@ public class Tag {
         } else {
             return null;
         }
-    }
-
-    public boolean isTopLevel() {
-        return this.topLevel;
     }
 
     public int getOpeningStart() {

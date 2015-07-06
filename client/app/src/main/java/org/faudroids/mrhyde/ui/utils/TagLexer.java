@@ -9,6 +9,7 @@ public class TagLexer {
     private final TagFactory tagFactory = new TagFactory();
     private final ArrayList<Character> validTagElements;
     private boolean readingFlag = false;
+    private int oldPosition = 0;
     private int tagStart = 0;
     private int tagLength = 0;
     private int tagEnd = 0;
@@ -22,14 +23,17 @@ public class TagLexer {
             if (this.validTagElements.contains(s.charAt(position))) {
                 Timber.d("Tag start: " + position);
                 this.readingFlag = true;
+                this.oldPosition = position;
                 this.tagStart = position;
                 this.tagLength = 1;
                 this.tagEnd = this.tagStart + this.tagLength;
             }
         } else {
             if(this.validTagElements.contains(s.charAt(position))) {
-                ++this.tagLength;
-                ++this.tagEnd;
+                int delta = position - this.oldPosition;
+                this.oldPosition = position;
+                this.tagLength += delta;
+                this.tagEnd += delta;
                 Timber.d("Tag end: " + this.tagEnd);
             } else {
                 String tagString = s.subSequence(this.tagStart, this.tagEnd).toString();
