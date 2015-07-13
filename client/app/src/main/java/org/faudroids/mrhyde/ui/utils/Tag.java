@@ -22,6 +22,19 @@ public class Tag {
         this.tag = tag;
     }
 
+    public Tag(Tag other) {
+        this.tag = other.getTag();
+        this.span = other.getSpan();
+        this.openingStart = other.getOpeningStart();
+        this.openingEnd = other.getOpeningEnd();
+        this.previousChar = other.getPreviousChar();
+        this.isClosed = other.isClosed();
+        this.topLevel = other.isTopLevel();
+        if(other.getNestedTags() != null) {
+            this.nestedTags.addAll(other.getNestedTags());
+        }
+    }
+
     public CharacterStyle getSpan() {
         return this.span;
     }

@@ -12,6 +12,12 @@ public class FontStyleTag extends Tag {
         this.span = new StyleSpan(this.style);
     }
 
+    public FontStyleTag(FontStyleTag other) {
+        super(other);
+        this.style = other.getFontStyle();
+        this.span = other.getSpan();
+    }
+
     public int getFontStyle() {
         return this.style;
     }

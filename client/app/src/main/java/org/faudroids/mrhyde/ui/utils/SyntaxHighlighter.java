@@ -100,7 +100,8 @@ public class SyntaxHighlighter implements TextWatcher {
                 if(currentTag.getPreviousChar() == ' ' || currentTag.getPreviousChar() == '\n') {
                     Timber.d("Creating top level tag");
                     currentTag.isTopLevel(true);
-                    this.topLevelTag = currentTag;
+                    this.topLevelTag = new FontStyleTag((FontStyleTag)currentTag);
+                    Timber.d("Start: " + this.topLevelTag.getOpeningStart());
                     this.lastState = this.tagState;
                     this.tagState = TAG_STATE.NESTED_OPENING;
                 } else {
@@ -160,6 +161,8 @@ public class SyntaxHighlighter implements TextWatcher {
                     Timber.d("Closing top level tag");
                     this.topLevelTag.closeTag(currentTag.getOpeningStart(), currentTag
                             .getOpeningEnd());
+                    Timber.d("From: " + this.topLevelTag.getOpeningStart() + " To: " + this
+                            .topLevelTag.getClosingEnd());
                     this.newTags.add(topLevelTag);
                     this.lastState = this.tagState;
                     this.tagState = TAG_STATE.OPENING;
