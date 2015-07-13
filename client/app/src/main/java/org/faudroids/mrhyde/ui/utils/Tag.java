@@ -66,10 +66,6 @@ public class Tag {
         isClosed = true;
     }
 
-    public int getSpanRange() {
-        return this.openingStart - this.closingEnd;
-    }
-
     public void isClosed(boolean isClosed) {
         this.isClosed = isClosed;
     }
