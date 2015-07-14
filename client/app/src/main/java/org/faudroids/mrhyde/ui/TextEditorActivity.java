@@ -7,8 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -325,6 +323,8 @@ public final class TextEditorActivity extends AbstractActionBarActivity {
 			// start edit mode
 			if (startEditMode) startEditMode();
 			else stopEditMode();
+
+			this.highlighter.updateTags(0);
 		} catch (UnsupportedEncodingException uee) {
 			Timber.e(uee, "failed to read content");
 		}

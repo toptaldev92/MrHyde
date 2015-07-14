@@ -1,50 +1,34 @@
 package org.faudroids.mrhyde.ui.utils;
 
 import android.text.Editable;
+import android.text.Spanned;
 import android.widget.EditText;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 public class Highlighter {
 
     private final EditText editor;
-    private HashMap<Integer, Tag> activeTags = new HashMap<>();
-    private HashMap<Integer, Integer> tagMapping = new HashMap<>();
-    private ArrayList<Tag> newList = new ArrayList<>();
-    private ArrayList<Tag> deleteList = new ArrayList<>();
+    private Editable msg;
 
     public Highlighter(EditText editor) {
         this.editor = editor;
     }
 
-    public int highlight() {
-        Editable msg = this.editor.getEditableText();
-        for(Tag t : newList) {
-            this.tagMapping.put(t.getOpeningStart(), t.getOpeningStart());
-            this.tagMapping.put(t.getOpeningEnd(), t.getOpeningStart());
-            this.tagMapping.put(t.getClosingStart(), t.getOpeningStart());
-            this.tagMapping.put(t.getClosingEnd(), t.getOpeningStart());
-
-            this.activeTags.put(t.getOpeningStart(), t);
-            msg.setSpan(t.getSpan(), t.getOpeningStart(), t.getClosingEnd(), ((FontStyleTag) t).getFontStyle());
+    public void switchOn(TreeSet<Tag> tags) {
+        this.msg = this.editor.getEditableText();
+        for(Tag t : tags) {
+            msg.setSpan(t.getSpan(), t.getOpeningStart(), t.getClosingEnd(), Spanned
+                    .SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-        return 0;
     }
 
-    public void addTag(Tag tag) {
-        this.newList.add(tag);
-    }
-
-    public Tag hasTag(int from, int to) {
-        //TODO Insert some beautiful code here
-        return null;
-    }
-
-    public void removeTag(Tag t) {
-//        if(tagMapping.get(t.)) {
-//            activeList.remove(t);
-//            deleteList.add(t);
-//        }
+    public void switchOff(TreeSet<Tag> tags) {
+        this.msg = this.editor.getEditableText();
+        for(Tag t : tags) {
+            msg.removeSpan(t.getSpan());
+        }
     }
 }

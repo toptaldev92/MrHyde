@@ -7,7 +7,7 @@ import timber.log.Timber;
 public class TagLexer {
 
     private final TagFactory tagFactory = new TagFactory();
-    private final ArrayList<Character> validTagElements;
+    private final ArrayList<Character> validTagStartElements;
     private boolean readingFlag = false;
     private boolean continueReading = false;
     private int oldPosition = 0;
@@ -15,13 +15,13 @@ public class TagLexer {
     private int tagLength = 0;
     private int tagEnd = 0;
 
-    public TagLexer(ArrayList<Character> validTagElements) {
-        this.validTagElements = validTagElements;
+    public TagLexer(ArrayList<Character> validTagStartElements) {
+        this.validTagStartElements = validTagStartElements;
     }
 
     public Tag read(CharSequence s, int position) {
         if(!this.readingFlag) {
-            if (this.validTagElements.contains(s.charAt(position))) {
+            if (this.validTagStartElements.contains(s.charAt(position))) {
                 this.readingFlag = true;
                 if(this.continueReading) {
                     this.continueReading = false;
@@ -35,14 +35,14 @@ public class TagLexer {
                 this.tagEnd = this.tagStart + this.tagLength;
             }
         } else {
-            if(this.validTagElements.contains(s.charAt(position)) && s.charAt(oldPosition) == s
+            if(this.validTagStartElements.contains(s.charAt(position)) && s.charAt(oldPosition) == s
                     .charAt(position)) {
                 int delta = position - this.oldPosition;
                 this.oldPosition = position;
                 this.tagLength += delta;
                 this.tagEnd += delta;
                 Timber.d("Tag end: " + this.tagEnd);
-            } else if(this.validTagElements.contains(s.charAt(position)) && s.charAt(position-1)
+            } else if(this.validTagStartElements.contains(s.charAt(position)) && s.charAt(position-1)
                     != s.charAt(position)) {
                 this.oldPosition = position;
                 this.continueReading = true;

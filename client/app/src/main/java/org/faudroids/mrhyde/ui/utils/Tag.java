@@ -4,7 +4,7 @@ import android.text.style.CharacterStyle;
 
 import java.util.ArrayList;
 
-public class Tag {
+public class Tag implements Comparable {
     private int openingStart = 0;
     private int openingEnd = 0;
     private int closingStart = 0;
@@ -23,7 +23,7 @@ public class Tag {
     }
 
     public Tag(Tag other) {
-        this.tag = other.getTag();
+        this.tag = other.toString();
         this.span = other.getSpan();
         this.openingStart = other.getOpeningStart();
         this.openingEnd = other.getOpeningEnd();
@@ -39,7 +39,7 @@ public class Tag {
         return this.span;
     }
 
-    public String getTag() {
+    public String toString() {
         return this.tag;
     }
 
@@ -122,11 +122,30 @@ public class Tag {
         return this.closingEnd;
     }
 
-    public boolean equals(Tag other) {
-        if(this.tag.equals(other.getTag())) {
-            return true;
+    @Override
+    public int compareTo(Object other) {
+        int returnValue;
+
+        if(openingStart == ((Tag)other).getOpeningStart()) {
+            returnValue = 0;
         } else {
-            return false;
+            if(openingStart > ((Tag)other).getOpeningStart()) {
+                returnValue = 1;
+            } else {
+                returnValue = -1;
+            }
         }
+
+        return returnValue;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return other instanceof Tag && (this.openingStart == ((Tag) other).getOpeningStart());
+    }
+
+    @Override
+    public int hashCode() {
+        return openingStart;
     }
 }
